@@ -17,6 +17,7 @@ import {
   type LandingVariant,
   type LocalProject,
 } from "../lib/local-demo";
+import { buildTrafficKit } from "../lib/traffic-kit";
 
 type AgentPayload = AgentPayloadLite;
 
@@ -62,6 +63,7 @@ export default function StudioClient() {
   const decision = useMemo(() => (activeProject && signal ? decideFromSignal(activeProject, signal) : null), [activeProject, signal]);
   const mvpBrief = useMemo(() => (activeProject && signal ? buildMvpBrief(activeProject, signal) : null), [activeProject, signal]);
   const marketAnalysis = useMemo(() => (activeProject ? analyzeMarket(activeProject) : null), [activeProject]);
+  const trafficKit = useMemo(() => (activeProject && marketAnalysis ? buildTrafficKit(activeProject, marketAnalysis) : null), [activeProject, marketAnalysis]);
 
   const providerTone = result?.meta?.provider === "openai"
     ? "border-emerald-200 bg-emerald-50 text-emerald-700"
@@ -173,7 +175,7 @@ export default function StudioClient() {
               <span className="block bg-gradient-to-r from-cyan-500 via-sky-500 to-violet-500 bg-clip-text text-transparent">Before You Build</span>
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-xl leading-9 text-slate-500">
-              Idea in → market analysis → landing variants → publish → collect leads → analyze signal → decide → generate MVP.
+              Idea in → market analysis → traffic kit → landing variants → publish → collect leads → analyze signal → decide → generate MVP.
             </p>
           </div>
         </section>
@@ -183,7 +185,7 @@ export default function StudioClient() {
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-3xl font-bold tracking-tight">Describe Your Startup</h2>
-                <p className="mt-2 text-slate-500">Autonomous mode: market analysis, local publish, local leads, local analytics, local decision engine.</p>
+                <p className="mt-2 text-slate-500">Autonomous mode: market analysis, traffic kit, local publish, local leads, local analytics, local decision engine.</p>
               </div>
               <button
                 type="button"
@@ -197,7 +199,7 @@ export default function StudioClient() {
             <div className="space-y-5">
               <Field label="Startup Idea" placeholder="e.g. An AI tool that generates personalized workout plans" value={form.idea} onChange={(value) => setForm({ ...form, idea: value })} />
               <Field label="Target Customer (ICP)" placeholder="e.g. Fitness enthusiasts aged 25–35 who work from home" value={form.icp} onChange={(value) => setForm({ ...form, icp: value })} />
-              <Field label="Value Proposition" placeholder="e.g. Help users stay consistent with tailored plans and faster results" value={form.value} onChange={(value) => setForm({ ...form, value })} />
+              <Field label="Value Proposition" placeholder="e.g. Help users stay consistent with tailored plans and faster results" value={form.value} onChange={(value) => setForm({ ...form, value: value })} />
             </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -252,6 +254,33 @@ export default function StudioClient() {
                     {marketAnalysis.topRisks.map((item) => <li key={item}>• {item}</li>)}
                   </ul>
                 </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {activeProject && trafficKit && (
+          <section className="px-4 pb-4 pt-8">
+            <div className="mx-auto max-w-6xl rounded-[28px] border border-slate-200 bg-white p-7 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">Traffic Kit</div>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">Ready-to-copy posts and messages to start generating qualified traffic and conversations.</p>
+                </div>
+                <div className="rounded-full bg-cyan-50 px-3 py-2 text-xs font-semibold text-cyan-700">Launch faster</div>
+              </div>
+              <div className="mt-6 grid gap-6 lg:grid-cols-2">
+                <CopyCard title="LinkedIn post" text={trafficKit.linkedinPost} />
+                <CopyCard title="X post" text={trafficKit.xPost} />
+                <CopyCard title="Reddit post" text={trafficKit.redditPost} />
+                <CopyCard title="Direct outreach" text={trafficKit.outreachMessage} />
+              </div>
+              <div className="mt-6 rounded-2xl bg-slate-50 p-5">
+                <div className="text-sm font-semibold text-slate-900">Interview questions</div>
+                <ul className="mt-4 space-y-2 text-sm leading-6 text-slate-700">
+                  {trafficKit.interviewQuestions.map((item) => <li key={item}>• {item}</li>)}
+                </ul>
+                <button onClick={() => copyText(trafficKit.interviewQuestions.map((item, index) => `${index + 1}. ${item}`).join("\n"))} className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Copy interview script</button>
               </div>
             </div>
           </section>
@@ -405,7 +434,7 @@ export default function StudioClient() {
             <div className="mt-14 grid gap-8 md:grid-cols-2 xl:grid-cols-4">
               <StepCard step="Step 1" title="Describe Your Idea" text="Enter your startup concept, target audience, and value proposition." />
               <StepCard step="Step 2" title="Understand the Market" text="Buildly estimates market urgency, pressure, wedge, and best starting channel." />
-              <StepCard step="Step 3" title="Collect Signal" text="Publish one variant, drive traffic, collect leads, and watch the signal update." />
+              <StepCard step="Step 3" title="Launch Traffic" text="Use ready-made posts and outreach messages to get the first qualified visitors." />
               <StepCard step="Step 4" title="Build with Confidence" text="Use the decision engine and MVP brief to move only when the signal is strong enough." />
             </div>
           </div>
@@ -456,6 +485,12 @@ export default function StudioClient() {
   );
 }
 
+function copyText(text: string) {
+  if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text);
+  }
+}
+
 function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder: string }) {
   return (
     <label className="block text-left">
@@ -496,6 +531,18 @@ function StepCard({ step, title, text }: { step: string; title: string; text: st
       <div className="mt-5 text-sm font-semibold text-cyan-600">{step}</div>
       <div className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{title}</div>
       <p className="mt-3 text-lg leading-8 text-slate-500">{text}</p>
+    </div>
+  );
+}
+
+function CopyCard({ title, text }: { title: string; text: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 p-5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-sm font-semibold text-slate-900">{title}</div>
+        <button onClick={() => copyText(text)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700">Copy</button>
+      </div>
+      <pre className="mt-4 whitespace-pre-wrap text-sm leading-6 text-slate-700">{text}</pre>
     </div>
   );
 }
