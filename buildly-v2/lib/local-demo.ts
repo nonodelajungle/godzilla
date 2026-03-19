@@ -132,6 +132,26 @@ export type MvpBrief = {
   doNotBuild: string[];
 };
 
+export type BenchmarkReport = {
+  segment: "B2B" | "Consumer" | "Prosumer";
+  verdict: "Strong" | "Promising" | "Weak";
+  expectedCtr: string;
+  expectedConversion: string;
+  explanation: string;
+};
+
+export type PivotRecommendation = {
+  title: string;
+  reason: string;
+  nextTest: string;
+};
+
+export type InvestorMemo = {
+  title: string;
+  summary: string;
+  bullets: string[];
+};
+
 const KEYS = {
   projects: "buildly/local-projects/v1",
   landings: "buildly/local-landings/v1",
@@ -456,4 +476,162 @@ export function buildMvpBrief(project: LocalProject, signal: ProjectSignal): Mvp
       "Multi-persona workflows before one ICP clearly wins.",
     ],
   };
+}
+
+export function benchmarkSignal(project: LocalProject, signal: ProjectSignal): BenchmarkReport {
+  const segment = inferSegment(project);
+  const expectedCtr = segment === "B2B" ? "3%–8%" : segment === "Consumer" ? "8%–18%" : "5%–12%";
+  const expectedConversion = segment === "B2B" ? "4%–10%" : segment === "Consumer" ? "8%–20%" : "5%–12%";
+
+  let verdict: BenchmarkReport["verdict"] = "Promising";
+  if (signal.conversion >= (segment === "Consumer" ? 10 : 6) && signal.ctr >= (segment === "Consumer" ? 12 : 5)) verdict = "Strong";
+  else if (signal.totalViews >= 100 && signal.conversion < (segment === "Consumer" ? 3 : 2)) verdict = "Weak";
+
+  const explanation = verdict === "Strong"
+    ? `This project is outperforming early ${segment} benchmark ranges on both click interest and lead capture.`
+    : verdict === "Weak"
+      ? `Relative to a rough ${segment} benchmark, the current traffic is not turning into enough intent. Rework message, audience, or offer.`
+      : `This project is near an early ${segment} benchmark, but it still needs more traffic or a sharper winner before you lock the MVP.`;
+
+  return { segment, verdict, expectedCtr, expectedConversion, explanation };
+}
+
+export function buildPivotPlan(project: LocalProject, signal: ProjectSignal): PivotRecommendation[] {
+  const decision = decideFromSignal(project, signal);
+  const winner = signal.bestVariant;
+
+  if (decision.code === "go") {
+    return [
+      {
+        title: "Double down on the winning angle",
+        reason: `The ${winner?.variantType || "best"} variant is already producing usable signal.` ,
+        nextTest: "Keep one headline stable, then test onboarding intent or pricing instead of reworking the whole proposition.",
+      },
+      {
+        title: "Interview fresh leads",
+        reason: "You now have enough demand to extract the exact workflow people expect from v1.",
+        nextTest: "Ask the next 5 leads what they tried before, how often the pain appears, and what would make them pay now.",
+      },
+      {
+        title: "Scope a narrower MVP",
+        reason: "Momentum is good, so unnecessary features become the main risk.",
+        nextTest: "Ship one core workflow and one success metric before adding collaboration, dashboards, or settings.",
+      },
+    ];
+  }
+
+  if (decision.code === "narrow_icp") {
+    return [
+      {
+        title: "Shrink the audience",
+        reason: "Clicks exist, but the current segment is too broad to convert consistently.",
+        nextTest: `Rewrite the page for one sub-segment inside ${project.input.icp.toLowerCase()} and remove generic wording.`,
+      },
+      {
+        title: "Use sharper proof",
+        reason: "Visitors need stronger evidence that the offer is made for them specifically.",
+        nextTest: "Add one concrete before/after result and one painful workflow example above the fold.",
+      },
+      {
+        title: "Reduce CTA ambiguity",
+        reason: "A broad CTA can hide weak buying intent.",
+        nextTest: "Switch from a vague CTA to a very specific action like book demo, join cohort, or request early access.",
+      },
+    ];
+  }
+
+  if (decision.code === "test_pricing") {
+    return [
+      {
+        title: "Add a paid intent step",
+        reason: "You have enough interest to move from curiosity to willingness-to-pay validation.",
+        nextTest: "Test a paid waitlist, refundable deposit, or pricing survey with one concrete package.",
+      },
+      {
+        title: "Position by outcome not features",
+        reason: "Pricing tests work best when tied to a measurable outcome.",
+        nextTest: "Rewrite the offer around time saved, revenue gained, or manual work eliminated.",
+      },
+      {
+        title: "Segment high-intent leads",
+        reason: "Not every lead should influence pricing equally.",
+        nextTest: "Tag leads who replied fastest or gave detailed notes, and test pricing with them first.",
+      },
+    ];
+  }
+
+  if (decision.code === "kill") {
+    return [
+      {
+        title: "Keep the pain, change the wedge",
+        reason: "Weak response often means the angle is wrong, not always that the market is dead.",
+        nextTest: "Reframe the problem around a narrower urgent use case rather than the full product vision.",
+      },
+      {
+        title: "Change acquisition source",
+        reason: "Low-quality traffic can make a decent idea look dead.",
+        nextTest: "Run one test in a channel where the ICP already hangs out instead of broad paid traffic.",
+      },
+      {
+        title: "Archive and compare later",
+        reason: "Some ideas are better paused than endlessly tuned.",
+        nextTest: "Start a new concept in Buildly, then compare both signals side by side after 1 week.",
+      },
+    ];
+  }
+
+  return [
+    {
+      title: "Sharpen the headline",
+      reason: "The main promise is still not crisp enough to turn interest into action.",
+      nextTest: "Write three variants that each focus on one painful outcome, then test only one audience at a time.",
+    },
+    {
+      title: "Test one channel deeply",
+      reason: "Spreading traffic too widely makes the signal noisy.",
+      nextTest: `Concentrate the next traffic batch on ${project.result.validation.channel} and compare only one winner against one challenger.`,
+    },
+    {
+      title: "Collect richer notes from leads",
+      reason: "Qualitative feedback helps explain why conversion is weak or strong.",
+      nextTest: "Ask every new lead what they do today, what breaks, and what result they want this month.",
+    },
+  ];
+}
+
+export function buildInvestorMemo(project: LocalProject, signal: ProjectSignal): InvestorMemo {
+  const decision = decideFromSignal(project, signal);
+  const winner = signal.bestVariant;
+  const benchmark = benchmarkSignal(project, signal);
+
+  return {
+    title: `${project.input.idea} traction memo`,
+    summary: `${decision.label}. Buildly observed ${signal.totalViews} views, ${signal.totalLeads} captured leads, ${signal.conversion}% visitor-to-lead conversion, and a current benchmark verdict of ${benchmark.verdict.toLowerCase()} for ${benchmark.segment.toLowerCase()} demand.` ,
+    bullets: [
+      `Best current angle: ${winner ? `${winner.variantType} at ${winner.conversion}% conversion` : "no winning variant yet"}.`,
+      `Primary ICP tested: ${project.input.icp}.`,
+      `Recommended next move: ${decision.label}.`,
+      `Validation thesis: ${project.result.validation.insight}`,
+    ],
+  };
+}
+
+export function exportLeadsCsv(projectId: string) {
+  const leads = listProjectLeads(projectId);
+  const rows = [
+    ["name", "email", "note", "created_at"],
+    ...leads.map((lead) => [lead.name || "", lead.email, lead.note || "", lead.createdAt]),
+  ];
+  return rows.map((row) => row.map(csvEscape).join(",")).join("\n");
+}
+
+function inferSegment(project: LocalProject): BenchmarkReport["segment"] {
+  const text = `${project.input.idea} ${project.input.icp} ${project.input.value}`.toLowerCase();
+  if (/consumer|parents|students|creators|fitness|dating|beauty|food|travel|tiktok|instagram|reddit/.test(text)) return "Consumer";
+  if (/freelance|creator|agency|coach|consultant|designer|solo|independent/.test(text)) return "Prosumer";
+  return "B2B";
+}
+
+function csvEscape(value: string) {
+  return `"${String(value || "").replace(/"/g, '""')}"`;
 }
