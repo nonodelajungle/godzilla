@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  analyzeMarket,
   benchmarkSignal,
   buildInvestorMemo,
   buildMvpBrief,
@@ -23,7 +24,8 @@ export default function DashboardPage() {
     const benchmark = benchmarkSignal(project, signal);
     const pivotPlan = buildPivotPlan(project, signal);
     const investorMemo = buildInvestorMemo(project, signal);
-    return { project, signal, decision, leads, brief, benchmark, pivotPlan, investorMemo };
+    const market = analyzeMarket(project);
+    return { project, signal, decision, leads, brief, benchmark, pivotPlan, investorMemo, market };
   });
 
   const totalProjects = enriched.length;
@@ -37,7 +39,7 @@ export default function DashboardPage() {
           <a href="/" className="text-sm font-medium text-slate-500">← Back to Buildly</a>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Founder dashboard</h1>
           <p className="mt-3 max-w-3xl text-lg leading-8 text-slate-600">
-            Local autonomous mode: signal, benchmarks, pivot suggestions, investor memo, and MVP scope without extra setup.
+            Local autonomous mode: market analysis, signal, benchmarks, pivot suggestions, investor memo, and MVP scope without extra setup.
           </p>
         </div>
 
@@ -53,7 +55,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="grid gap-6 xl:grid-cols-2">
-            {enriched.map(({ project, signal, decision, leads, brief, benchmark, pivotPlan, investorMemo }) => (
+            {enriched.map(({ project, signal, decision, leads, brief, benchmark, pivotPlan, investorMemo, market }) => (
               <article key={project.id} className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
@@ -71,6 +73,28 @@ export default function DashboardPage() {
                     >
                       Export leads CSV
                     </button>
+                  </div>
+                </div>
+
+                <div className="mt-6 rounded-[22px] bg-slate-50 p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm font-semibold text-slate-900">Market analysis</div>
+                    <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                      <span className="rounded-full bg-white px-3 py-1 text-slate-700">{market.segment}</span>
+                      <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700">Attractiveness · {market.marketAttractiveness}</span>
+                      <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-700">Urgency · {market.buyerUrgency}</span>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">{market.summary}</p>
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    <div className="rounded-2xl bg-white p-4">
+                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Best entry wedge</div>
+                      <p className="mt-2 text-sm leading-6 text-slate-700">{market.entryWedge}</p>
+                    </div>
+                    <div className="rounded-2xl bg-white p-4">
+                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Best starting channel</div>
+                      <p className="mt-2 text-sm leading-6 text-slate-700">{market.recommendedChannel}</p>
+                    </div>
                   </div>
                 </div>
 

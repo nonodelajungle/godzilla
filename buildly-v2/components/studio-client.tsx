@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { demoIdeas, type ValidationInput } from "../lib/buildly";
 import {
+  analyzeMarket,
   buildLocalProject,
   buildMvpBrief,
   decideFromSignal,
@@ -60,6 +61,7 @@ export default function StudioClient() {
   const leads = useMemo(() => (activeProject ? listProjectLeads(activeProject.id) : []), [activeProject, publishModal.open]);
   const decision = useMemo(() => (activeProject && signal ? decideFromSignal(activeProject, signal) : null), [activeProject, signal]);
   const mvpBrief = useMemo(() => (activeProject && signal ? buildMvpBrief(activeProject, signal) : null), [activeProject, signal]);
+  const marketAnalysis = useMemo(() => (activeProject ? analyzeMarket(activeProject) : null), [activeProject]);
 
   const providerTone = result?.meta?.provider === "openai"
     ? "border-emerald-200 bg-emerald-50 text-emerald-700"
@@ -171,7 +173,7 @@ export default function StudioClient() {
               <span className="block bg-gradient-to-r from-cyan-500 via-sky-500 to-violet-500 bg-clip-text text-transparent">Before You Build</span>
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-xl leading-9 text-slate-500">
-              Idea in → landing variants → publish → collect leads → analyze signal → decide → generate MVP.
+              Idea in → market analysis → landing variants → publish → collect leads → analyze signal → decide → generate MVP.
             </p>
           </div>
         </section>
@@ -181,7 +183,7 @@ export default function StudioClient() {
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-3xl font-bold tracking-tight">Describe Your Startup</h2>
-                <p className="mt-2 text-slate-500">Autonomous mode: local publish, local leads, local analytics, local decision engine.</p>
+                <p className="mt-2 text-slate-500">Autonomous mode: market analysis, local publish, local leads, local analytics, local decision engine.</p>
               </div>
               <button
                 type="button"
@@ -219,8 +221,44 @@ export default function StudioClient() {
           </div>
         </section>
 
+        {activeProject && marketAnalysis && (
+          <section className="px-4 pb-4 pt-14">
+            <div className="mx-auto max-w-6xl rounded-[28px] border border-slate-200 bg-white p-7 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">Market Analysis</div>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">Automatic reading of the targeted market before you push traffic into landing tests.</p>
+                </div>
+                <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                  <span className="rounded-full bg-slate-100 px-3 py-2 text-slate-700">{marketAnalysis.segment}</span>
+                  <span className="rounded-full bg-emerald-50 px-3 py-2 text-emerald-700">Attractiveness · {marketAnalysis.marketAttractiveness}</span>
+                  <span className="rounded-full bg-amber-50 px-3 py-2 text-amber-700">Urgency · {marketAnalysis.buyerUrgency}</span>
+                  <span className="rounded-full bg-rose-50 px-3 py-2 text-rose-700">Competition · {marketAnalysis.competitivePressure}</span>
+                </div>
+              </div>
+              <p className="mt-5 text-sm leading-7 text-slate-600">{marketAnalysis.summary}</p>
+              <div className="mt-6 grid gap-6 lg:grid-cols-3">
+                <div className="rounded-2xl bg-slate-50 p-5">
+                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Best entry wedge</div>
+                  <p className="mt-3 text-sm leading-7 text-slate-700">{marketAnalysis.entryWedge}</p>
+                </div>
+                <div className="rounded-2xl bg-slate-50 p-5">
+                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Recommended first channel</div>
+                  <p className="mt-3 text-sm leading-7 text-slate-700">{marketAnalysis.recommendedChannel}</p>
+                </div>
+                <div className="rounded-2xl bg-slate-50 p-5">
+                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Top market risks</div>
+                  <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+                    {marketAnalysis.topRisks.map((item) => <li key={item}>• {item}</li>)}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {variants && (
-          <section className="px-4 pb-4 pt-16">
+          <section className="px-4 pb-4 pt-10">
             <div className="mx-auto max-w-6xl">
               <SectionHeader
                 eyebrow="Landing variants"
@@ -366,7 +404,7 @@ export default function StudioClient() {
             />
             <div className="mt-14 grid gap-8 md:grid-cols-2 xl:grid-cols-4">
               <StepCard step="Step 1" title="Describe Your Idea" text="Enter your startup concept, target audience, and value proposition." />
-              <StepCard step="Step 2" title="Get Landing Pages" text="Buildly generates 3 distinct landing page variants optimized for different goals." />
+              <StepCard step="Step 2" title="Understand the Market" text="Buildly estimates market urgency, pressure, wedge, and best starting channel." />
               <StepCard step="Step 3" title="Collect Signal" text="Publish one variant, drive traffic, collect leads, and watch the signal update." />
               <StepCard step="Step 4" title="Build with Confidence" text="Use the decision engine and MVP brief to move only when the signal is strong enough." />
             </div>

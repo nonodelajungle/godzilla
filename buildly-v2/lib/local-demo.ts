@@ -152,6 +152,18 @@ export type InvestorMemo = {
   bullets: string[];
 };
 
+export type MarketAnalysis = {
+  segment: "B2B" | "Consumer" | "Prosumer";
+  marketAttractiveness: "High" | "Medium" | "Low";
+  buyerUrgency: "High" | "Medium" | "Low";
+  competitivePressure: "High" | "Medium" | "Low";
+  entryWedge: string;
+  recommendedChannel: string;
+  opportunities: string[];
+  topRisks: string[];
+  summary: string;
+};
+
 const KEYS = {
   projects: "buildly/local-projects/v1",
   landings: "buildly/local-landings/v1",
@@ -447,7 +459,7 @@ export function decideFromSignal(project: LocalProject, signal: ProjectSignal): 
     code: "iterate",
     label: "Iterate positioning",
     rationale: `The current winner is ${best.variantType}, but the conversion signal still needs work. Tighten the headline, value prop, and CTA before generating the MVP.`,
-    confidence: "Medium",
+      confidence: "Medium",
   };
 }
 
@@ -496,6 +508,37 @@ export function benchmarkSignal(project: LocalProject, signal: ProjectSignal): B
   return { segment, verdict, expectedCtr, expectedConversion, explanation };
 }
 
+export function analyzeMarket(project: LocalProject): MarketAnalysis {
+  const segment = inferSegment(project);
+  const text = `${project.input.idea} ${project.input.icp} ${project.input.value}`.toLowerCase();
+  const urgencyScore = scoreUrgency(text);
+  const pressureScore = scoreCompetition(text);
+  const buyerUrgency = urgencyScore >= 3 ? "High" : urgencyScore === 2 ? "Medium" : "Low";
+  const competitivePressure = pressureScore >= 3 ? "High" : pressureScore === 2 ? "Medium" : "Low";
+
+  let attractiveness: MarketAnalysis["marketAttractiveness"] = "Medium";
+  if (urgencyScore >= 3 && pressureScore <= 2) attractiveness = "High";
+  if (urgencyScore <= 1 || (pressureScore >= 3 && urgencyScore <= 2)) attractiveness = "Low";
+
+  const entryWedge = getEntryWedge(project, segment, urgencyScore);
+  const recommendedChannel = getRecommendedChannel(project, segment);
+  const opportunities = buildOpportunities(project, segment, urgencyScore);
+  const topRisks = buildMarketRisks(project, segment, pressureScore, urgencyScore);
+  const summary = `${segment} market with ${buyerUrgency.toLowerCase()} buyer urgency and ${competitivePressure.toLowerCase()} competitive pressure. The best wedge is ${entryWedge.toLowerCase()}, with ${recommendedChannel.toLowerCase()} as the most natural first channel.`;
+
+  return {
+    segment,
+    marketAttractiveness: attractiveness,
+    buyerUrgency,
+    competitivePressure,
+    entryWedge,
+    recommendedChannel,
+    opportunities,
+    topRisks,
+    summary,
+  };
+}
+
 export function buildPivotPlan(project: LocalProject, signal: ProjectSignal): PivotRecommendation[] {
   const decision = decideFromSignal(project, signal);
   const winner = signal.bestVariant;
@@ -504,7 +547,7 @@ export function buildPivotPlan(project: LocalProject, signal: ProjectSignal): Pi
     return [
       {
         title: "Double down on the winning angle",
-        reason: `The ${winner?.variantType || "best"} variant is already producing usable signal.` ,
+        reason: `The ${winner?.variantType || "best"} variant is already producing usable signal.`,
         nextTest: "Keep one headline stable, then test onboarding intent or pricing instead of reworking the whole proposition.",
       },
       {
@@ -606,7 +649,7 @@ export function buildInvestorMemo(project: LocalProject, signal: ProjectSignal):
 
   return {
     title: `${project.input.idea} traction memo`,
-    summary: `${decision.label}. Buildly observed ${signal.totalViews} views, ${signal.totalLeads} captured leads, ${signal.conversion}% visitor-to-lead conversion, and a current benchmark verdict of ${benchmark.verdict.toLowerCase()} for ${benchmark.segment.toLowerCase()} demand.` ,
+    summary: `${decision.label}. Buildly observed ${signal.totalViews} views, ${signal.totalLeads} captured leads, ${signal.conversion}% visitor-to-lead conversion, and a current benchmark verdict of ${benchmark.verdict.toLowerCase()} for ${benchmark.segment.toLowerCase()} demand.`,
     bullets: [
       `Best current angle: ${winner ? `${winner.variantType} at ${winner.conversion}% conversion` : "no winning variant yet"}.`,
       `Primary ICP tested: ${project.input.icp}.`,
@@ -630,6 +673,52 @@ function inferSegment(project: LocalProject): BenchmarkReport["segment"] {
   if (/consumer|parents|students|creators|fitness|dating|beauty|food|travel|tiktok|instagram|reddit/.test(text)) return "Consumer";
   if (/freelance|creator|agency|coach|consultant|designer|solo|independent/.test(text)) return "Prosumer";
   return "B2B";
+}
+
+function scoreUrgency(text: string) {
+  if (/(save|compliance|revenue|sales|pipeline|deadline|risk|manual|ops|automation|urgent|churn|cost|time)/.test(text)) return 3;
+  if (/(improve|better|faster|simpler|easier|consistent|growth|organize)/.test(text)) return 2;
+  return 1;
+}
+
+function scoreCompetition(text: string) {
+  if (/(ai|crm|productivity|analytics|marketing|design|project management|fitness app|content)/.test(text)) return 3;
+  if (/(workflow|automation|saas|dashboard|community|marketplace)/.test(text)) return 2;
+  return 1;
+}
+
+function getEntryWedge(project: LocalProject, segment: MarketAnalysis["segment"], urgencyScore: number) {
+  if (urgencyScore >= 3 && segment === "B2B") return `a narrow operational pain for ${project.input.icp.toLowerCase()}`;
+  if (segment === "Consumer") return "a single emotionally resonant outcome with strong social proof";
+  if (segment === "Prosumer") return "a time-saving workflow that pays back within the first week";
+  return "one painful workflow with a concrete before/after promise";
+}
+
+function getRecommendedChannel(project: LocalProject, segment: MarketAnalysis["segment"]) {
+  if (segment === "B2B") return project.result.validation.channel || "LinkedIn outbound + founder-led outreach";
+  if (segment === "Consumer") return "TikTok / Instagram / creator communities";
+  return "X / LinkedIn / niche communities";
+}
+
+function buildOpportunities(project: LocalProject, segment: MarketAnalysis["segment"], urgencyScore: number) {
+  const opportunities = [
+    `Position around ${project.input.value.toLowerCase()}.`,
+    `Test a sharper wedge for ${project.input.icp.toLowerCase()}.`,
+  ];
+  if (segment === "B2B") opportunities.push("Use founder-led outreach to validate pain before scaling traffic.");
+  if (segment === "Consumer") opportunities.push("Lean on social proof and visual results to accelerate trust.");
+  if (urgencyScore >= 3) opportunities.push("Buyers likely respond to a strong ROI or time-saving framing.");
+  return opportunities.slice(0, 3);
+}
+
+function buildMarketRisks(project: LocalProject, segment: MarketAnalysis["segment"], pressureScore: number, urgencyScore: number) {
+  const risks = [] as string[];
+  if (pressureScore >= 3) risks.push("Crowded space with strong incumbent expectations.");
+  if (urgencyScore <= 1) risks.push("Problem may feel nice-to-have rather than urgent.");
+  if (segment === "Consumer") risks.push("Traffic may be cheap but intent quality may vary widely.");
+  if (segment === "B2B") risks.push("Sales cycle may be longer than initial landing tests suggest.");
+  if (risks.length === 0) risks.push("The ICP may still be broader than the real winning buyer segment.");
+  return risks.slice(0, 3);
 }
 
 function csvEscape(value: string) {
