@@ -64,18 +64,6 @@ export default function StudioClient() {
     ? "border-emerald-200 bg-emerald-50 text-emerald-700"
     : "border-rose-200 bg-rose-50 text-rose-700";
 
-  const lovableUrl = useMemo(
-    () =>
-      buildLovableUrl({
-        input: result?.input ?? form,
-        generatedCopy: result?.generatedCopy,
-        landingSections: result?.landingSections,
-        mvpScope: result?.mvpScope,
-        agentActions: result?.agentActions,
-      }),
-    [form, result],
-  );
-
   async function generateLanding(nextForm?: ValidationInput) {
     const payload = nextForm ?? form;
     setLoading(true);
@@ -104,7 +92,6 @@ export default function StudioClient() {
       setStatus("Voice input is not supported in this browser. Use Chrome or Edge.");
       return;
     }
-
     const recognition = new SR();
     recognition.lang = "en-US";
     recognition.interimResults = true;
@@ -131,7 +118,6 @@ export default function StudioClient() {
       setRecording(false);
       setStatus("Voice captured. Generate the landing page.");
     };
-
     if (!recording) recognition.start();
     else recognition.stop();
   }
@@ -166,15 +152,21 @@ export default function StudioClient() {
               Buildly turns your idea into a landing page, tests it on real users through social channels,
               and tells you exactly what to build next.
             </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3 text-sm text-slate-700">
+              <Tag>Voice input</Tag>
+              <Tag>Landing generation</Tag>
+              <Tag>Validation signal</Tag>
+              <Tag>MVP scoping</Tag>
+            </div>
           </div>
         </section>
 
-        <section id="generator" className="mt-12 grid gap-6 lg:grid-cols-[1.05fr_.95fr]">
+        <section id="generator" className="mt-12 grid gap-6 lg:grid-cols-[1.05fr_.95fr] lg:items-start">
           <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,.08)] md:p-7">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <div className="text-sm font-semibold text-slate-900">One-page MVP studio</div>
-                <div className="mt-1 text-sm text-slate-500">Describe the startup, generate the landing, then send the project to Lovable.</div>
+                <div className="mt-1 text-sm text-slate-500">Describe the startup, generate the landing, and decide what to build.</div>
               </div>
               <div className={`rounded-full border px-4 py-2 text-sm ${recording ? "border-rose-200 bg-rose-50 text-rose-700" : "border-slate-200 bg-slate-50 text-slate-700"}`}>
                 {status}
@@ -184,7 +176,7 @@ export default function StudioClient() {
             <div className="mt-6 space-y-4">
               <Field label="Startup idea" value={form.idea} onChange={(value) => setForm({ ...form, idea: value })} />
               <Field label="ICP / target audience" value={form.icp} onChange={(value) => setForm({ ...form, icp: value })} />
-              <Field label="Value proposition" value={form.value} onChange={(value) => setForm({ ...form, value: value })} />
+              <Field label="Value proposition" value={form.value} onChange={(value) => setForm({ ...form, value })} />
             </div>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -194,14 +186,6 @@ export default function StudioClient() {
               <button type="button" onClick={() => void generateLanding()} className="inline-flex h-12 items-center justify-center rounded-full bg-slate-950 px-6 font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,.18)]">
                 {loading ? "Generating..." : "Generate landing"}
               </button>
-              <a
-                href={lovableUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex h-12 items-center justify-center rounded-full border border-slate-200 bg-white px-6 font-semibold text-slate-900 transition hover:bg-slate-50"
-              >
-                Create
-              </a>
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
@@ -219,12 +203,12 @@ export default function StudioClient() {
                 <div className="text-sm font-semibold text-white/90">What Buildly does</div>
                 <div className="mt-1 text-sm text-white/60">Validate, test, decide, then build.</div>
               </div>
-              <div className="rounded-full border border-white/15 bg-white/5 px-3 py-2 text-xs text-white/70">Lovable connected</div>
+              <div className="rounded-full border border-white/15 bg-white/5 px-3 py-2 text-xs text-white/70">Lovable-like single page</div>
             </div>
             <div className="mt-6 grid gap-3">
               <DarkCard title="Validate" text="Turn a raw idea into a landing-page angle and a clear hypothesis." />
               <DarkCard title="Test" text="Run experiments through social and paid channels where attention already exists." />
-              <DarkCard title="Create in Lovable" text="Use the Create button to open Lovable with a prefilled prompt based on your current Buildly output." />
+              <DarkCard title="Generate MVP" text="Once the signal is real, move from validation into the first product version." />
             </div>
           </div>
         </section>
@@ -282,14 +266,9 @@ export default function StudioClient() {
                       <button className="rounded-full bg-slate-950 px-6 py-3 font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,.18)]">
                         {result.generatedCopy.cta}
                       </button>
-                      <a
-                        href={lovableUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex rounded-full border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-800 transition hover:bg-slate-50"
-                      >
-                        Create
-                      </a>
+                      <button className="rounded-full border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-800">
+                        See validation plan
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -344,7 +323,7 @@ export default function StudioClient() {
             items={[
               ["Validate", "Turn a raw idea into a landing-page angle and a clear hypothesis."],
               ["Test", "Run experiments through social and paid channels where attention already exists."],
-              ["Create in Lovable", "Open Lovable with a prefilled project brief generated from the current Buildly idea or output."],
+              ["Generate MVP", "Once the signal is real, move from validation into the first product version."],
             ]}
           />
 
@@ -355,7 +334,7 @@ export default function StudioClient() {
               ["1. Describe the idea", "Buildly turns the startup concept, ICP, and promise into a sharp validation angle."],
               ["2. Generate the page", "The app produces a convincing one-page landing preview you can react to immediately."],
               ["3. Read the signal", "You get positioning clues, recommended channel, and an MVP readiness score."],
-              ["4. Create the MVP", "Use Create to open Lovable with a brief derived from the validated concept."],
+              ["4. Build with focus", "Once the signal is good enough, Buildly tells you what the first product should include."],
             ]}
           />
 
@@ -389,27 +368,24 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
 function Metric({ value, label }: { value: string; label: string }) {
   return <div className="rounded-[24px] border border-slate-200 bg-white p-5"><div className="text-3xl font-semibold tracking-[-0.04em]">{value}</div><div className="mt-1 text-sm text-slate-500">{label}</div></div>;
 }
-
 function PreviewMini({ title, label }: { title: string; label: string }) {
   return <div className="rounded-[22px] border border-slate-200 bg-slate-50 p-4"><strong className="block text-slate-900">{title}</strong><div className="mt-2 text-xs text-slate-500">{label}</div></div>;
 }
-
 function SectionBox({ title, text }: { title: string; text: string }) {
   return <div className="rounded-[22px] border border-slate-200 bg-slate-50 p-5"><strong className="block text-slate-900">{title}</strong><p className="mt-2 leading-7 text-slate-600">{text}</p></div>;
 }
-
 function QuoteCard({ title, text }: { title: string; text: string }) {
   return <div className="rounded-[24px] border border-slate-200 bg-white p-5"><strong className="block text-slate-900">{title}</strong><p className="mt-3 leading-7 text-slate-600">“{text}”</p></div>;
 }
-
 function FeaturePreview({ title, text }: { title: string; text: string }) {
   return <div className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm"><div className="text-base font-semibold text-slate-900">{title}</div><p className="mt-2 text-sm leading-6 text-slate-600">{text}</p></div>;
 }
-
+function Tag({ children }: { children: React.ReactNode }) {
+  return <span className="rounded-full border border-slate-200 bg-white/80 px-4 py-2">{children}</span>;
+}
 function DarkCard({ title, text }: { title: string; text: string }) {
   return <div className="rounded-[24px] border border-white/10 bg-white/5 p-4"><div className="text-sm font-semibold text-white">{title}</div><p className="mt-2 text-sm leading-6 text-white/65">{text}</p></div>;
 }
-
 function BlockSection({ title, subtitle, items }: { title: string; subtitle: string; items: [string, string][] }) {
   return (
     <section className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,.08)] md:p-8">
@@ -428,7 +404,6 @@ function BlockSection({ title, subtitle, items }: { title: string; subtitle: str
     </section>
   );
 }
-
 function PriceCard({ title, price, description, items, featured = false }: { title: string; price: string; description: string; items: string[]; featured?: boolean }) {
   return (
     <div className={`rounded-[26px] border p-5 ${featured ? "border-violet-300 bg-violet-50/50" : "border-slate-200 bg-white"}`}>
@@ -441,59 +416,6 @@ function PriceCard({ title, price, description, items, featured = false }: { tit
     </div>
   );
 }
-
-type LovableBuildContext = {
-  input: ValidationInput;
-  generatedCopy?: AgentPayload["generatedCopy"];
-  landingSections?: string[];
-  mvpScope?: string[];
-  agentActions?: string[];
-};
-
-function buildLovableUrl(context: LovableBuildContext) {
-  return `https://lovable.dev/?autosubmit=true#prompt=${encodeURIComponent(buildLovablePrompt(context))}`;
-}
-
-function buildLovablePrompt({ input, generatedCopy, landingSections, mvpScope, agentActions }: LovableBuildContext) {
-  const sections = landingSections?.length ? landingSections : [
-    "Hero with clear product value",
-    "Problem and why existing workflows fail",
-    "Solution walkthrough",
-    "Social proof or traction placeholder",
-    "Founder CTA to request access",
-  ];
-
-  const scope = mvpScope?.length ? mvpScope : [
-    "Landing page with strong signup CTA",
-    "Waitlist or lead capture flow",
-    "Simple founder dashboard for validation feedback",
-  ];
-
-  const actions = agentActions?.length ? agentActions : [
-    "Make the value proposition feel specific and urgent",
-    "Design for conversion before adding complexity",
-    "Keep the MVP focused on one core workflow",
-  ];
-
-  return [
-    "Create a polished startup MVP website in React and TypeScript with a premium Lovable-style feel.",
-    "Use a modern single-page layout with soft gradients, rounded cards, strong hierarchy, and conversion-focused copy.",
-    `Startup idea: ${input.idea}`,
-    `Target audience: ${input.icp}`,
-    `Value proposition: ${input.value}`,
-    generatedCopy ? `Hero headline: ${generatedCopy.headline}` : null,
-    generatedCopy ? `Hero subheadline: ${generatedCopy.subheadline}` : null,
-    generatedCopy ? `Primary CTA label: ${generatedCopy.cta}` : null,
-    "Landing page sections:",
-    ...sections.map((section) => `- ${section}`),
-    "Core MVP scope:",
-    ...scope.map((item) => `- ${item}`),
-    "Product guidance:",
-    ...actions.map((action) => `- ${action}`),
-    "Include a clean hero, product overview, validation-oriented CTA, and responsive layout.",
-  ].filter(Boolean).join("\n");
-}
-
 function parseTranscript(transcript: string) {
   const cleaned = transcript.trim();
   let idea = cleaned;
@@ -510,7 +432,6 @@ function parseTranscript(transcript: string) {
   idea = cleaned.replace(/\.$/, "");
   return { idea, icp, value };
 }
-
 function extractProblem(value: string) {
   const cleaned = value.replace(/^Help\s+/i, "").replace(/^Give\s+/i, "").trim();
   return cleaned ? `${cleaned.charAt(0).toUpperCase()}${cleaned.slice(1)}` : "Users struggle with a painful workflow.";
