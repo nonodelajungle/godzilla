@@ -18,70 +18,28 @@ const SYSTEM_PROMPT = [
 const RESPONSE_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: [
-    "input",
-    "urgency",
-    "landingSections",
-    "agentActions",
-    "mvpScope",
-    "generatedCopy",
-    "validation",
-  ],
+  required: ["input", "urgency", "landingSections", "agentActions", "mvpScope", "generatedCopy", "validation"],
   properties: {
     input: {
       type: "object",
       additionalProperties: false,
       required: ["idea", "icp", "value"],
-      properties: {
-        idea: { type: "string" },
-        icp: { type: "string" },
-        value: { type: "string" },
-      },
+      properties: { idea: { type: "string" }, icp: { type: "string" }, value: { type: "string" } },
     },
     urgency: { type: "string" },
-    landingSections: {
-      type: "array",
-      minItems: 4,
-      maxItems: 6,
-      items: { type: "string" },
-    },
-    agentActions: {
-      type: "array",
-      minItems: 3,
-      maxItems: 3,
-      items: { type: "string" },
-    },
-    mvpScope: {
-      type: "array",
-      minItems: 3,
-      maxItems: 3,
-      items: { type: "string" },
-    },
+    landingSections: { type: "array", minItems: 4, maxItems: 6, items: { type: "string" } },
+    agentActions: { type: "array", minItems: 3, maxItems: 3, items: { type: "string" } },
+    mvpScope: { type: "array", minItems: 3, maxItems: 3, items: { type: "string" } },
     generatedCopy: {
       type: "object",
       additionalProperties: false,
       required: ["headline", "subheadline", "cta"],
-      properties: {
-        headline: { type: "string" },
-        subheadline: { type: "string" },
-        cta: { type: "string" },
-      },
+      properties: { headline: { type: "string" }, subheadline: { type: "string" }, cta: { type: "string" } },
     },
     validation: {
       type: "object",
       additionalProperties: false,
-      required: [
-        "visitors",
-        "signups",
-        "conversion",
-        "channel",
-        "score",
-        "readiness",
-        "nextStep",
-        "insight",
-        "mvpRecommendation",
-        "features",
-      ],
+      required: ["visitors", "signups", "conversion", "channel", "score", "readiness", "nextStep", "insight", "mvpRecommendation", "features"],
       properties: {
         visitors: { type: "number" },
         signups: { type: "number" },
@@ -100,10 +58,7 @@ const RESPONSE_SCHEMA = {
             type: "object",
             additionalProperties: false,
             required: ["title", "description"],
-            properties: {
-              title: { type: "string" },
-              description: { type: "string" },
-            },
+            properties: { title: { type: "string" }, description: { type: "string" } },
           },
         },
       },
@@ -120,7 +75,7 @@ export async function POST(request: Request) {
   };
 
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return NextResponse.json(runBuildlyAgent(input));
+  if (!apiKey) return NextResponse.json(withMeta(runBuildlyAgent(input), false));
 
   try {
     const response = await fetch(OPENAI_API_URL, {
@@ -153,15 +108,22 @@ export async function POST(request: Request) {
       output?: Array<{ content?: Array<{ text?: string }> }>;
     };
 
-    const rawText =
-      data.output_text ??
-      data.output?.flatMap((item) => item.content ?? []).map((item) => item.text ?? "").join("") ??
-      "";
-
-    return NextResponse.json(sanitize(JSON.parse(rawText)));
+    const rawText = data.output_text ?? data.output?.flatMap((item) => item.content ?? []).map((item) => item.text ?? "").join("") ?? "";
+    return NextResponse.json(withMeta(sanitize(JSON.parse(rawText)), true));
   } catch {
-    return NextResponse.json(runBuildlyAgent(input));
+    return NextResponse.json(withMeta(runBuildlyAgent(input), false));
   }
+}
+
+function withMeta(payload: any, openaiEnabled: boolean) {
+  return {
+    ...payload,
+    meta: {
+      provider: openaiEnabled ? "openai" : "fallback",
+      model: openaiEnabled ? OPENAI_MODEL : "local-buildly-agent",
+      reasoning: openaiEnabled ? OPENAI_REASONING_EFFORT : "none",
+    },
+  };
 }
 
 function sanitize(payload: any) {

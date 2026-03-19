@@ -9,6 +9,7 @@ type AgentPayload = {
   agentActions: string[];
   mvpScope: string[];
   generatedCopy: { headline: string; subheadline: string; cta: string };
+  meta?: { provider?: string; model?: string; reasoning?: string };
   validation: {
     visitors: number;
     signups: number;
@@ -58,6 +59,10 @@ export default function StudioClient() {
     return "border-amber-200 bg-amber-50 text-amber-700";
   }, [result]);
 
+  const providerTone = result?.meta?.provider === "openai"
+    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+    : "border-slate-200 bg-slate-50 text-slate-700";
+
   async function generateLanding(nextForm?: ValidationInput) {
     const payload = nextForm ?? form;
     setLoading(true);
@@ -98,11 +103,7 @@ export default function StudioClient() {
       let transcript = "";
       for (let i = event.resultIndex; i < event.results.length; i += 1) transcript += event.results[i][0].transcript;
       const parsed = parseTranscript(transcript);
-      setForm((current) => ({
-        idea: parsed.idea || current.idea,
-        icp: parsed.icp || current.icp,
-        value: parsed.value || current.value,
-      }));
+      setForm((current) => ({ idea: parsed.idea || current.idea, icp: parsed.icp || current.icp, value: parsed.value || current.value }));
     };
     recognition.onerror = (event) => {
       setRecording(false);
@@ -129,7 +130,6 @@ export default function StudioClient() {
           </div>
           <div className="hidden items-center gap-6 text-sm text-slate-700 md:flex">
             <a href="#results">Preview</a>
-            <a href="#how">How it works</a>
             <a href="/dashboard">Dashboard</a>
           </div>
         </nav>
@@ -160,17 +160,20 @@ export default function StudioClient() {
               </div>
             </div>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
-              {demoIdeas.map((example) => (
-                <button key={example.idea} type="button" onClick={() => loadExample(example)} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700">{example.idea}</button>
-              ))}
+              {demoIdeas.map((example) => <button key={example.idea} type="button" onClick={() => loadExample(example)} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700">{example.idea}</button>)}
             </div>
           </div>
         </section>
 
         <section id="results" className="py-8">
           <div className="rounded-[28px] border border-slate-200 bg-white p-8 shadow-soft">
-            <div className="text-xs font-extrabold uppercase tracking-[0.08em] text-slate-500">Generated result</div>
-            <h2 className="mt-3 text-4xl font-semibold tracking-[-0.04em]">Landing page preview for the creator’s idea</h2>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className="text-xs font-extrabold uppercase tracking-[0.08em] text-slate-500">Generated result</div>
+                <h2 className="mt-3 text-4xl font-semibold tracking-[-0.04em]">Landing page preview for the creator’s idea</h2>
+              </div>
+              {result?.meta && <div className={`rounded-full border px-3 py-2 text-sm font-semibold ${providerTone}`}>{result.meta.provider === "openai" ? `OpenAI · ${result.meta.model} · ${result.meta.reasoning}` : "Fallback local agent"}</div>}
+            </div>
             <p className="mt-3 max-w-4xl text-lg leading-8 text-slate-500">Buildly generates a complete landing concept when the creator pushes a project idea.</p>
 
             {!result ? (
@@ -184,7 +187,6 @@ export default function StudioClient() {
                   <Metric value={result.validation.channel} label="Best channel" />
                   <Metric value={String(result.validation.score)} label="Validation score" />
                 </div>
-
                 <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-soft">
                   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4">
                     <div className="text-xs text-slate-500">Generated landing-page preview</div>
@@ -201,12 +203,7 @@ export default function StudioClient() {
                     <PreviewMini title={result.validation.nextStep} label="Recommended move" />
                   </div>
                   <div className="grid gap-4 px-7 pb-6 md:grid-cols-3">
-                    {result.validation.features.map((feature) => (
-                      <div key={feature.title} className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">
-                        <strong className="block text-base">{feature.title}</strong>
-                        <p className="mt-2 text-sm leading-6 text-slate-500">{feature.description}</p>
-                      </div>
-                    ))}
+                    {result.validation.features.map((feature) => <div key={feature.title} className="rounded-[20px] border border-slate-200 bg-slate-50 p-4"><strong className="block text-base">{feature.title}</strong><p className="mt-2 text-sm leading-6 text-slate-500">{feature.description}</p></div>)}
                   </div>
                   <div className="grid gap-4 px-7 pb-7 md:grid-cols-2">
                     <SectionBox title="Problem" text={extractProblem(result.input.value)} />
@@ -238,48 +235,11 @@ export default function StudioClient() {
 }
 
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
-  return (
-    <label className="block text-left text-sm font-semibold text-slate-700">
-      <span className="mb-2 block">{label}</span>
-      <input value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-950 outline-none" />
-    </label>
-  );
+  return <label className="block text-left text-sm font-semibold text-slate-700"><span className="mb-2 block">{label}</span><input value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-950 outline-none" /></label>;
 }
-
-function Metric({ value, label }: { value: string; label: string }) {
-  return <div className="rounded-[22px] border border-slate-200 p-5"><div className="text-3xl font-semibold tracking-[-0.04em]">{value}</div><div className="mt-1 text-sm text-slate-500">{label}</div></div>;
-}
-
-function PreviewMini({ title, label }: { title: string; label: string }) {
-  return <div className="rounded-[20px] border border-slate-200 p-4"><strong className="block">{title}</strong><div className="mt-2 text-xs text-slate-500">{label}</div></div>;
-}
-
-function SectionBox({ title, text }: { title: string; text: string }) {
-  return <div className="rounded-[18px] border border-slate-200 p-5"><strong className="block">{title}</strong><p className="mt-2 leading-7 text-slate-500">{text}</p></div>;
-}
-
-function QuoteCard({ title, text }: { title: string; text: string }) {
-  return <div className="rounded-[20px] border border-slate-200 p-5"><strong className="block">{title}</strong><p className="mt-3 leading-7 text-slate-500">“{text}”</p></div>;
-}
-
-function parseTranscript(transcript: string) {
-  const cleaned = transcript.trim();
-  let idea = cleaned;
-  let icp = "";
-  let value = "";
-  const targeting = cleaned.match(/targeting (.+?)(?: and helping| helping| that helps| who need|$)/i);
-  if (targeting) icp = targeting[1].trim();
-  const helping = cleaned.match(/(?:helping|that helps|which helps) (.+)$/i);
-  if (helping) value = `Help ${helping[1].trim().replace(/\.$/, "")}.`;
-  const forMatch = cleaned.match(/for (.+?)(?: that| who| helping| to|$)/i);
-  if (!icp && forMatch) icp = forMatch[1].trim();
-  const toMatch = cleaned.match(/to (.+)$/i);
-  if (!value && toMatch) value = `Help users ${toMatch[1].trim().replace(/\.$/, "")}.`;
-  idea = cleaned.replace(/\.$/, "");
-  return { idea, icp, value };
-}
-
-function extractProblem(value: string) {
-  const cleaned = value.replace(/^Help\s+/i, "").replace(/^Give\s+/i, "").trim();
-  return cleaned ? `${cleaned.charAt(0).toUpperCase()}${cleaned.slice(1)}` : "Users struggle with a painful workflow.";
-}
+function Metric({ value, label }: { value: string; label: string }) { return <div className="rounded-[22px] border border-slate-200 p-5"><div className="text-3xl font-semibold tracking-[-0.04em]">{value}</div><div className="mt-1 text-sm text-slate-500">{label}</div></div>; }
+function PreviewMini({ title, label }: { title: string; label: string }) { return <div className="rounded-[20px] border border-slate-200 p-4"><strong className="block">{title}</strong><div className="mt-2 text-xs text-slate-500">{label}</div></div>; }
+function SectionBox({ title, text }: { title: string; text: string }) { return <div className="rounded-[18px] border border-slate-200 p-5"><strong className="block">{title}</strong><p className="mt-2 leading-7 text-slate-500">{text}</p></div>; }
+function QuoteCard({ title, text }: { title: string; text: string }) { return <div className="rounded-[20px] border border-slate-200 p-5"><strong className="block">{title}</strong><p className="mt-3 leading-7 text-slate-500">“{text}”</p></div>; }
+function parseTranscript(transcript: string) { const cleaned = transcript.trim(); let idea = cleaned; let icp = ""; let value = ""; const targeting = cleaned.match(/targeting (.+?)(?: and helping| helping| that helps| who need|$)/i); if (targeting) icp = targeting[1].trim(); const helping = cleaned.match(/(?:helping|that helps|which helps) (.+)$/i); if (helping) value = `Help ${helping[1].trim().replace(/\.$/, "")}.`; const forMatch = cleaned.match(/for (.+?)(?: that| who| helping| to|$)/i); if (!icp && forMatch) icp = forMatch[1].trim(); const toMatch = cleaned.match(/to (.+)$/i); if (!value && toMatch) value = `Help users ${toMatch[1].trim().replace(/\.$/, "")}.`; idea = cleaned.replace(/\.$/, ""); return { idea, icp, value }; }
+function extractProblem(value: string) { const cleaned = value.replace(/^Help\s+/i, "").replace(/^Give\s+/i, "").trim(); return cleaned ? `${cleaned.charAt(0).toUpperCase()}${cleaned.slice(1)}` : "Users struggle with a painful workflow."; }
