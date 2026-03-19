@@ -17,7 +17,9 @@ import {
   type LandingVariant,
   type LocalProject,
 } from "../lib/local-demo";
+import { buildMarketStudy } from "../lib/market-study";
 import { buildTrafficKit } from "../lib/traffic-kit";
+import { MarketStudyPanel } from "./market-study-panel";
 
 type AgentPayload = AgentPayloadLite;
 
@@ -63,6 +65,7 @@ export default function StudioClient() {
   const decision = useMemo(() => (activeProject && signal ? decideFromSignal(activeProject, signal) : null), [activeProject, signal]);
   const mvpBrief = useMemo(() => (activeProject && signal ? buildMvpBrief(activeProject, signal) : null), [activeProject, signal]);
   const marketAnalysis = useMemo(() => (activeProject ? analyzeMarket(activeProject) : null), [activeProject]);
+  const marketStudy = useMemo(() => (activeProject && marketAnalysis ? buildMarketStudy(activeProject, marketAnalysis) : null), [activeProject, marketAnalysis]);
   const trafficKit = useMemo(() => (activeProject && marketAnalysis ? buildTrafficKit(activeProject, marketAnalysis) : null), [activeProject, marketAnalysis]);
 
   const providerTone = result?.meta?.provider === "openai"
@@ -175,7 +178,7 @@ export default function StudioClient() {
               <span className="block bg-gradient-to-r from-cyan-500 via-sky-500 to-violet-500 bg-clip-text text-transparent">Before You Build</span>
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-xl leading-9 text-slate-500">
-              Idea in → market analysis → traffic kit → landing variants → publish → collect leads → analyze signal → decide → generate MVP.
+              Idea in → market analysis → market study → traffic kit → landing variants → publish → collect leads → analyze signal → decide → generate MVP.
             </p>
           </div>
         </section>
@@ -185,7 +188,7 @@ export default function StudioClient() {
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-3xl font-bold tracking-tight">Describe Your Startup</h2>
-                <p className="mt-2 text-slate-500">Autonomous mode: market analysis, traffic kit, local publish, local leads, local analytics, local decision engine.</p>
+                <p className="mt-2 text-slate-500">Autonomous mode: market analysis, market study, traffic kit, local publish, local leads, local analytics, local decision engine.</p>
               </div>
               <button
                 type="button"
@@ -255,6 +258,14 @@ export default function StudioClient() {
                   </ul>
                 </div>
               </div>
+            </div>
+          </section>
+        )}
+
+        {activeProject && marketStudy && (
+          <section className="px-4 pb-4 pt-8">
+            <div className="mx-auto max-w-6xl">
+              <MarketStudyPanel study={marketStudy} />
             </div>
           </section>
         )}
