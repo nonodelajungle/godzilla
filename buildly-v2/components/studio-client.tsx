@@ -1,16 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { demoIdeas, type ValidationInput } from "../lib/buildly";
 
 type AgentPayload = {
   input: ValidationInput;
   urgency: string;
+  landingSections?: string[];
   agentActions: string[];
   mvpScope: string[];
-  landingSections?: string[];
-  generatedCopy: { headline: string; subheadline: string; cta: string };
-  meta?: { provider?: string; model?: string; reasoning?: string; error?: string };
+  generatedCopy: {
+    headline: string;
+    subheadline: string;
+    cta: string;
+  };
+  meta?: {
+    provider?: string;
+    model?: string;
+    reasoning?: string;
+    error?: string;
+  };
   validation: {
     visitors: number;
     signups: number;
@@ -23,6 +32,44 @@ type AgentPayload = {
     mvpRecommendation: string;
     features: { title: string; description: string }[];
   };
+};
+
+type LandingPageVariant = {
+  id: string;
+  type: "Lead Capture" | "Waitlist" | "Pre-Sell";
+  angle: string;
+  headline: string;
+  subheadline: string;
+  cta: string;
+  audience: string;
+};
+
+type ValidationMetrics = {
+  visitors: number;
+  signups: number;
+  conversion: string;
+  channel: string;
+  score: number;
+  readiness: "Low" | "Medium" | "High";
+  nextStep: string;
+  insight: string;
+  mvpRecommendation: string;
+};
+
+type Experiment = {
+  id: string;
+  title: string;
+  channel: string;
+  goal: string;
+  budget: string;
+};
+
+type StartupIdea = {
+  id: string;
+  idea: string;
+  icp: string;
+  valueProp: string;
+  createdAt: string;
 };
 
 declare global {
@@ -48,25 +95,47 @@ const initialInput = demoIdeas[0];
 
 export default function StudioClient() {
   const [form, setForm] = useState<ValidationInput>(initialInput);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [status, setStatus] = useState("Voice input ready.");
   const [recording, setRecording] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [variants, setVariants] = useState<LandingPageVariant[] | null>(null);
+  const [metrics, setMetrics] = useState<ValidationMetrics | null>(null);
+  const [experiments, setExperiments] = useState<Experiment[] | null>(null);
+  const [history, setHistory] = useState<StartupIdea[]>([]);
   const [result, setResult] = useState<AgentPayload | null>(null);
-
-  const readinessTone = useMemo(() => {
-    const readiness = result?.validation.readiness ?? "Medium";
-    if (readiness === "High") return "border-emerald-200 bg-emerald-50 text-emerald-700";
-    if (readiness === "Low") return "border-rose-200 bg-rose-50 text-rose-700";
-    return "border-amber-200 bg-amber-50 text-amber-700";
-  }, [result]);
+  const [publishModal, setPublishModal] = useState<{ open: boolean; url: string; variant?: string }>({ open: false, url: "" });
 
   const providerTone = result?.meta?.provider === "openai"
     ? "border-emerald-200 bg-emerald-50 text-emerald-700"
     : "border-rose-200 bg-rose-50 text-rose-700";
 
-  async function generateLanding(nextForm?: ValidationInput) {
-    const payload = nextForm ?? form;
-    setLoading(true);
+  const readinessTone = useMemo(() => {
+    const readiness = metrics?.readiness ?? "Medium";
+    if (readiness === "High") return "border-emerald-200 bg-emerald-50 text-emerald-700";
+    if (readiness === "Low") return "border-rose-200 bg-rose-50 text-rose-700";
+    return "border-amber-200 bg-amber-50 text-amber-700";
+  }, [metrics]);
+
+  const handleGenerate = useCallback(async (idea?: string, icp?: string, value?: string) => {
+    const payload: ValidationInput = {
+      idea: idea ?? form.idea,
+      icp: icp ?? form.icp,
+      value: value ?? form.value,
+    };
+
+    setForm(payload);
+    setIsGenerating(true);
+    setStatus("Generating landing variants and validation plan...");
+
+    const newEntry: StartupIdea = {
+      id: crypto.randomUUID(),
+      idea: payload.idea,
+      icp: payload.icp,
+      valueProp: payload.value,
+      createdAt: new Date().toISOString(),
+    };
+    setHistory((prev) => [newEntry, ...prev.filter((item) => item.idea !== payload.idea)]);
+
     try {
       const response = await fetch("/api/agent", {
         method: "POST",
@@ -75,16 +144,33 @@ export default function StudioClient() {
       });
       const data = (await response.json()) as AgentPayload;
       setResult(data);
-      setStatus("Landing page generated.");
+      setVariants(buildVariants(data));
+      setMetrics({
+        visitors: data.validation.visitors,
+        signups: data.validation.signups,
+        conversion: data.validation.conversion,
+        channel: data.validation.channel,
+        score: data.validation.score,
+        readiness: data.validation.readiness,
+        nextStep: data.validation.nextStep,
+        insight: data.validation.insight,
+        mvpRecommendation: data.validation.mvpRecommendation,
+      });
+      setExperiments(buildExperiments(data));
+      setStatus("Landing variants ready.");
     } finally {
-      setLoading(false);
+      setIsGenerating(false);
     }
-  }
+  }, [form]);
 
-  function loadExample(example: ValidationInput) {
-    setForm(example);
-    void generateLanding(example);
-  }
+  const handlePublish = useCallback((variant: LandingPageVariant) => {
+    const slug = `${variant.type.toLowerCase().replace(/\s+/g, "-")}-${Date.now().toString(36)}`;
+    setPublishModal({ open: true, url: `https://${slug}.buildly.app`, variant: variant.type });
+  }, []);
+
+  const handleHistorySelect = useCallback((item: StartupIdea) => {
+    void handleGenerate(item.idea, item.icp, item.valueProp);
+  }, [handleGenerate]);
 
   function toggleVoice() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -116,306 +202,387 @@ export default function StudioClient() {
     };
     recognition.onend = () => {
       setRecording(false);
-      setStatus("Voice captured. Generate the landing page.");
+      setStatus("Voice captured. Generate landing variants.");
     };
     if (!recording) recognition.start();
     else recognition.stop();
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(800px_300px_at_0%_0%,rgba(121,173,255,.18),transparent_60%),radial-gradient(700px_260px_at_100%_0%,rgba(255,88,185,.12),transparent_55%),#f7f8fc] text-slate-950">
-      <div className="mx-auto max-w-7xl px-5 pb-16 md:px-8">
-        <nav className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200/70 bg-[#f7f8fc]/85 py-5 backdrop-blur">
+    <div className="min-h-screen bg-[#f7fbfb] text-slate-900">
+      <nav className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-lg">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
+          <span className="text-2xl font-bold tracking-tight text-cyan-600">Buildly</span>
           <div className="flex items-center gap-4">
-            <div className="h-11 w-11 rounded-2xl bg-[conic-gradient(from_210deg,#4ec5ff,#ff4fb3,#ffb347,#8b6cff,#4ec5ff)] shadow-[0_12px_30px_rgba(80,120,255,.18)]" />
-            <div>
-              <div className="text-[28px] font-semibold tracking-[0.02em]">BUILDLY</div>
-              <div className="text-[11px] font-semibold text-slate-500">Turn ideas into validated, growing startups</div>
-            </div>
+            <a href="#how-it-works" className="hidden text-sm text-slate-500 transition hover:text-slate-900 sm:block">How it works</a>
+            <a href="#pricing" className="hidden text-sm text-slate-500 transition hover:text-slate-900 sm:block">Pricing</a>
+            <a href="#generator" className="rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Get Started</a>
           </div>
-          <div className="hidden items-center gap-6 text-sm text-slate-700 md:flex">
-            <a href="#generator">Generator</a>
-            <a href="#preview">Preview</a>
-            <a href="#pricing">Pricing</a>
-          </div>
-        </nav>
+        </div>
+      </nav>
 
-        <section className="pt-14 md:pt-20">
+      <main>
+        <section className="bg-[radial-gradient(circle_at_top_left,rgba(59,196,190,0.10),transparent_35%),radial-gradient(circle_at_top_right,rgba(121,103,255,0.12),transparent_35%),linear-gradient(180deg,#f8fcfc_0%,#f5f8fb_100%)] px-4 pb-24 pt-28">
           <div className="mx-auto max-w-5xl text-center">
-            <div className="inline-flex rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-600 shadow-sm">
-              Validate before you build
-            </div>
-            <h1 className="mx-auto mt-6 max-w-5xl text-5xl font-semibold tracking-[-0.06em] md:text-7xl">
-              Validate startup ideas before you build anything
+            <div className="inline-flex items-center rounded-full bg-emerald-50 px-5 py-2 text-sm font-medium text-emerald-600">✦ AI-Powered Startup Validation</div>
+            <h1 className="mx-auto mt-8 max-w-4xl text-5xl font-bold tracking-[-0.05em] text-slate-950 md:text-7xl">
+              Validate Your Startup Idea
+              <span className="block bg-gradient-to-r from-cyan-500 via-sky-500 to-violet-500 bg-clip-text text-transparent">Before You Build</span>
             </h1>
-            <p className="mx-auto mt-5 max-w-4xl text-lg leading-8 text-slate-600 md:text-[21px]">
-              Buildly turns your idea into a landing page, tests it on real users through social channels,
-              and tells you exactly what to build next.
+            <p className="mx-auto mt-6 max-w-3xl text-xl leading-9 text-slate-500">
+              Buildly turns your idea into landing variants, tests them on real users, and tells you exactly what to build next.
             </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-3 text-sm text-slate-700">
-              <Tag>Voice input</Tag>
-              <Tag>Landing generation</Tag>
-              <Tag>Validation signal</Tag>
-              <Tag>MVP scoping</Tag>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-8 text-base text-slate-500">
+              <span>✓ No code needed</span>
+              <span>✓ Real validation data</span>
+              <span>✓ Launch in minutes</span>
             </div>
           </div>
         </section>
 
-        <section id="generator" className="mt-12 grid gap-6 lg:grid-cols-[1.05fr_.95fr] lg:items-start">
-          <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,.08)] md:p-7">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+        <section id="generator" className="relative -mt-10 px-4">
+          <div className="mx-auto max-w-4xl rounded-[28px] border border-slate-200 bg-white p-8 shadow-[0_20px_70px_rgba(15,23,42,0.08)]">
+            <div className="mb-6 flex items-start justify-between gap-4">
               <div>
-                <div className="text-sm font-semibold text-slate-900">One-page MVP studio</div>
-                <div className="mt-1 text-sm text-slate-500">Describe the startup, generate the landing, and decide what to build.</div>
+                <h2 className="text-3xl font-bold tracking-tight">Describe Your Startup</h2>
+                <p className="mt-2 text-slate-500">Idea in → landing variants → publish → collect leads → analyze signal → decide → generate MVP</p>
               </div>
-              <div className={`rounded-full border px-4 py-2 text-sm ${recording ? "border-rose-200 bg-rose-50 text-rose-700" : "border-slate-200 bg-slate-50 text-slate-700"}`}>
-                {status}
-              </div>
-            </div>
-
-            <div className="mt-6 space-y-4">
-              <Field label="Startup idea" value={form.idea} onChange={(value) => setForm({ ...form, idea: value })} />
-              <Field label="ICP / target audience" value={form.icp} onChange={(value) => setForm({ ...form, icp: value })} />
-              <Field label="Value proposition" value={form.value} onChange={(value) => setForm({ ...form, value })} />
-            </div>
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button type="button" onClick={toggleVoice} className={`inline-flex h-12 items-center justify-center rounded-full border px-5 font-semibold ${recording ? "border-rose-200 bg-rose-50 text-rose-700" : "border-slate-200 bg-white text-slate-900"}`}>
-                {recording ? "⏺ Stop" : "🎙️ Speak"}
-              </button>
-              <button type="button" onClick={() => void generateLanding()} className="inline-flex h-12 items-center justify-center rounded-full bg-slate-950 px-6 font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,.18)]">
-                {loading ? "Generating..." : "Generate landing"}
+              <button
+                type="button"
+                onClick={() => void handleGenerate(demoIdeas[1].idea, demoIdeas[1].icp, demoIdeas[1].value)}
+                className="text-sm font-semibold text-cyan-600 transition hover:text-cyan-700"
+              >
+                Fill example
               </button>
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-2">
-              {demoIdeas.map((example) => (
-                <button key={example.idea} type="button" onClick={() => loadExample(example)} className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700 transition hover:bg-white">
-                  {example.idea}
-                </button>
-              ))}
+            <div className="space-y-5">
+              <Field label="Startup Idea" placeholder="e.g. An AI tool that generates personalized workout plans" value={form.idea} onChange={(value) => setForm({ ...form, idea: value })} />
+              <Field label="Target Customer (ICP)" placeholder="e.g. Fitness enthusiasts aged 25–35 who work from home" value={form.icp} onChange={(value) => setForm({ ...form, icp: value })} />
+              <Field label="Value Proposition" placeholder="e.g. Help users stay consistent with tailored plans and faster results" value={form.value} onChange={(value) => setForm({ ...form, value })} />
             </div>
-          </div>
 
-          <div className="rounded-[32px] border border-slate-200 bg-[linear-gradient(135deg,#111827,#0f172a_65%,#1f2a44)] p-6 text-white shadow-[0_20px_60px_rgba(15,23,42,.22)] md:p-7">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <div className="text-sm font-semibold text-white/90">What Buildly does</div>
-                <div className="mt-1 text-sm text-white/60">Validate, test, decide, then build.</div>
-              </div>
-              <div className="rounded-full border border-white/15 bg-white/5 px-3 py-2 text-xs text-white/70">Lovable-like single page</div>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={toggleVoice}
+                className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${recording ? "border-rose-200 bg-rose-50 text-rose-700" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
+              >
+                {recording ? "⏺ Stop" : "🎙️ Voice input"}
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleGenerate()}
+                disabled={isGenerating}
+                className="flex-1 rounded-xl bg-gradient-to-r from-[#9bd9d4] to-[#7ed3cf] px-6 py-4 text-lg font-semibold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-80"
+              >
+                {isGenerating ? "Generating..." : "✦ Generate Landing Pages"}
+              </button>
             </div>
-            <div className="mt-6 grid gap-3">
-              <DarkCard title="Validate" text="Turn a raw idea into a landing-page angle and a clear hypothesis." />
-              <DarkCard title="Test" text="Run experiments through social and paid channels where attention already exists." />
-              <DarkCard title="Generate MVP" text="Once the signal is real, move from validation into the first product version." />
-            </div>
+            <p className="mt-4 text-sm text-slate-500">{status}</p>
           </div>
         </section>
 
-        <section id="preview" className="mt-8 rounded-[34px] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,.08)] md:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">Generated landing preview</div>
-              <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em] md:text-4xl">A sharper, more realistic landing-page preview</h2>
-            </div>
-            {result?.meta && (
-              <div className={`rounded-full border px-3 py-2 text-sm font-semibold ${providerTone}`}>
-                {result.meta.provider === "openai"
-                  ? `OpenAI · ${result.meta.model} · ${result.meta.reasoning}`
-                  : `Fallback · ${result.meta.error || "unknown_error"}`}
-              </div>
-            )}
-          </div>
-
-          {!result ? (
-            <div className="mt-8 rounded-[28px] border border-dashed border-slate-300 p-10 text-center text-slate-500">
-              Generate a landing to render the full preview here.
-            </div>
-          ) : (
-            <div className="mt-8 grid gap-6 xl:grid-cols-[330px_1fr]">
-              <div className="grid gap-4">
-                <Metric value={String(result.validation.visitors)} label="Visitors" />
-                <Metric value={String(result.validation.signups)} label="Signups" />
-                <Metric value={result.validation.conversion} label="Conversion" />
-                <Metric value={result.validation.channel} label="Best channel" />
-                <Metric value={String(result.validation.score)} label="Validation score" />
-                <div className={`rounded-[24px] border px-5 py-4 text-sm font-semibold ${readinessTone}`}>
-                  MVP readiness · {result.validation.readiness}
-                </div>
-              </div>
-
-              <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-[#fbfcff] shadow-[0_16px_50px_rgba(15,23,42,.08)]">
-                <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 text-sm text-slate-500">
-                  <span>Live landing canvas</span>
-                  <span>{result.input.icp}</span>
-                </div>
-
-                <div className="bg-[radial-gradient(650px_260px_at_0%_0%,rgba(78,197,255,.16),transparent_60%),radial-gradient(700px_260px_at_100%_0%,rgba(255,79,179,.14),transparent_60%),linear-gradient(180deg,#ffffff,#f8fbff)] px-7 py-10 md:px-10 md:py-12">
-                  <div className="max-w-4xl">
-                    <div className="inline-flex rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm">
-                      For {result.input.icp.toLowerCase()}
+        {variants && (
+          <section className="px-4 pb-4 pt-16">
+            <div className="mx-auto max-w-5xl">
+              <SectionHeader
+                eyebrow="Landing variants"
+                title="Pick the strongest angle before you publish"
+                subtitle="Buildly generates distinct landing page variants optimized for different validation goals."
+              />
+              <div className="mt-8 grid gap-6 lg:grid-cols-3">
+                {variants.map((variant) => (
+                  <div key={variant.id} className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+                    <div className="inline-flex rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">{variant.type}</div>
+                    <h3 className="mt-4 text-2xl font-bold tracking-tight text-slate-950">{variant.headline}</h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-500">{variant.subheadline}</p>
+                    <div className="mt-5 rounded-2xl bg-slate-50 p-4">
+                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Angle</div>
+                      <p className="mt-2 text-sm text-slate-600">{variant.angle}</p>
                     </div>
-                    <h3 className="mt-5 max-w-3xl text-4xl font-semibold tracking-[-0.05em] md:text-5xl">
-                      {result.generatedCopy.headline}
-                    </h3>
-                    <p className="mt-5 max-w-3xl text-[17px] leading-8 text-slate-600 md:text-lg">
-                      {result.generatedCopy.subheadline}
-                    </p>
-                    <div className="mt-7 flex flex-wrap gap-3">
-                      <button className="rounded-full bg-slate-950 px-6 py-3 font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,.18)]">
-                        {result.generatedCopy.cta}
-                      </button>
-                      <button className="rounded-full border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-800">
-                        See validation plan
-                      </button>
+                    <div className="mt-5 flex items-center justify-between gap-3">
+                      <span className="text-sm text-slate-500">For {variant.audience.toLowerCase()}</span>
+                      <button onClick={() => handlePublish(variant)} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Publish</button>
                     </div>
+                    <button className="mt-5 w-full rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-900">{variant.cta}</button>
                   </div>
-                </div>
-
-                <div className="grid gap-4 border-t border-slate-200 bg-white px-7 py-6 md:grid-cols-3 md:px-10">
-                  <PreviewMini title={result.urgency} label="Market signal" />
-                  <PreviewMini title={result.validation.nextStep} label="Recommended move" />
-                  <PreviewMini title={`Channel · ${result.validation.channel}`} label="Distribution" />
-                </div>
-
-                <div className="grid gap-4 px-7 pb-6 md:grid-cols-3 md:px-10">
-                  {result.validation.features.map((feature) => (
-                    <FeaturePreview key={feature.title} title={feature.title} text={feature.description} />
-                  ))}
-                </div>
-
-                <div className="grid gap-4 border-t border-slate-200 bg-white px-7 py-6 md:grid-cols-2 md:px-10">
-                  <SectionBox title="Problem" text={extractProblem(result.input.value)} />
-                  <SectionBox title="Promise" text={result.input.value} />
-                </div>
-
-                <div className="grid gap-4 px-7 pb-6 md:grid-cols-2 md:px-10">
-                  <QuoteCard title="Founder signal" text={result.validation.insight} />
-                  <QuoteCard title="User reaction" text={result.validation.mvpRecommendation} />
-                </div>
-
-                <div className="mx-7 mb-7 rounded-[26px] border border-slate-200 bg-white p-5 md:mx-10">
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div>
-                      <div className="text-sm font-semibold text-slate-900">Buildly AI recommendations</div>
-                      <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-600">
-                        {result.agentActions.map((action) => <li key={action}>{action}</li>)}
-                      </ul>
-                    </div>
-                    <div className="min-w-[220px] rounded-[20px] bg-[linear-gradient(135deg,rgba(78,197,255,.10),rgba(139,108,255,.10))] p-4">
-                      <div className="text-sm font-semibold text-slate-900">MVP scope</div>
-                      <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-600">
-                        {result.mvpScope.map((item) => <li key={item}>{item}</li>)}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
-            </div>
-          )}
-        </section>
-
-        <section className="mt-8 grid gap-8">
-          <BlockSection
-            title="What Buildly does"
-            subtitle="Validate, test, decide, then build"
-            items={[
-              ["Validate", "Turn a raw idea into a landing-page angle and a clear hypothesis."],
-              ["Test", "Run experiments through social and paid channels where attention already exists."],
-              ["Generate MVP", "Once the signal is real, move from validation into the first product version."],
-            ]}
-          />
-
-          <BlockSection
-            title="How it works"
-            subtitle="From idea to first product direction"
-            items={[
-              ["1. Describe the idea", "Buildly turns the startup concept, ICP, and promise into a sharp validation angle."],
-              ["2. Generate the page", "The app produces a convincing one-page landing preview you can react to immediately."],
-              ["3. Read the signal", "You get positioning clues, recommended channel, and an MVP readiness score."],
-              ["4. Build with focus", "Once the signal is good enough, Buildly tells you what the first product should include."],
-            ]}
-          />
-
-          <section id="pricing" className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,.08)] md:p-8">
-            <div className="max-w-2xl">
-              <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">Pricing</div>
-              <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">Simple pricing for founder progress</h2>
-              <p className="mt-3 text-slate-600">Pick the plan that matches your validation speed.</p>
-            </div>
-            <div className="mt-6 grid gap-4 lg:grid-cols-3">
-              <PriceCard title="Starter" price="$29" description="Validate your first ideas and generate early landing concepts." items={["Idea validation", "Landing-page generation", "Basic recommendations"]} />
-              <PriceCard title="Growth" price="$99" description="Run more experiments, test better angles, and tighten your positioning." items={["Channel recommendations", "Smarter validation loops", "Stronger decision support"]} featured />
-              <PriceCard title="Pro" price="$299" description="Move from validated demand into a first product scope." items={["MVP generation path", "Advanced agent guidance", "Priority support"]} />
             </div>
           </section>
+        )}
+
+        {variants && metrics && experiments && (
+          <section className="px-4 pb-8 pt-8">
+            <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-2">
+              <div className="rounded-[28px] border border-slate-200 bg-white p-7 shadow-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-semibold text-slate-900">Validation signal</div>
+                    <p className="mt-2 text-sm text-slate-500">Collect leads, analyze the signal, and decide what to build next.</p>
+                  </div>
+                  <div className={`rounded-full border px-3 py-2 text-sm font-semibold ${readinessTone}`}>Readiness · {metrics.readiness}</div>
+                </div>
+                <div className="mt-6 grid grid-cols-2 gap-4">
+                  <MetricCard label="Visitors" value={String(metrics.visitors)} />
+                  <MetricCard label="Signups" value={String(metrics.signups)} />
+                  <MetricCard label="Conversion" value={metrics.conversion} />
+                  <MetricCard label="Best channel" value={metrics.channel} />
+                </div>
+                <div className="mt-6 rounded-2xl bg-slate-50 p-5">
+                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Decision</div>
+                  <p className="mt-2 text-base font-semibold text-slate-900">{metrics.nextStep}</p>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">{metrics.insight}</p>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">{metrics.mvpRecommendation}</p>
+                </div>
+              </div>
+
+              <div className="rounded-[28px] border border-slate-200 bg-white p-7 shadow-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-semibold text-slate-900">Testing plan</div>
+                    <p className="mt-2 text-sm text-slate-500">Publish, collect leads, and run tight experiments before generating the MVP.</p>
+                  </div>
+                  {result?.meta && (
+                    <div className={`rounded-full border px-3 py-2 text-xs font-semibold ${providerTone}`}>
+                      {result.meta.provider === "openai" ? `OpenAI · ${result.meta.model}` : "Fallback mode"}
+                    </div>
+                  )}
+                </div>
+                <div className="mt-6 space-y-4">
+                  {experiments.map((experiment) => (
+                    <div key={experiment.id} className="rounded-2xl border border-slate-200 p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className="text-base font-semibold text-slate-900">{experiment.title}</div>
+                          <p className="mt-2 text-sm text-slate-500">Channel: {experiment.channel}</p>
+                        </div>
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{experiment.budget}</span>
+                      </div>
+                      <p className="mt-3 text-sm leading-7 text-slate-600">{experiment.goal}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section id="how-it-works" className="bg-[#f4f8f8] px-4 py-24">
+          <div className="mx-auto max-w-5xl">
+            <SectionHeader
+              title="What Buildly Does"
+              subtitle="From idea to validated MVP plan in minutes. No code, no guesswork, no wasted runway."
+            />
+            <div className="mt-14 grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+              <StepCard step="Step 1" title="Describe Your Idea" text="Enter your startup concept, target audience, and value proposition." />
+              <StepCard step="Step 2" title="Get Landing Pages" text="Buildly generates 3 distinct landing page variants optimized for different goals." />
+              <StepCard step="Step 3" title="Validate with Data" text="Run experiments, track real metrics, and see if your idea has traction." />
+              <StepCard step="Step 4" title="Build with Confidence" text="Get a clear MVP recommendation backed by actual user signals." />
+            </div>
+          </div>
         </section>
-      </div>
-    </main>
+
+        <section className="px-4 py-20">
+          <div className="mx-auto max-w-5xl">
+            <SectionHeader eyebrow="Project history" title="Come back to old ideas fast" subtitle="Your previous concepts stay one click away so you can iterate without losing context." />
+            <div className="mt-8 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+              {history.length === 0 ? (
+                <p className="text-sm text-slate-500">No project yet. Generate your first validation flow above.</p>
+              ) : (
+                <div className="space-y-3">
+                  {history.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => handleHistorySelect(item)}
+                      className="flex w-full items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:bg-slate-50"
+                    >
+                      <div>
+                        <div className="text-base font-semibold text-slate-900">{item.idea}</div>
+                        <div className="mt-1 text-sm text-slate-500">{item.icp} · {item.valueProp}</div>
+                      </div>
+                      <span className="text-xs font-medium text-slate-400">{formatDate(item.createdAt)}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section id="pricing" className="bg-[#f4f8f8] px-4 py-24">
+          <div className="mx-auto max-w-5xl">
+            <SectionHeader title="Simple, Transparent Pricing" subtitle="Start free. Upgrade when you're ready to scale." />
+            <div className="mt-10 grid gap-6 lg:grid-cols-3">
+              <PricingCard title="Starter" price="Free" items={["3 projects", "1 variant per idea", "Basic metrics"]} cta="Get Started" />
+              <PricingCard title="Pro" price="$29/mo" items={["Unlimited projects", "All 3 variants", "Full validation suite", "A/B testing", "Priority support"]} cta="Start Trial" featured badge="Most Popular" />
+              <PricingCard title="Team" price="$79/mo" items={["Everything in Pro", "Team collaboration", "Custom domains", "API access", "Dedicated support"]} cta="Start Trial" />
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-slate-200 bg-white py-8">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-4 sm:flex-row">
+          <span className="text-2xl font-bold tracking-tight text-cyan-600">Buildly</span>
+          <p className="text-xs text-slate-500">© 2026 Buildly. Validate before you build.</p>
+        </div>
+      </footer>
+
+      <PublishModal
+        isOpen={publishModal.open}
+        variant={publishModal.variant}
+        url={publishModal.url}
+        onClose={() => setPublishModal({ open: false, url: "" })}
+      />
+    </div>
   );
 }
 
-function Field({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder: string }) {
   return (
-    <label className="block text-left text-sm font-semibold text-slate-700">
-      <span className="mb-2 block">{label}</span>
-      <input value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-950 outline-none transition focus:border-slate-300 focus:bg-white" />
+    <label className="block text-left">
+      <span className="mb-2 block text-lg font-semibold text-slate-900">{label}</span>
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-2xl border border-slate-200 bg-[#fbfbfc] px-5 py-4 text-lg text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-200 focus:bg-white"
+      />
     </label>
   );
 }
 
-function Metric({ value, label }: { value: string; label: string }) {
-  return <div className="rounded-[24px] border border-slate-200 bg-white p-5"><div className="text-3xl font-semibold tracking-[-0.04em]">{value}</div><div className="mt-1 text-sm text-slate-500">{label}</div></div>;
-}
-function PreviewMini({ title, label }: { title: string; label: string }) {
-  return <div className="rounded-[22px] border border-slate-200 bg-slate-50 p-4"><strong className="block text-slate-900">{title}</strong><div className="mt-2 text-xs text-slate-500">{label}</div></div>;
-}
-function SectionBox({ title, text }: { title: string; text: string }) {
-  return <div className="rounded-[22px] border border-slate-200 bg-slate-50 p-5"><strong className="block text-slate-900">{title}</strong><p className="mt-2 leading-7 text-slate-600">{text}</p></div>;
-}
-function QuoteCard({ title, text }: { title: string; text: string }) {
-  return <div className="rounded-[24px] border border-slate-200 bg-white p-5"><strong className="block text-slate-900">{title}</strong><p className="mt-3 leading-7 text-slate-600">“{text}”</p></div>;
-}
-function FeaturePreview({ title, text }: { title: string; text: string }) {
-  return <div className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm"><div className="text-base font-semibold text-slate-900">{title}</div><p className="mt-2 text-sm leading-6 text-slate-600">{text}</p></div>;
-}
-function Tag({ children }: { children: React.ReactNode }) {
-  return <span className="rounded-full border border-slate-200 bg-white/80 px-4 py-2">{children}</span>;
-}
-function DarkCard({ title, text }: { title: string; text: string }) {
-  return <div className="rounded-[24px] border border-white/10 bg-white/5 p-4"><div className="text-sm font-semibold text-white">{title}</div><p className="mt-2 text-sm leading-6 text-white/65">{text}</p></div>;
-}
-function BlockSection({ title, subtitle, items }: { title: string; subtitle: string; items: [string, string][] }) {
+function SectionHeader({ eyebrow, title, subtitle }: { eyebrow?: string; title: string; subtitle: string }) {
   return (
-    <section className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,.08)] md:p-8">
-      <div className="max-w-3xl">
-        <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">{title}</div>
-        <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">{subtitle}</h2>
-      </div>
-      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {items.map(([itemTitle, itemText]) => (
-          <div key={itemTitle} className="rounded-[24px] border border-slate-200 p-5">
-            <div className="text-lg font-semibold text-slate-900">{itemTitle}</div>
-            <p className="mt-3 text-sm leading-6 text-slate-600">{itemText}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-function PriceCard({ title, price, description, items, featured = false }: { title: string; price: string; description: string; items: string[]; featured?: boolean }) {
-  return (
-    <div className={`rounded-[26px] border p-5 ${featured ? "border-violet-300 bg-violet-50/50" : "border-slate-200 bg-white"}`}>
-      <div className="text-xl font-semibold text-slate-900">{title}</div>
-      <div className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">{price}<span className="ml-1 text-base font-medium text-slate-500">/ month</span></div>
-      <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
-      <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-600">
-        {items.map((item) => <li key={item}>{item}</li>)}
-      </ul>
+    <div className="text-center">
+      {eyebrow ? <div className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-600">{eyebrow}</div> : null}
+      <h2 className="mt-3 text-4xl font-bold tracking-[-0.04em] text-slate-950 md:text-5xl">{title}</h2>
+      <p className="mx-auto mt-4 max-w-3xl text-xl leading-8 text-slate-500">{subtitle}</p>
     </div>
   );
 }
+
+function MetricCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+      <div className="text-3xl font-bold tracking-tight text-slate-950">{value}</div>
+      <div className="mt-2 text-sm text-slate-500">{label}</div>
+    </div>
+  );
+}
+
+function StepCard({ step, title, text }: { step: string; title: string; text: string }) {
+  return (
+    <div className="text-center">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-2xl text-emerald-500">✦</div>
+      <div className="mt-5 text-sm font-semibold text-cyan-600">{step}</div>
+      <div className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{title}</div>
+      <p className="mt-3 text-lg leading-8 text-slate-500">{text}</p>
+    </div>
+  );
+}
+
+function PricingCard({ title, price, items, cta, featured = false, badge }: { title: string; price: string; items: string[]; cta: string; featured?: boolean; badge?: string }) {
+  return (
+    <div className={`relative rounded-[28px] border bg-white p-6 shadow-sm ${featured ? "border-cyan-500" : "border-slate-200"}`}>
+      {badge ? <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-500 px-4 py-2 text-sm font-semibold text-white">{badge}</div> : null}
+      <div className="text-2xl font-bold text-slate-950">{title}</div>
+      <div className="mt-4 text-5xl font-bold tracking-tight text-slate-950">{price}</div>
+      <ul className="mt-6 space-y-3 text-lg text-slate-500">
+        {items.map((item) => <li key={item}>✓ {item}</li>)}
+      </ul>
+      <button className={`mt-8 w-full rounded-2xl px-5 py-4 text-lg font-semibold ${featured ? "bg-gradient-to-r from-cyan-500 to-sky-500 text-white" : "bg-slate-100 text-slate-900"}`}>{cta}</button>
+    </div>
+  );
+}
+
+function PublishModal({ isOpen, onClose, url, variant }: { isOpen: boolean; onClose: () => void; url: string; variant?: string }) {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/50 px-4">
+      <div className="w-full max-w-lg rounded-[28px] bg-white p-7 shadow-2xl">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="text-2xl font-bold tracking-tight text-slate-950">Landing published</div>
+            <p className="mt-2 text-slate-500">{variant ? `${variant} variant is ready for testing.` : "Your landing page is ready for testing."}</p>
+          </div>
+          <button onClick={onClose} className="text-slate-400 transition hover:text-slate-700">✕</button>
+        </div>
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">{url}</div>
+        <div className="mt-6 flex gap-3">
+          <button onClick={onClose} className="flex-1 rounded-2xl bg-slate-100 px-4 py-3 font-semibold text-slate-900">Close</button>
+          <a href={url} target="_blank" rel="noreferrer" className="flex-1 rounded-2xl bg-gradient-to-r from-cyan-500 to-sky-500 px-4 py-3 text-center font-semibold text-white">Open URL</a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function buildVariants(data: AgentPayload): LandingPageVariant[] {
+  const base = data.generatedCopy;
+  return [
+    {
+      id: "lead-capture",
+      type: "Lead Capture",
+      angle: "Capture intent from high-pain prospects with a direct promise and fast CTA.",
+      headline: base.headline,
+      subheadline: base.subheadline,
+      cta: base.cta,
+      audience: data.input.icp,
+    },
+    {
+      id: "waitlist",
+      type: "Waitlist",
+      angle: "Position the product as an early-access opportunity to validate excitement and demand.",
+      headline: `Join the waitlist for ${data.input.idea}`,
+      subheadline: `Built for ${data.input.icp.toLowerCase()} who want ${data.input.value.toLowerCase()}`,
+      cta: "Join the waitlist",
+      audience: data.input.icp,
+    },
+    {
+      id: "pre-sell",
+      type: "Pre-Sell",
+      angle: "Test willingness to pay with a stronger commercial framing before building the MVP.",
+      headline: `Pre-order the easiest way to ${extractOutcome(data.input.value)}`,
+      subheadline: `A sharper value proposition for ${data.input.icp.toLowerCase()} with a pricing-ready offer.`,
+      cta: "Reserve your spot",
+      audience: data.input.icp,
+    },
+  ];
+}
+
+function buildExperiments(data: AgentPayload): Experiment[] {
+  return [
+    {
+      id: "exp-1",
+      title: "Run first landing test",
+      channel: data.validation.channel,
+      goal: `Publish the strongest variant, collect the first 20 leads, and measure whether ${data.input.icp.toLowerCase()} respond to the core promise.`,
+      budget: "$150",
+    },
+    {
+      id: "exp-2",
+      title: "Compare headline angles",
+      channel: "Organic + paid social",
+      goal: `Test which headline creates more curiosity and signups before making any MVP commitments.`,
+      budget: "$100",
+    },
+    {
+      id: "exp-3",
+      title: "Qualitative follow-up",
+      channel: "Email replies",
+      goal: "Ask every lead why they signed up, what they use today, and what would make them pay immediately.",
+      budget: "$0",
+    },
+  ];
+}
+
+function extractOutcome(value: string) {
+  return value.replace(/^help\s+/i, "").replace(/\.$/, "").toLowerCase() || "solve this painful workflow";
+}
+
 function parseTranscript(transcript: string) {
   const cleaned = transcript.trim();
   let idea = cleaned;
@@ -432,7 +599,7 @@ function parseTranscript(transcript: string) {
   idea = cleaned.replace(/\.$/, "");
   return { idea, icp, value };
 }
-function extractProblem(value: string) {
-  const cleaned = value.replace(/^Help\s+/i, "").replace(/^Give\s+/i, "").trim();
-  return cleaned ? `${cleaned.charAt(0).toUpperCase()}${cleaned.slice(1)}` : "Users struggle with a painful workflow.";
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
