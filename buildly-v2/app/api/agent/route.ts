@@ -2,17 +2,16 @@ import { NextResponse } from "next/server";
 import { runBuildlyAgent } from "../../../lib/agent";
 import type { ValidationInput } from "../../../lib/buildly";
 
-const OPENAI_API_URL = "https://api.openai.com/v1/responses";
-const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.2";
-const OPENAI_REASONING_EFFORT = process.env.OPENAI_REASONING_EFFORT || "xhigh";
+const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.2-chat-latest";
+const OPENAI_REASONING_EFFORT = process.env.OPENAI_REASONING_EFFORT || "high";
 
 const SYSTEM_PROMPT = [
   "You are Buildly, an elite startup strategist, conversion copywriter, positioning expert, product manager, and landing-page designer.",
-  "Your job is to turn a raw startup idea into a sharp validation plan and a convincing landing-page preview.",
+  "Turn a raw startup idea into a sharp validation plan and a convincing landing-page preview.",
   "Think deeply about ICP clarity, value proposition sharpness, acquisition realism, willingness to pay, pain intensity, and MVP focus.",
   "Do not produce generic startup fluff.",
   "Write like a world-class operator advising an ambitious founder.",
-  "The response must feel commercially sharp, specific, and immediately usable inside a startup validation product.",
 ].join(" ");
 
 const RESPONSE_SCHEMA = {
@@ -74,56 +73,87 @@ export async function POST(request: Request) {
     value: body.value ?? "",
   };
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return NextResponse.json(withMeta(runBuildlyAgent(input), false));
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) return NextResponse.json(withMeta(runBuildlyAgent(input), false, "missing_openai_api_key"));
 
-  try {
-    const response = await fetch(OPENAI_API_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: OPENAI_MODEL,
-        reasoning: { effort: OPENAI_REASONING_EFFORT },
-        max_output_tokens: 3000,
-        instructions: SYSTEM_PROMPT,
-        input: `Startup idea: ${input.idea}\nICP: ${input.icp}\nValue proposition: ${input.value}\n\nGenerate the strongest possible Buildly output. Make the copy sharp, the strategy realistic, the positioning clear, and the MVP scope ruthless.`,
-        text: {
-          format: {
-            type: "json_schema",
-            name: "buildly_agent_response",
-            strict: true,
-            schema: RESPONSE_SCHEMA,
+  const candidates = Array.from(new Set([
+    OPENAI_MODEL,
+    OPENAI_MODEL === "gpt-5.2" ? "gpt-5.2-chat-latest" : null,
+    "gpt-5",
+  ].filter(Boolean))) as string[];
+
+  let lastError = "unknown_openai_error";
+
+  for (const model of candidates) {
+    for (const withReasoning of [true, false]) {
+      try {
+        const response = await fetch(OPENAI_API_URL, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
           },
-        },
-      }),
-    });
+          body: JSON.stringify({
+            model,
+            ...(withReasoning ? { reasoning_effort: OPENAI_REASONING_EFFORT } : {}),
+            max_completion_tokens: 2500,
+            messages: [
+              { role: "system", content: SYSTEM_PROMPT },
+              {
+                role: "user",
+                content: `Startup idea: ${input.idea}\nICP: ${input.icp}\nValue proposition: ${input.value}\n\nGenerate the strongest possible Buildly output. Make the copy sharp, the strategy realistic, the positioning clear, and the MVP scope ruthless.`,
+              },
+            ],
+            response_format: {
+              type: "json_schema",
+              json_schema: {
+                name: "buildly_agent_response",
+                strict: true,
+                schema: RESPONSE_SCHEMA,
+              },
+            },
+          }),
+        });
 
-    if (!response.ok) throw new Error(await response.text());
+        if (!response.ok) {
+          lastError = compactError(await response.text());
+          continue;
+        }
 
-    const data = (await response.json()) as {
-      output_text?: string;
-      output?: Array<{ content?: Array<{ text?: string }> }>;
-    };
+        const data = (await response.json()) as {
+          choices?: Array<{ message?: { content?: string } }>;
+        };
 
-    const rawText = data.output_text ?? data.output?.flatMap((item) => item.content ?? []).map((item) => item.text ?? "").join("") ?? "";
-    return NextResponse.json(withMeta(sanitize(JSON.parse(rawText)), true));
-  } catch {
-    return NextResponse.json(withMeta(runBuildlyAgent(input), false));
+        const rawText = data.choices?.[0]?.message?.content?.trim();
+        if (!rawText) {
+          lastError = "empty_openai_response";
+          continue;
+        }
+
+        return NextResponse.json(withMeta(sanitize(JSON.parse(rawText)), true, undefined, model, withReasoning ? OPENAI_REASONING_EFFORT : "none"));
+      } catch (error) {
+        lastError = compactError(String(error));
+      }
+    }
   }
+
+  return NextResponse.json(withMeta(runBuildlyAgent(input), false, lastError));
 }
 
-function withMeta(payload: any, openaiEnabled: boolean) {
+function withMeta(payload: any, openaiEnabled: boolean, error?: string, model?: string, reasoning?: string) {
   return {
     ...payload,
     meta: {
       provider: openaiEnabled ? "openai" : "fallback",
-      model: openaiEnabled ? OPENAI_MODEL : "local-buildly-agent",
-      reasoning: openaiEnabled ? OPENAI_REASONING_EFFORT : "none",
+      model: openaiEnabled ? (model || OPENAI_MODEL) : "local-buildly-agent",
+      reasoning: openaiEnabled ? (reasoning || OPENAI_REASONING_EFFORT) : "none",
+      ...(error ? { error } : {}),
     },
   };
+}
+
+function compactError(value: string) {
+  return value.replace(/\s+/g, " ").slice(0, 220);
 }
 
 function sanitize(payload: any) {
