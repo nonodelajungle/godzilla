@@ -15,6 +15,7 @@ import {
 import { buildMarketStudy } from "../../../lib/market-study";
 import { buildMvpPack } from "../../../lib/mvp-pack";
 import { MarketStudyPanel } from "../../../components/market-study-panel";
+import { MvpPreview } from "../../../components/mvp-preview";
 
 export default function MvpBlueprintPage() {
   const params = useParams<{ projectId: string }>();
@@ -83,6 +84,14 @@ export default function MvpBlueprintPage() {
             <button onClick={() => copyText(pack.prdMarkdown)} className="rounded-2xl border border-white/20 px-5 py-3 text-sm font-semibold text-white">Copy PRD markdown</button>
           </div>
         </section>
+
+        <MvpPreview
+          idea={project.input.idea}
+          oneLiner={pack.productOneLiner}
+          targetUser={pack.targetUser}
+          coreOutcome={pack.coreOutcome}
+          screens={pack.screens}
+        />
 
         <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-8">
