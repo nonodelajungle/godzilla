@@ -1,6 +1,12 @@
 import type { MvpThemeKey } from "./mvp-pack";
 
-export type BuildlyThemePreset = "lovable_soft" | "lovable_dark" | "saas_cyan" | "creator_rose" | "commerce_amber" | "finance_violet";
+export type BuildlyThemePreset =
+  | "lovable_soft"
+  | "lovable_dark"
+  | "saas_cyan"
+  | "creator_rose"
+  | "commerce_amber"
+  | "finance_violet";
 
 export type BuildlyProjectConfig = {
   themePreset: BuildlyThemePreset;
@@ -26,13 +32,18 @@ export type BuildlyUrlSeed = {
 const DEFAULT_THEME: BuildlyThemePreset = "lovable_soft";
 const WORKSPACE_KNOWLEDGE_KEY = "buildly/workspace-knowledge/v1";
 
-export const THEME_PRESETS: Array<{ value: BuildlyThemePreset; label: string; description: string; themeKey: MvpThemeKey }> = [
-  { value: "lovable_soft", label: "Lovable Soft", description: "Balanced SaaS styling for product-first MVPs.", themeKey: "cyan" },
-  { value: "lovable_dark", label: "Lovable Dark", description: "More premium and contrast-heavy for AI / dev tools.", themeKey: "indigo" },
-  { value: "saas_cyan", label: "SaaS Cyan", description: "Classic B2B SaaS palette with cleaner clarity.", themeKey: "cyan" },
-  { value: "creator_rose", label: "Creator Rose", description: "Warmer creator / consumer visual identity.", themeKey: "rose" },
-  { value: "commerce_amber", label: "Commerce Amber", description: "Stronger commerce / marketplace merchandising feel.", themeKey: "amber" },
-  { value: "finance_violet", label: "Finance Violet", description: "Sharper finance / data / recruiting interface feel.", themeKey: "violet" },
+export const THEME_PRESETS: Array<{
+  value: BuildlyThemePreset;
+  label: string;
+  description: string;
+  themeKey: MvpThemeKey;
+}> = [
+  { value: "lovable_soft", label: "Lovable Soft", description: "Adaptive palette that follows the generated product family.", themeKey: "cyan" },
+  { value: "lovable_dark", label: "Lovable Dark", description: "Adaptive darker palette for AI and software-heavy products.", themeKey: "indigo" },
+  { value: "saas_cyan", label: "SaaS Cyan", description: "Force a classic B2B SaaS cyan palette.", themeKey: "cyan" },
+  { value: "creator_rose", label: "Creator Rose", description: "Force a warmer creator / consumer visual identity.", themeKey: "rose" },
+  { value: "commerce_amber", label: "Commerce Amber", description: "Force a stronger commerce / marketplace merchandising feel.", themeKey: "amber" },
+  { value: "finance_violet", label: "Finance Violet", description: "Force a sharper finance / data / recruiting palette.", themeKey: "violet" },
 ];
 
 export function defaultProjectConfig(overrides?: Partial<BuildlyProjectConfig>): BuildlyProjectConfig {
@@ -48,6 +59,7 @@ export function defaultProjectConfig(overrides?: Partial<BuildlyProjectConfig>):
 }
 
 export function themePresetToThemeKey(preset?: BuildlyThemePreset | null): MvpThemeKey | null {
+  if (!preset || preset === "lovable_soft" || preset === "lovable_dark") return null;
   const match = THEME_PRESETS.find((item) => item.value === preset);
   return match?.themeKey || null;
 }
