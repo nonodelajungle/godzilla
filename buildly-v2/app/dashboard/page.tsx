@@ -102,6 +102,11 @@ export default function DashboardPage() {
                     <MvpListCard title="Next backlog" items={brief.backlog} />
                     <MvpListCard title="Do not build yet" items={brief.doNotBuild} />
                   </div>
+
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <a href={`/mvp/${project.id}`} className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950">Open dedicated MVP blueprint</a>
+                    <a href={`/mvp/${project.id}`} className="rounded-2xl border border-white/20 px-4 py-3 text-sm font-semibold text-white">Open build plan</a>
+                  </div>
                 </div>
 
                 <div className="mt-6 rounded-[22px] bg-slate-50 p-5">
