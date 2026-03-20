@@ -12,6 +12,18 @@ type MvpPreviewProps = {
 
 type ScreenKind = "landing" | "onboarding" | "workflow" | "results" | "analytics" | "generic";
 
+type PreviewBranding = {
+  name: string;
+  badge: string;
+  headlineA: string;
+  accentB: string;
+  accentC: string;
+  closing: string;
+  subtitle: string;
+  primaryCta: string;
+  secondaryCta: string;
+};
+
 export function MvpPreview({ idea, oneLiner, targetUser, coreOutcome, screens }: MvpPreviewProps) {
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [activeScreen, setActiveScreen] = useState(0);
@@ -19,13 +31,14 @@ export function MvpPreview({ idea, oneLiner, targetUser, coreOutcome, screens }:
   const visibleScreens = useMemo(() => screens.slice(0, 5), [screens]);
   const current = visibleScreens[activeScreen] || visibleScreens[0] || "Core workflow";
   const currentKind = inferScreenKind(current, activeScreen);
+  const branding = useMemo(() => buildBranding(idea, targetUser, coreOutcome, oneLiner), [idea, targetUser, coreOutcome, oneLiner]);
 
   return (
     <section className="rounded-[28px] border border-slate-200 bg-white p-7 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="text-sm font-semibold text-slate-900">MVP preview</div>
-          <p className="mt-2 text-sm leading-6 text-slate-500">Interactive builder-style preview generated from the MVP pack.</p>
+          <p className="mt-2 text-sm leading-6 text-slate-500">Builder-style visual result generated from the MVP pack.</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="hidden rounded-full bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 sm:block">Preview only</div>
@@ -36,19 +49,17 @@ export function MvpPreview({ idea, oneLiner, targetUser, coreOutcome, screens }:
         </div>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[260px_1fr]">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[280px_1fr]">
         <div className="space-y-3">
           {visibleScreens.map((screen, index) => (
             <button
               key={screen}
               onClick={() => setActiveScreen(index)}
-              className={`w-full rounded-2xl border px-4 py-4 text-left transition ${activeScreen === index ? "border-cyan-200 bg-cyan-50" : "border-slate-200 bg-white hover:bg-slate-50"}`}
+              className={`w-full rounded-2xl border px-4 py-4 text-left transition ${activeScreen === index ? "border-cyan-200 bg-cyan-50 shadow-sm" : "border-slate-200 bg-white hover:bg-slate-50"}`}
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Screen {index + 1}</div>
-                <div className="rounded-full bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                  {inferScreenKind(screen, index)}
-                </div>
+                <div className="rounded-full bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">{inferScreenKind(screen, index)}</div>
               </div>
               <div className="mt-2 text-sm font-semibold text-slate-900">{screen}</div>
               <div className="mt-2 text-xs leading-5 text-slate-500">{describeScreen(screen, targetUser, coreOutcome)}</div>
@@ -56,39 +67,21 @@ export function MvpPreview({ idea, oneLiner, targetUser, coreOutcome, screens }:
           ))}
         </div>
 
-        <div className="rounded-[28px] bg-[linear-gradient(180deg,#0f172a,#111827)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-          <div className={`mx-auto overflow-hidden rounded-[26px] border border-white/10 bg-white ${device === "desktop" ? "max-w-5xl" : "max-w-[390px]"}`}>
-            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
+        <div className="rounded-[30px] bg-[linear-gradient(180deg,#060b14,#0b1220)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+          <div className={`mx-auto overflow-hidden rounded-[28px] border border-white/10 bg-[#070c15] ${device === "desktop" ? "max-w-6xl" : "max-w-[390px]"}`}>
+            <div className="flex items-center justify-between border-b border-white/10 bg-[#050912] px-4 py-3">
               <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-rose-300" />
-                <span className="h-3 w-3 rounded-full bg-amber-300" />
-                <span className="h-3 w-3 rounded-full bg-emerald-300" />
+                <span className="h-3 w-3 rounded-full bg-rose-400/80" />
+                <span className="h-3 w-3 rounded-full bg-amber-400/80" />
+                <span className="h-3 w-3 rounded-full bg-emerald-400/80" />
               </div>
-              <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-500">{idea}</div>
+              <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-300">{branding.name}</div>
             </div>
 
             {device === "desktop" ? (
-              <DesktopPreview
-                idea={idea}
-                targetUser={targetUser}
-                oneLiner={oneLiner}
-                coreOutcome={coreOutcome}
-                screens={visibleScreens}
-                activeScreen={activeScreen}
-                current={current}
-                kind={currentKind}
-              />
+              <DesktopPreview branding={branding} targetUser={targetUser} coreOutcome={coreOutcome} screens={visibleScreens} activeScreen={activeScreen} current={current} kind={currentKind} />
             ) : (
-              <MobilePreview
-                idea={idea}
-                oneLiner={oneLiner}
-                targetUser={targetUser}
-                coreOutcome={coreOutcome}
-                screens={visibleScreens}
-                activeScreen={activeScreen}
-                current={current}
-                kind={currentKind}
-              />
+              <MobilePreview branding={branding} targetUser={targetUser} coreOutcome={coreOutcome} screens={visibleScreens} activeScreen={activeScreen} current={current} kind={currentKind} />
             )}
           </div>
         </div>
@@ -97,162 +90,118 @@ export function MvpPreview({ idea, oneLiner, targetUser, coreOutcome, screens }:
   );
 }
 
-function DesktopPreview({
-  idea,
-  targetUser,
-  oneLiner,
-  coreOutcome,
-  screens,
-  activeScreen,
-  current,
-  kind,
-}: {
-  idea: string;
-  targetUser: string;
-  oneLiner: string;
-  coreOutcome: string;
-  screens: string[];
-  activeScreen: number;
-  current: string;
-  kind: ScreenKind;
-}) {
-  return (
-    <div className="grid min-h-[640px] grid-cols-[240px_1fr]">
-      <aside className="border-r border-slate-200 bg-slate-50 p-4">
-        <div className="rounded-2xl bg-slate-950 px-4 py-4 text-white shadow-sm">
-          <div className="text-xs uppercase tracking-[0.16em] text-cyan-200">Buildly app</div>
-          <div className="mt-2 text-base font-semibold">{idea}</div>
-          <div className="mt-2 text-xs leading-5 text-slate-300">For {targetUser.toLowerCase()}</div>
+function DesktopPreview({ branding, targetUser, coreOutcome, screens, activeScreen, current, kind }: { branding: PreviewBranding; targetUser: string; coreOutcome: string; screens: string[]; activeScreen: number; current: string; kind: ScreenKind }) {
+  if (kind === "landing") {
+    return (
+      <div className="min-h-[760px] bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_30%),linear-gradient(180deg,#030712,#081120_65%,#0a1324)] text-white">
+        <div className="flex items-center justify-between border-b border-white/10 px-8 py-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-400 text-base font-bold text-slate-950">⚡</div>
+            <div className="text-3xl font-semibold tracking-tight">{branding.name}</div>
+          </div>
+          <div className="flex items-center gap-8 text-sm text-slate-300">
+            <span>Dashboard</span>
+            <button className="rounded-2xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950">Get started</button>
+          </div>
         </div>
-        <div className="mt-5 space-y-2">
+
+        <div className="mx-auto max-w-5xl px-8 pb-20 pt-14 text-center">
+          <div className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-5 py-2 text-sm font-medium text-cyan-300">
+            ✦ {branding.badge}
+          </div>
+          <h2 className="mx-auto mt-10 max-w-4xl text-7xl font-bold tracking-[-0.06em] leading-[0.95]">
+            <span className="text-slate-100">{branding.headlineA} </span>
+            <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">{branding.accentB}</span>
+            <span className="text-slate-100"> </span>
+            <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">{branding.accentC}</span>
+            <span className="text-slate-100"> {branding.closing}</span>
+          </h2>
+          <p className="mx-auto mt-8 max-w-3xl text-2xl leading-10 text-slate-400">{branding.subtitle}</p>
+          <div className="mt-10 flex items-center justify-center gap-4">
+            <button className="rounded-2xl bg-cyan-400 px-8 py-4 text-xl font-semibold text-slate-950">{branding.primaryCta} →</button>
+            <button className="rounded-2xl border border-white/15 bg-white/5 px-8 py-4 text-xl font-semibold text-slate-100">{branding.secondaryCta}</button>
+          </div>
+          <div className="mt-10 flex items-center justify-center gap-10 text-xl text-slate-500">
+            <span>✓ Free to start</span>
+            <span>✓ No credit card</span>
+            <span>✓ Cancel anytime</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid min-h-[760px] grid-cols-[250px_1fr] bg-[#081120] text-white">
+      <aside className="border-r border-white/10 bg-[#050912] p-5">
+        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-400 font-bold text-slate-950">⚡</div>
+          <div>
+            <div className="text-base font-semibold">{branding.name}</div>
+            <div className="text-xs text-slate-400">For {targetUser.toLowerCase()}</div>
+          </div>
+        </div>
+
+        <div className="mt-6 space-y-2">
           {screens.map((screen, index) => (
-            <div key={screen} className={`rounded-xl px-3 py-3 text-sm transition ${index === activeScreen ? "bg-white font-semibold text-slate-950 shadow-sm" : "text-slate-500"}`}>
+            <div key={screen} className={`rounded-2xl px-4 py-3 text-sm transition ${index === activeScreen ? "bg-cyan-400 text-slate-950 font-semibold" : "bg-white/5 text-slate-300"}`}>
               {screen}
             </div>
           ))}
         </div>
-        <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
-          <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Live signal</div>
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <MiniStat label="Leads" value="24" />
-            <MiniStat label="Conv" value="7.2%" />
+
+        <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Pipeline</div>
+          <div className="mt-4 space-y-3">
+            <DarkKpi label="Leads" value="142" />
+            <DarkKpi label="Replies" value="31" />
+            <DarkKpi label="Won" value="9" />
           </div>
         </div>
       </aside>
 
-      <main className="bg-white p-6">
-        <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+      <main className="p-6">
+        <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
           <div>
             <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Current screen</div>
-            <div className="mt-1 text-lg font-semibold text-slate-950">{current}</div>
+            <div className="mt-1 text-xl font-semibold text-white">{current}</div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="rounded-full bg-cyan-50 px-3 py-2 text-xs font-semibold text-cyan-700">Generated MVP</span>
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">{kind}</span>
+          <div className="flex items-center gap-3">
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-cyan-300">Generated MVP</span>
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-300">{kind}</span>
           </div>
         </div>
 
         <div className="mt-6">
-          <DesktopScreen kind={kind} idea={idea} oneLiner={oneLiner} targetUser={targetUser} coreOutcome={coreOutcome} current={current} />
+          <DesktopAppScreen branding={branding} targetUser={targetUser} coreOutcome={coreOutcome} current={current} kind={kind} />
         </div>
       </main>
     </div>
   );
 }
 
-function MobilePreview({
-  idea,
-  oneLiner,
-  targetUser,
-  coreOutcome,
-  screens,
-  activeScreen,
-  current,
-  kind,
-}: {
-  idea: string;
-  oneLiner: string;
-  targetUser: string;
-  coreOutcome: string;
-  screens: string[];
-  activeScreen: number;
-  current: string;
-  kind: ScreenKind;
-}) {
-  return (
-    <div className="min-h-[720px] bg-slate-100 p-3">
-      <div className="mx-auto overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-sm">
-        <div className="flex items-center justify-between px-4 pb-2 pt-3 text-xs font-semibold text-slate-400">
-          <span>9:41</span>
-          <span>{idea}</span>
-        </div>
-        <div className="px-4 pb-4">
-          <div className="rounded-[24px] bg-[radial-gradient(circle_at_top_left,rgba(45,197,186,0.16),transparent_35%),linear-gradient(180deg,#f8fcfc,#ffffff)] p-4">
-            <div className="inline-flex rounded-full bg-cyan-50 px-3 py-2 text-[11px] font-semibold text-cyan-700">{kind}</div>
-            <h3 className="mt-3 text-2xl font-bold tracking-tight text-slate-950">{current}</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{oneLiner}</p>
-          </div>
-
-          <div className="mt-4">
-            <MobileScreen kind={kind} targetUser={targetUser} coreOutcome={coreOutcome} current={current} />
-          </div>
-
-          <div className="mt-4 grid gap-3">
-            {screens.map((screen, index) => (
-              <div key={screen} className={`rounded-2xl border px-4 py-4 text-sm ${index === activeScreen ? "border-cyan-200 bg-cyan-50 text-slate-950" : "border-slate-200 bg-white text-slate-500"}`}>
-                {screen}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DesktopScreen({ kind, idea, oneLiner, targetUser, coreOutcome, current }: { kind: ScreenKind; idea: string; oneLiner: string; targetUser: string; coreOutcome: string; current: string }) {
-  if (kind === "landing") {
-    return (
-      <div className="space-y-6">
-        <div className="rounded-[28px] bg-[radial-gradient(circle_at_top_left,rgba(45,197,186,0.12),transparent_35%),linear-gradient(180deg,#f8fcfc,#ffffff)] p-7">
-          <div className="inline-flex rounded-full bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm">Validated angle</div>
-          <h3 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-slate-950">{oneLiner}</h3>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">Built for {targetUser.toLowerCase()}, this MVP focuses on the narrowest outcome that can create activation fast.</p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white">Start free</button>
-            <button className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700">Book demo</button>
-          </div>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          <MetricCard label="Target user" value={targetUser} />
-          <MetricCard label="Core outcome" value={coreOutcome} />
-          <MetricCard label="Primary screen" value={current} />
-        </div>
-      </div>
-    );
-  }
-
+function DesktopAppScreen({ branding, targetUser, coreOutcome, current, kind }: { branding: PreviewBranding; targetUser: string; coreOutcome: string; current: string; kind: ScreenKind }) {
   if (kind === "onboarding") {
     return (
-      <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
-        <div className="rounded-[28px] border border-slate-200 p-6">
-          <div className="text-sm font-semibold text-slate-900">Create your first workspace</div>
-          <div className="mt-5 space-y-4">
-            <FieldRow label="Company name" value={idea} />
-            <FieldRow label="Role" value={targetUser} />
-            <FieldRow label="Primary goal" value={coreOutcome} />
-            <FieldRow label="Success metric" value="Activation within 7 days" />
+      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+        <div className="rounded-[28px] border border-white/10 bg-white/5 p-6">
+          <div className="text-sm font-semibold text-white">Set up your workspace</div>
+          <div className="mt-6 space-y-4">
+            <DarkField label="Business name" value={branding.name} />
+            <DarkField label="Ideal client" value={targetUser} />
+            <DarkField label="Primary outcome" value={coreOutcome} />
+            <DarkField label="Offer type" value="AI-assisted service workflow" />
           </div>
           <div className="mt-6 flex justify-end">
-            <button className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white">Continue setup</button>
+            <button className="rounded-2xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950">Continue</button>
           </div>
         </div>
-        <div className="rounded-[28px] bg-slate-50 p-5">
-          <div className="text-sm font-semibold text-slate-900">Why we ask this</div>
-          <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-            <li>• Personalize the workflow for the ICP.</li>
-            <li>• Keep the first-run experience focused.</li>
-            <li>• Prepare activation analytics from day one.</li>
+        <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
+          <div className="text-sm font-semibold text-white">Why this setup matters</div>
+          <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-400">
+            <li>• Personalize the outbound engine for your niche.</li>
+            <li>• Generate more credible first proposals.</li>
+            <li>• Track activation and close-rate from the start.</li>
           </ul>
         </div>
       </div>
@@ -262,43 +211,45 @@ function DesktopScreen({ kind, idea, oneLiner, targetUser, coreOutcome, current 
   if (kind === "workflow") {
     return (
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        <div className="rounded-[28px] border border-slate-200 p-6">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <div className="text-sm font-semibold text-slate-900">Core workflow</div>
-              <p className="mt-2 text-sm text-slate-500">Move the user to the first useful outcome as fast as possible.</p>
-            </div>
-            <span className="rounded-full bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">Step 2 of 3</span>
-          </div>
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <StepCard number="01" title="Input" text="Capture just enough data to personalize the result." />
-            <StepCard number="02" title="Generate" text="Run the narrow workflow that creates instant value." />
-            <StepCard number="03" title="Deliver" text="Show a clear result and next action." />
-          </div>
-          <div className="mt-6 rounded-2xl bg-slate-50 p-5">
-            <div className="text-sm font-semibold text-slate-900">Live workspace</div>
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl bg-white p-4 shadow-sm">
-                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Input queue</div>
-                <div className="mt-3 space-y-2 text-sm text-slate-700">
-                  <div className="rounded-xl bg-slate-50 px-3 py-3">Ideal customer profile</div>
-                  <div className="rounded-xl bg-slate-50 px-3 py-3">Desired result</div>
-                  <div className="rounded-xl bg-slate-50 px-3 py-3">Current workflow pain</div>
-                </div>
+        <div className="space-y-6">
+          <div className="rounded-[28px] border border-white/10 bg-white/5 p-6">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <div className="text-sm font-semibold text-white">Core workflow</div>
+                <p className="mt-2 text-sm text-slate-400">From lead research to proposal draft and follow-up.</p>
               </div>
-              <div className="rounded-2xl bg-white p-4 shadow-sm">
-                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Generated result</div>
-                <div className="mt-3 rounded-xl bg-slate-950 p-4 text-sm leading-6 text-slate-200">First useful result aligned with {coreOutcome.toLowerCase()}.</div>
+              <span className="rounded-full bg-cyan-400 px-3 py-2 text-xs font-semibold text-slate-950">Automated</span>
+            </div>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              <DarkStep title="Find leads" text="Score high-quality prospects automatically." />
+              <DarkStep title="Write proposals" text="Generate personalized proposals from fit signals." />
+              <DarkStep title="Close deals" text="Trigger follow-ups and move opportunities forward." />
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
+              <div className="text-sm font-semibold text-white">Lead feed</div>
+              <div className="mt-4 space-y-3">
+                {['Studio North — website redesign','Acme Interiors — proposal requested','Pixel Foundry — warm inbound lead'].map((item) => <DarkListItem key={item} text={item} />)}
+              </div>
+            </div>
+            <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
+              <div className="text-sm font-semibold text-white">Generated proposal</div>
+              <div className="mt-4 rounded-2xl bg-[#0b1220] p-4 text-sm leading-6 text-slate-300">
+                Tailored pitch focused on {coreOutcome.toLowerCase()}, with timeline, scope, and follow-up sequence already prepared.
               </div>
             </div>
           </div>
         </div>
-        <div className="rounded-[28px] bg-slate-50 p-5">
-          <div className="text-sm font-semibold text-slate-900">Side panel</div>
+
+        <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
+          <div className="text-sm font-semibold text-white">Weekly snapshot</div>
           <div className="mt-4 space-y-4">
-            <SidePanelBox title="Activation score" body="78 / 100" />
-            <SidePanelBox title="Time to value" body="Under 5 minutes" />
-            <SidePanelBox title="Next action" body="Invite first users and track completion." />
+            <DarkKpi label="Qualified leads" value="48" />
+            <DarkKpi label="Proposal drafts" value="19" />
+            <DarkKpi label="Reply rate" value="24%" />
+            <DarkKpi label="Win rate" value="8.9%" />
           </div>
         </div>
       </div>
@@ -307,32 +258,23 @@ function DesktopScreen({ kind, idea, oneLiner, targetUser, coreOutcome, current 
 
   if (kind === "results") {
     return (
-      <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-3">
-          <MetricCard label="Completed" value="18" />
-          <MetricCard label="Activated" value="11" />
-          <MetricCard label="Saved time" value="4.6h" />
-        </div>
-        <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-          <div className="rounded-[28px] border border-slate-200 p-6">
-            <div className="text-sm font-semibold text-slate-900">Result summary</div>
-            <div className="mt-4 rounded-2xl bg-slate-50 p-5">
-              <div className="text-2xl font-bold tracking-tight text-slate-950">Your first success state is live</div>
-              <p className="mt-3 text-sm leading-7 text-slate-600">Users can now reach the core outcome without extra setup friction, which is the strongest possible v1 proof.</p>
-            </div>
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <PreviewCard title="What worked" body="Clear messaging and a single focused workflow increased first-run completion." />
-              <PreviewCard title="What to improve" body="Reduce optional fields and tighten the feedback loop after the first result." />
-            </div>
+      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+        <div className="rounded-[28px] border border-white/10 bg-white/5 p-6">
+          <div className="text-sm font-semibold text-white">Outcome summary</div>
+          <div className="mt-5 grid gap-4 md:grid-cols-3">
+            <DarkKpi label="Leads found" value="142" />
+            <DarkKpi label="Proposals sent" value="56" />
+            <DarkKpi label="Deals won" value="9" />
           </div>
-          <div className="rounded-[28px] bg-slate-50 p-5">
-            <div className="text-sm font-semibold text-slate-900">Checklist</div>
-            <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-700">
-              <li>✓ Core flow finished</li>
-              <li>✓ Result screen delivered</li>
-              <li>✓ Activation tracked</li>
-              <li>○ Invite next cohort</li>
-            </ul>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <DarkPanel title="What worked" body="Clear value proposition and fast proposal turnaround increased response quality." />
+            <DarkPanel title="What to improve" body="Enrich personalization on mid-fit leads and tighten follow-up timing." />
+          </div>
+        </div>
+        <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
+          <div className="text-sm font-semibold text-white">Next actions</div>
+          <div className="mt-4 space-y-3">
+            {['Invite another lead cohort','Refine proposal template','Test new follow-up cadence'].map((item) => <DarkListItem key={item} text={item} />)}
           </div>
         </div>
       </div>
@@ -343,27 +285,27 @@ function DesktopScreen({ kind, idea, oneLiner, targetUser, coreOutcome, current 
     return (
       <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-4">
-          <MetricCard label="Visitors" value="1,240" />
-          <MetricCard label="Signups" value="89" />
-          <MetricCard label="Activation" value="31%" />
-          <MetricCard label="Paid intent" value="12" />
+          <DarkKpi label="Visitors" value="3,281" />
+          <DarkKpi label="Signups" value="214" />
+          <DarkKpi label="Activation" value="34%" />
+          <DarkKpi label="Close rate" value="9%" />
         </div>
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-          <div className="rounded-[28px] border border-slate-200 p-6">
-            <div className="text-sm font-semibold text-slate-900">Funnel</div>
+          <div className="rounded-[28px] border border-white/10 bg-white/5 p-6">
+            <div className="text-sm font-semibold text-white">Pipeline funnel</div>
             <div className="mt-5 space-y-4">
-              <FunnelBar label="Landing views" value="1240" width="100%" />
-              <FunnelBar label="Started onboarding" value="242" width="72%" />
-              <FunnelBar label="Completed workflow" value="89" width="48%" />
-              <FunnelBar label="Reached outcome" value="39" width="28%" />
+              <DarkBar label="Landing visits" value="3281" width="100%" />
+              <DarkBar label="Qualified leads" value="214" width="72%" />
+              <DarkBar label="Proposal opened" value="98" width="49%" />
+              <DarkBar label="Closed won" value="19" width="21%" />
             </div>
           </div>
-          <div className="rounded-[28px] bg-slate-50 p-5">
-            <div className="text-sm font-semibold text-slate-900">Insights</div>
-            <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-700">
-              <li>• Best conversion came from the workflow screen.</li>
-              <li>• Drop-off is highest during onboarding.</li>
-              <li>• The strongest wedge remains the result state.</li>
+          <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
+            <div className="text-sm font-semibold text-white">Insights</div>
+            <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-400">
+              <li>• The hero message drives the highest-quality traffic.</li>
+              <li>• Proposal opens are strongest on warm referral leads.</li>
+              <li>• Follow-up automation lifts reply rate after day 3.</li>
             </ul>
           </div>
         </div>
@@ -372,27 +314,61 @@ function DesktopScreen({ kind, idea, oneLiner, targetUser, coreOutcome, current 
   }
 
   return (
-    <div className="rounded-[28px] border border-slate-200 p-6">
-      <div className="text-sm font-semibold text-slate-900">{current}</div>
-      <p className="mt-3 text-sm leading-7 text-slate-600">{oneLiner}</p>
+    <div className="rounded-[28px] border border-white/10 bg-white/5 p-6">
+      <div className="text-sm font-semibold text-white">{current}</div>
+      <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-400">{branding.subtitle}</p>
       <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <PreviewCard title="Target user" body={targetUser} />
-        <PreviewCard title="Core outcome" body={coreOutcome} />
+        <DarkPanel title="Target user" body={targetUser} />
+        <DarkPanel title="Core outcome" body={coreOutcome} />
       </div>
     </div>
   );
 }
 
-function MobileScreen({ kind, targetUser, coreOutcome, current }: { kind: ScreenKind; targetUser: string; coreOutcome: string; current: string }) {
-  if (kind === "onboarding") {
-    return (
-      <div className="rounded-[24px] bg-white p-4 shadow-sm">
-        <div className="space-y-3">
-          <MobileField label="Role" value={targetUser} />
-          <MobileField label="Goal" value={coreOutcome} />
-          <MobileField label="Success metric" value="First useful outcome" />
-          <button className="w-full rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white">Continue setup</button>
+function MobilePreview({ branding, targetUser, coreOutcome, screens, activeScreen, current, kind }: { branding: PreviewBranding; targetUser: string; coreOutcome: string; screens: string[]; activeScreen: number; current: string; kind: ScreenKind }) {
+  return (
+    <div className="min-h-[760px] bg-[#070c15] p-3">
+      <div className="mx-auto overflow-hidden rounded-[30px] border border-white/10 bg-[#081120] shadow-sm">
+        <div className="flex items-center justify-between px-4 pb-2 pt-3 text-xs font-semibold text-slate-500">
+          <span>9:41</span>
+          <span>{branding.name}</span>
         </div>
+        <div className="px-4 pb-4">
+          <div className="rounded-[28px] border border-white/10 bg-white/5 p-4">
+            <div className="inline-flex rounded-full bg-cyan-400/10 px-3 py-2 text-[11px] font-semibold text-cyan-300">{kind}</div>
+            <h3 className="mt-3 text-3xl font-bold tracking-tight text-white">{current}</h3>
+            <p className="mt-3 text-sm leading-6 text-slate-400">{branding.subtitle}</p>
+          </div>
+
+          <div className="mt-4">
+            <MobileScreen kind={kind} branding={branding} targetUser={targetUser} coreOutcome={coreOutcome} />
+          </div>
+
+          <div className="mt-4 grid gap-3">
+            {screens.map((screen, index) => (
+              <div key={screen} className={`rounded-2xl border px-4 py-4 text-sm ${index === activeScreen ? "border-cyan-400/30 bg-cyan-400/10 text-white" : "border-white/10 bg-white/5 text-slate-400"}`}>
+                {screen}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MobileScreen({ kind, branding, targetUser, coreOutcome }: { kind: ScreenKind; branding: PreviewBranding; targetUser: string; coreOutcome: string }) {
+  if (kind === "landing") {
+    return (
+      <div className="rounded-[28px] border border-white/10 bg-white/5 p-4">
+        <div className="text-4xl font-bold leading-tight tracking-[-0.04em] text-white">
+          <span>{branding.headlineA} </span>
+          <span className="text-cyan-300">{branding.accentB}</span>
+          <span> </span>
+          <span className="text-cyan-300">{branding.accentC}</span>
+          <span> {branding.closing}</span>
+        </div>
+        <button className="mt-5 w-full rounded-2xl bg-cyan-400 px-4 py-3 text-sm font-semibold text-slate-950">{branding.primaryCta}</button>
       </div>
     );
   }
@@ -400,51 +376,80 @@ function MobileScreen({ kind, targetUser, coreOutcome, current }: { kind: Screen
   if (kind === "workflow") {
     return (
       <div className="space-y-3">
-        <div className="rounded-[24px] bg-white p-4 shadow-sm">
-          <div className="text-sm font-semibold text-slate-900">Workflow</div>
-          <div className="mt-3 space-y-2 text-sm text-slate-700">
-            <div className="rounded-2xl bg-slate-50 p-4">Input</div>
-            <div className="rounded-2xl bg-slate-950 p-4 text-white">Generate</div>
-            <div className="rounded-2xl bg-slate-50 p-4">Deliver</div>
+        <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
+          <div className="text-sm font-semibold text-white">Workflow</div>
+          <div className="mt-3 space-y-2 text-sm">
+            <div className="rounded-2xl bg-white/5 p-4 text-slate-300">Lead research</div>
+            <div className="rounded-2xl bg-cyan-400 p-4 font-semibold text-slate-950">Proposal generation</div>
+            <div className="rounded-2xl bg-white/5 p-4 text-slate-300">Follow-up automation</div>
           </div>
         </div>
-        <div className="rounded-[24px] bg-white p-4 shadow-sm text-sm leading-6 text-slate-600">This flow is optimized for {coreOutcome.toLowerCase()}.</div>
-      </div>
-    );
-  }
-
-  if (kind === "results") {
-    return (
-      <div className="space-y-3">
-        <div className="grid grid-cols-2 gap-3">
-          <MobileKpi label="Activated" value="11" />
-          <MobileKpi label="Saved" value="4.6h" />
-        </div>
-        <div className="rounded-[24px] bg-white p-4 shadow-sm text-sm leading-6 text-slate-600">Users reached the first success state from {current.toLowerCase()}.</div>
+        <div className="rounded-[24px] border border-white/10 bg-white/5 p-4 text-sm leading-6 text-slate-400">Built for {targetUser.toLowerCase()} to {coreOutcome.toLowerCase()}.</div>
       </div>
     );
   }
 
   if (kind === "analytics") {
     return (
-      <div className="rounded-[24px] bg-white p-4 shadow-sm">
-        <div className="text-sm font-semibold text-slate-900">Weekly signal</div>
+      <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
+        <div className="text-sm font-semibold text-white">Weekly signal</div>
         <div className="mt-4 space-y-3">
-          <MiniBar label="Visitors" width="100%" />
-          <MiniBar label="Signups" width="68%" />
-          <MiniBar label="Activated" width="42%" />
+          <MiniBarDark label="Visitors" width="100%" />
+          <MiniBarDark label="Leads" width="74%" />
+          <MiniBarDark label="Won" width="26%" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="rounded-[24px] bg-white p-4 shadow-sm">
-      <div className="text-sm font-semibold text-slate-900">Built for</div>
-      <div className="mt-3 rounded-2xl bg-slate-50 p-4 text-sm text-slate-700">{targetUser}</div>
-      <button className="mt-4 w-full rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white">Continue</button>
+    <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
+      <div className="text-sm font-semibold text-white">Target user</div>
+      <div className="mt-3 rounded-2xl bg-white/5 p-4 text-sm text-slate-300">{targetUser}</div>
+      <div className="mt-3 rounded-2xl bg-white/5 p-4 text-sm text-slate-300">{coreOutcome}</div>
+      <button className="mt-4 w-full rounded-2xl bg-cyan-400 px-4 py-3 text-sm font-semibold text-slate-950">Continue</button>
     </div>
   );
+}
+
+function buildBranding(idea: string, targetUser: string, coreOutcome: string, oneLiner: string): PreviewBranding {
+  const text = `${idea} ${targetUser} ${coreOutcome} ${oneLiner}`.toLowerCase();
+  if (/(proposal|client|lead|agency|designer|freelance|freelancer)/.test(text)) {
+    return {
+      name: "ProposalPilot",
+      badge: "AI-Powered Client Acquisition",
+      headlineA: "Find clients.",
+      accentB: "Send",
+      accentC: "proposals.",
+      closing: "Close deals.",
+      subtitle: "The AI assistant that finds high-quality leads, writes personalized proposals, and automates follow-ups — so you can focus on designing.",
+      primaryCta: "Start finding clients",
+      secondaryCta: "See how it works",
+    };
+  }
+
+  const brand = toBrandName(idea);
+  return {
+    name: brand,
+    badge: "AI-Powered MVP",
+    headlineA: firstSentence(oneLiner) || `Launch ${brand}.`,
+    accentB: "Generate",
+    accentC: "results.",
+    closing: "Move faster.",
+    subtitle: `${brand} helps ${targetUser.toLowerCase()} ${coreOutcome.toLowerCase()} with a sharper workflow, better activation, and a clearer path to revenue.`,
+    primaryCta: "Get started",
+    secondaryCta: "See how it works",
+  };
+}
+
+function toBrandName(idea: string) {
+  const words = idea.replace(/[^a-zA-Z0-9 ]/g, " ").split(/\s+/).filter(Boolean).slice(0, 2);
+  if (words.length === 0) return "BuildlyPilot";
+  return words.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join("");
+}
+
+function firstSentence(value: string) {
+  return value.split(/[.!?]/).map((part) => part.trim()).filter(Boolean)[0] || value;
 }
 
 function inferScreenKind(screen: string, index: number): ScreenKind {
@@ -465,106 +470,73 @@ function inferScreenKind(screen: string, index: number): ScreenKind {
 function describeScreen(screen: string, targetUser: string, coreOutcome: string) {
   const kind = inferScreenKind(screen, 0);
   if (kind === "landing") return `Hero, proof, and CTA for ${targetUser.toLowerCase()}.`;
-  if (kind === "onboarding") return `Collect just enough setup data to unlock ${coreOutcome.toLowerCase()}.`;
-  if (kind === "workflow") return "Main in-product experience with the first useful outcome.";
-  if (kind === "results") return "Success state, summary, and next best action.";
-  if (kind === "analytics") return "Signal, activation, and funnel metrics for the founder.";
+  if (kind === "onboarding") return `Collect setup data to unlock ${coreOutcome.toLowerCase()}.`;
+  if (kind === "workflow") return "Main in-product experience with clear value delivery.";
+  if (kind === "results") return "Success state, summary, and next action.";
+  if (kind === "analytics") return "Signal, funnel, and conversion metrics for the founder.";
   return `Product screen for ${targetUser.toLowerCase()}.`;
 }
 
-function MetricCard({ label, value }: { label: string; value: string }) {
+function DarkKpi({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</div>
-      <div className="mt-2 text-sm font-semibold text-slate-900">{value}</div>
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</div>
+      <div className="mt-2 text-xl font-semibold text-white">{value}</div>
     </div>
   );
 }
 
-function PreviewCard({ title, body }: { title: string; body: string }) {
+function DarkPanel({ title, body }: { title: string; body: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="text-sm font-semibold text-slate-900">{title}</div>
-      <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="text-sm font-semibold text-white">{title}</div>
+      <p className="mt-2 text-sm leading-6 text-slate-400">{body}</p>
     </div>
   );
 }
 
-function FieldRow({ label, value }: { label: string; value: string }) {
+function DarkField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</div>
-      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">{value}</div>
+      <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</div>
+      <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">{value}</div>
     </div>
   );
 }
 
-function StepCard({ number, title, text }: { number: string; title: string; text: string }) {
+function DarkStep({ title, text }: { title: string; text: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-600">{number}</div>
-      <div className="mt-2 text-sm font-semibold text-slate-900">{title}</div>
-      <p className="mt-2 text-sm leading-6 text-slate-600">{text}</p>
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="text-sm font-semibold text-white">{title}</div>
+      <p className="mt-2 text-sm leading-6 text-slate-400">{text}</p>
     </div>
   );
 }
 
-function SidePanelBox({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{title}</div>
-      <div className="mt-2 text-sm font-semibold text-slate-900">{body}</div>
-    </div>
-  );
+function DarkListItem({ text }: { text: string }) {
+  return <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">{text}</div>;
 }
 
-function FunnelBar({ label, value, width }: { label: string; value: string; width: string }) {
+function DarkBar({ label, value, width }: { label: string; value: string; width: string }) {
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between gap-3 text-sm text-slate-600">
+      <div className="mb-2 flex items-center justify-between gap-3 text-sm text-slate-400">
         <span>{label}</span>
-        <span className="font-semibold text-slate-900">{value}</span>
+        <span className="font-semibold text-white">{value}</span>
       </div>
-      <div className="h-3 rounded-full bg-slate-100">
-        <div className="h-3 rounded-full bg-slate-950" style={{ width }} />
+      <div className="h-3 rounded-full bg-white/10">
+        <div className="h-3 rounded-full bg-cyan-400" style={{ width }} />
       </div>
     </div>
   );
 }
 
-function MiniStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl bg-slate-50 p-3">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{label}</div>
-      <div className="mt-1 text-sm font-semibold text-slate-900">{value}</div>
-    </div>
-  );
-}
-
-function MobileField({ label, value }: { label: string; value: string }) {
+function MiniBarDark({ label, width }: { label: string; width: string }) {
   return (
     <div>
-      <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{label}</div>
-      <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-700">{value}</div>
-    </div>
-  );
-}
-
-function MobileKpi({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[24px] bg-white p-4 shadow-sm">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{label}</div>
-      <div className="mt-2 text-lg font-bold text-slate-950">{value}</div>
-    </div>
-  );
-}
-
-function MiniBar({ label, width }: { label: string; width: string }) {
-  return (
-    <div>
-      <div className="mb-2 text-sm text-slate-600">{label}</div>
-      <div className="h-3 rounded-full bg-slate-100">
-        <div className="h-3 rounded-full bg-slate-950" style={{ width }} />
+      <div className="mb-2 text-sm text-slate-400">{label}</div>
+      <div className="h-3 rounded-full bg-white/10">
+        <div className="h-3 rounded-full bg-cyan-400" style={{ width }} />
       </div>
     </div>
   );
