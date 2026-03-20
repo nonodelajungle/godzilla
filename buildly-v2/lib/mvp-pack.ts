@@ -760,22 +760,24 @@ function ecommerceConfig(defaults: ArchetypeConfig, brand: string): ArchetypeCon
 }
 
 function detectB2BMode(text: string): B2BMode {
-  const ranked: Array<[B2BMode, number]> = [
-    ["sales", countMatches(text, ["sales", "crm", "lead", "prospect", "deal", "revenue", "outreach", "pipeline"])],
-    ["analytics", countMatches(text, ["analytics", "bi", "reporting", "dashboard", "metric", "insight", "data"])],
-    ["support", countMatches(text, ["support", "ticket", "help desk", "customer service", "inbox", "resolution", "sla"])],
-    ["ops", countMatches(text, ["ops", "workflow", "automation", "approval", "handoff", "task", "backoffice"])],
-  ].sort((a, b) => b[1] - a[1]);
+  const scores: Record<B2BMode, number> = {
+    sales: countMatches(text, ["sales", "crm", "lead", "prospect", "deal", "revenue", "outreach", "pipeline"]),
+    analytics: countMatches(text, ["analytics", "bi", "reporting", "dashboard", "metric", "insight", "data"]),
+    support: countMatches(text, ["support", "ticket", "help desk", "customer service", "inbox", "resolution", "sla"]),
+    ops: countMatches(text, ["ops", "workflow", "automation", "approval", "handoff", "task", "backoffice"]),
+  };
+  const ranked = (Object.entries(scores) as Array<[B2BMode, number]>).sort((a, b) => b[1] - a[1]);
   return ranked[0] && ranked[0][1] > 0 ? ranked[0][0] : "ops";
 }
 
 function detectConsumerMode(text: string): ConsumerMode {
-  const ranked: Array<[ConsumerMode, number]> = [
-    ["assistant", countMatches(text, ["assistant", "copilot", "ai companion", "chat", "generate", "recommendation"])],
-    ["planner", countMatches(text, ["plan", "planner", "habit", "routine", "daily", "goal", "schedule", "organize"])],
-    ["community", countMatches(text, ["community", "social", "group", "friends", "network", "forum"])],
-    ["general", 0],
-  ].sort((a, b) => b[1] - a[1]);
+  const scores: Record<ConsumerMode, number> = {
+    assistant: countMatches(text, ["assistant", "copilot", "ai companion", "chat", "generate", "recommendation"]),
+    planner: countMatches(text, ["plan", "planner", "habit", "routine", "daily", "goal", "schedule", "organize"]),
+    community: countMatches(text, ["community", "social", "group", "friends", "network", "forum"]),
+    general: 0,
+  };
+  const ranked = (Object.entries(scores) as Array<[ConsumerMode, number]>).sort((a, b) => b[1] - a[1]);
   return ranked[0] && ranked[0][1] > 0 ? ranked[0][0] : "general";
 }
 
