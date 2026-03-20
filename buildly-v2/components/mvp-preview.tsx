@@ -22,6 +22,14 @@ type PreviewBranding = {
   subtitle: string;
   primaryCta: string;
   secondaryCta: string;
+  featuresTitle: string;
+  featuresAccent: string;
+  featuresSubtitle: string;
+  features: Array<{ title: string; body: string; icon: string }>;
+  footerTitle: string;
+  footerSubtitle: string;
+  footerCta: string;
+  footerNote: string;
 };
 
 export function MvpPreview({ idea, oneLiner, targetUser, coreOutcome, screens }: MvpPreviewProps) {
@@ -92,43 +100,7 @@ export function MvpPreview({ idea, oneLiner, targetUser, coreOutcome, screens }:
 
 function DesktopPreview({ branding, targetUser, coreOutcome, screens, activeScreen, current, kind }: { branding: PreviewBranding; targetUser: string; coreOutcome: string; screens: string[]; activeScreen: number; current: string; kind: ScreenKind }) {
   if (kind === "landing") {
-    return (
-      <div className="min-h-[760px] bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_30%),linear-gradient(180deg,#030712,#081120_65%,#0a1324)] text-white">
-        <div className="flex items-center justify-between border-b border-white/10 px-8 py-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-400 text-base font-bold text-slate-950">⚡</div>
-            <div className="text-3xl font-semibold tracking-tight">{branding.name}</div>
-          </div>
-          <div className="flex items-center gap-8 text-sm text-slate-300">
-            <span>Dashboard</span>
-            <button className="rounded-2xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950">Get started</button>
-          </div>
-        </div>
-
-        <div className="mx-auto max-w-5xl px-8 pb-20 pt-14 text-center">
-          <div className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-5 py-2 text-sm font-medium text-cyan-300">
-            ✦ {branding.badge}
-          </div>
-          <h2 className="mx-auto mt-10 max-w-4xl text-7xl font-bold tracking-[-0.06em] leading-[0.95]">
-            <span className="text-slate-100">{branding.headlineA} </span>
-            <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">{branding.accentB}</span>
-            <span className="text-slate-100"> </span>
-            <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">{branding.accentC}</span>
-            <span className="text-slate-100"> {branding.closing}</span>
-          </h2>
-          <p className="mx-auto mt-8 max-w-3xl text-2xl leading-10 text-slate-400">{branding.subtitle}</p>
-          <div className="mt-10 flex items-center justify-center gap-4">
-            <button className="rounded-2xl bg-cyan-400 px-8 py-4 text-xl font-semibold text-slate-950">{branding.primaryCta} →</button>
-            <button className="rounded-2xl border border-white/15 bg-white/5 px-8 py-4 text-xl font-semibold text-slate-100">{branding.secondaryCta}</button>
-          </div>
-          <div className="mt-10 flex items-center justify-center gap-10 text-xl text-slate-500">
-            <span>✓ Free to start</span>
-            <span>✓ No credit card</span>
-            <span>✓ Cancel anytime</span>
-          </div>
-        </div>
-      </div>
-    );
+    return <LovableLikeLanding branding={branding} />;
   }
 
   return (
@@ -176,6 +148,77 @@ function DesktopPreview({ branding, targetUser, coreOutcome, screens, activeScre
           <DesktopAppScreen branding={branding} targetUser={targetUser} coreOutcome={coreOutcome} current={current} kind={kind} />
         </div>
       </main>
+    </div>
+  );
+}
+
+function LovableLikeLanding({ branding }: { branding: PreviewBranding }) {
+  return (
+    <div className="min-h-[1400px] overflow-hidden bg-white">
+      <section className="bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.12),transparent_22%),linear-gradient(180deg,#030712,#081120_68%,#0a1324)] text-white">
+        <div className="flex items-center justify-between border-b border-white/10 px-8 py-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-400 text-base font-bold text-slate-950">⚡</div>
+            <div className="text-3xl font-semibold tracking-tight">{branding.name}</div>
+          </div>
+          <div className="flex items-center gap-8 text-sm text-slate-300">
+            <span>Dashboard</span>
+            <button className="rounded-2xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950">Get started</button>
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-5xl px-8 pb-24 pt-16 text-center">
+          <div className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-5 py-2 text-sm font-medium text-cyan-300">
+            ✦ {branding.badge}
+          </div>
+          <h2 className="mx-auto mt-10 max-w-4xl text-7xl font-bold tracking-[-0.06em] leading-[0.95]">
+            <span className="text-slate-100">{branding.headlineA} </span>
+            <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">{branding.accentB}</span>
+            <span className="text-slate-100"> </span>
+            <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">{branding.accentC}</span>
+            <span className="text-slate-100"> {branding.closing}</span>
+          </h2>
+          <p className="mx-auto mt-8 max-w-3xl text-2xl leading-10 text-slate-400">{branding.subtitle}</p>
+          <div className="mt-10 flex items-center justify-center gap-4">
+            <button className="rounded-2xl bg-cyan-400 px-8 py-4 text-xl font-semibold text-slate-950">{branding.primaryCta} →</button>
+            <button className="rounded-2xl border border-white/15 bg-white/5 px-8 py-4 text-xl font-semibold text-slate-100">{branding.secondaryCta}</button>
+          </div>
+          <div className="mt-10 flex items-center justify-center gap-10 text-xl text-slate-500">
+            <span>✓ Free to start</span>
+            <span>✓ No credit card</span>
+            <span>✓ Cancel anytime</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[#f5f5f6] px-8 py-20 text-slate-900">
+        <div className="mx-auto max-w-6xl text-center">
+          <h3 className="text-6xl font-bold tracking-[-0.05em]">
+            <span>{branding.featuresTitle} </span>
+            <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">{branding.featuresAccent}</span>
+          </h3>
+          <p className="mx-auto mt-6 max-w-3xl text-2xl leading-10 text-slate-500">{branding.featuresSubtitle}</p>
+
+          <div className="mt-14 grid gap-6 md:grid-cols-2">
+            {branding.features.map((feature) => (
+              <div key={feature.title} className="rounded-[28px] border border-slate-200 bg-white p-8 text-left shadow-sm">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-50 text-2xl text-cyan-500">{feature.icon}</div>
+                <div className="mt-6 text-3xl font-semibold tracking-tight text-slate-950">{feature.title}</div>
+                <p className="mt-4 text-xl leading-9 text-slate-500">{feature.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.10),transparent_22%),linear-gradient(180deg,#030712,#081120_68%,#0a1324)] px-8 py-24 text-white">
+        <div className="mx-auto max-w-5xl text-center">
+          <h3 className="text-6xl font-bold tracking-[-0.05em]">{branding.footerTitle}</h3>
+          <p className="mx-auto mt-8 max-w-3xl text-2xl leading-10 text-slate-400">{branding.footerSubtitle}</p>
+          <button className="mt-10 rounded-2xl bg-cyan-400 px-8 py-4 text-2xl font-semibold text-slate-950">{branding.footerCta} →</button>
+          <div className="mt-16 text-lg text-slate-500">{branding.footerNote}</div>
+        </div>
+      </section>
     </div>
   );
 }
@@ -326,6 +369,61 @@ function DesktopAppScreen({ branding, targetUser, coreOutcome, current, kind }: 
 }
 
 function MobilePreview({ branding, targetUser, coreOutcome, screens, activeScreen, current, kind }: { branding: PreviewBranding; targetUser: string; coreOutcome: string; screens: string[]; activeScreen: number; current: string; kind: ScreenKind }) {
+  if (kind === "landing") {
+    return (
+      <div className="min-h-[980px] bg-white">
+        <section className="bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.12),transparent_25%),linear-gradient(180deg,#030712,#081120_68%,#0a1324)] px-4 pb-12 pt-4 text-white">
+          <div className="flex items-center justify-between pb-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-400 font-bold text-slate-950">⚡</div>
+              <div className="text-2xl font-semibold tracking-tight">{branding.name}</div>
+            </div>
+            <button className="rounded-2xl bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950">Get started</button>
+          </div>
+          <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 text-center">
+            <div className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-xs font-medium text-cyan-300">✦ {branding.badge}</div>
+            <div className="mt-6 text-5xl font-bold leading-[0.95] tracking-[-0.05em] text-white">
+              <span>{branding.headlineA} </span>
+              <span className="text-cyan-300">{branding.accentB}</span>
+              <span> </span>
+              <span className="text-cyan-300">{branding.accentC}</span>
+              <span> {branding.closing}</span>
+            </div>
+            <p className="mt-5 text-base leading-7 text-slate-400">{branding.subtitle}</p>
+            <div className="mt-6 space-y-3">
+              <button className="w-full rounded-2xl bg-cyan-400 px-4 py-3 text-sm font-semibold text-slate-950">{branding.primaryCta} →</button>
+              <button className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white">{branding.secondaryCta}</button>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-[#f5f5f6] px-4 py-10 text-slate-900">
+          <h3 className="text-4xl font-bold tracking-[-0.05em] leading-tight text-center">
+            <span>{branding.featuresTitle} </span>
+            <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">{branding.featuresAccent}</span>
+          </h3>
+          <p className="mt-4 text-center text-base leading-7 text-slate-500">{branding.featuresSubtitle}</p>
+          <div className="mt-8 grid gap-4">
+            {branding.features.map((feature) => (
+              <div key={feature.title} className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-50 text-xl text-cyan-500">{feature.icon}</div>
+                <div className="mt-4 text-2xl font-semibold tracking-tight text-slate-950">{feature.title}</div>
+                <p className="mt-3 text-base leading-7 text-slate-500">{feature.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.10),transparent_25%),linear-gradient(180deg,#030712,#081120_68%,#0a1324)] px-4 py-12 text-center text-white">
+          <h3 className="text-4xl font-bold tracking-[-0.05em] leading-tight">{branding.footerTitle}</h3>
+          <p className="mt-4 text-base leading-7 text-slate-400">{branding.footerSubtitle}</p>
+          <button className="mt-6 rounded-2xl bg-cyan-400 px-6 py-3 text-base font-semibold text-slate-950">{branding.footerCta} →</button>
+          <div className="mt-8 text-sm text-slate-500">{branding.footerNote}</div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-[760px] bg-[#070c15] p-3">
       <div className="mx-auto overflow-hidden rounded-[30px] border border-white/10 bg-[#081120] shadow-sm">
@@ -358,21 +456,6 @@ function MobilePreview({ branding, targetUser, coreOutcome, screens, activeScree
 }
 
 function MobileScreen({ kind, branding, targetUser, coreOutcome }: { kind: ScreenKind; branding: PreviewBranding; targetUser: string; coreOutcome: string }) {
-  if (kind === "landing") {
-    return (
-      <div className="rounded-[28px] border border-white/10 bg-white/5 p-4">
-        <div className="text-4xl font-bold leading-tight tracking-[-0.04em] text-white">
-          <span>{branding.headlineA} </span>
-          <span className="text-cyan-300">{branding.accentB}</span>
-          <span> </span>
-          <span className="text-cyan-300">{branding.accentC}</span>
-          <span> {branding.closing}</span>
-        </div>
-        <button className="mt-5 w-full rounded-2xl bg-cyan-400 px-4 py-3 text-sm font-semibold text-slate-950">{branding.primaryCta}</button>
-      </div>
-    );
-  }
-
   if (kind === "workflow") {
     return (
       <div className="space-y-3">
@@ -425,6 +508,35 @@ function buildBranding(idea: string, targetUser: string, coreOutcome: string, on
       subtitle: "The AI assistant that finds high-quality leads, writes personalized proposals, and automates follow-ups — so you can focus on designing.",
       primaryCta: "Start finding clients",
       secondaryCta: "See how it works",
+      featuresTitle: "Everything you need to",
+      featuresAccent: "land more clients",
+      featuresSubtitle: "Stop cold-emailing into the void. Let AI handle the grind while you do what you love.",
+      features: [
+        {
+          title: "Smart Lead Discovery",
+          body: "AI scans job boards, social media, and directories to find clients who need your exact skills.",
+          icon: "⌕",
+        },
+        {
+          title: "Auto-Generated Proposals",
+          body: "Personalized proposals crafted from your portfolio and the client's specific needs — in seconds.",
+          icon: "📄",
+        },
+        {
+          title: "Follow-Up Automation",
+          body: "Never lose a deal to silence. Automated, tasteful follow-ups keep you top of mind.",
+          icon: "◔",
+        },
+        {
+          title: "Pipeline Analytics",
+          body: "Track your outreach, response rates, and close rates. Know what's working.",
+          icon: "↗",
+        },
+      ],
+      footerTitle: "Ready to stop chasing clients?",
+      footerSubtitle: "Join designers who are landing 3x more clients with half the effort.",
+      footerCta: "Get started free",
+      footerNote: "© 2026 ProposalPilot. Built for freelance designers.",
     };
   }
 
@@ -439,6 +551,19 @@ function buildBranding(idea: string, targetUser: string, coreOutcome: string, on
     subtitle: `${brand} helps ${targetUser.toLowerCase()} ${coreOutcome.toLowerCase()} with a sharper workflow, better activation, and a clearer path to revenue.`,
     primaryCta: "Get started",
     secondaryCta: "See how it works",
+    featuresTitle: "Everything you need to",
+    featuresAccent: "launch faster",
+    featuresSubtitle: `${brand} turns a validated idea into a sharper workflow, a stronger offer, and better activation.`,
+    features: [
+      { title: "Clear onboarding", body: "Guide users into the product with less friction and stronger activation.", icon: "✦" },
+      { title: "Focused workflow", body: "Deliver the core outcome in the first session without unnecessary complexity.", icon: "⚙" },
+      { title: "Signal tracking", body: "Measure activation, completion, and progression from day one.", icon: "↗" },
+      { title: "Faster iteration", body: "Use feedback loops to improve the MVP without rebuilding everything.", icon: "◔" },
+    ],
+    footerTitle: `Ready to launch ${brand}?`,
+    footerSubtitle: `Move from MVP plan to a more credible product experience in less time.`,
+    footerCta: "Start now",
+    footerNote: `© 2026 ${brand}. Generated by Buildly.`,
   };
 }
 
@@ -469,7 +594,7 @@ function inferScreenKind(screen: string, index: number): ScreenKind {
 
 function describeScreen(screen: string, targetUser: string, coreOutcome: string) {
   const kind = inferScreenKind(screen, 0);
-  if (kind === "landing") return `Hero, proof, and CTA for ${targetUser.toLowerCase()}.`;
+  if (kind === "landing") return `Hero, features, and CTA for ${targetUser.toLowerCase()}.`;
   if (kind === "onboarding") return `Collect setup data to unlock ${coreOutcome.toLowerCase()}.`;
   if (kind === "workflow") return "Main in-product experience with clear value delivery.";
   if (kind === "results") return "Success state, summary, and next action.";
@@ -480,7 +605,7 @@ function describeScreen(screen: string, targetUser: string, coreOutcome: string)
 function DarkKpi({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</div>
+      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</div>
       <div className="mt-2 text-xl font-semibold text-white">{value}</div>
     </div>
   );
@@ -498,7 +623,7 @@ function DarkPanel({ title, body }: { title: string; body: string }) {
 function DarkField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</div>
+      <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</div>
       <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">{value}</div>
     </div>
   );
