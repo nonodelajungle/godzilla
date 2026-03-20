@@ -163,6 +163,7 @@ export default function StudioClient() {
           <span className="text-2xl font-bold tracking-tight text-cyan-600">Buildly</span>
           <div className="flex items-center gap-4">
             <a href="#how-it-works" className="hidden text-sm text-slate-500 transition hover:text-slate-900 sm:block">How it works</a>
+            <a href="#mvp-blueprint" className="hidden text-sm text-slate-500 transition hover:text-slate-900 sm:block">Generate MVP</a>
             <a href="/dashboard" className="hidden text-sm text-slate-500 transition hover:text-slate-900 sm:block">Dashboard</a>
             <a href="#generator" className="rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Get Started</a>
           </div>
@@ -175,10 +176,10 @@ export default function StudioClient() {
             <div className="inline-flex items-center rounded-full bg-emerald-50 px-5 py-2 text-sm font-medium text-emerald-600">✦ AI-Powered Startup Validation</div>
             <h1 className="mx-auto mt-8 max-w-4xl text-5xl font-bold tracking-[-0.05em] text-slate-950 md:text-7xl">
               Validate Your Startup Idea
-              <span className="block bg-gradient-to-r from-cyan-500 via-sky-500 to-violet-500 bg-clip-text text-transparent">Before You Build</span>
+              <span className="block bg-gradient-to-r from-cyan-500 via-sky-500 to-violet-500 bg-clip-text text-transparent">Then Turn Signal Into an MVP</span>
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-xl leading-9 text-slate-500">
-              Idea in → market analysis → market study → traffic kit → landing variants → publish → collect leads → analyze signal → decide → generate MVP.
+              Idea in → market analysis → market study → traffic kit → landing variants → publish → collect leads → analyze signal → generate MVP.
             </p>
           </div>
         </section>
@@ -297,6 +298,38 @@ export default function StudioClient() {
           </section>
         )}
 
+        {activeProject && signal && decision && mvpBrief && (
+          <section id="mvp-blueprint" className="px-4 pb-4 pt-8">
+            <div className="mx-auto max-w-6xl overflow-hidden rounded-[32px] border border-slate-200 bg-[radial-gradient(circle_at_top_left,rgba(45,197,186,0.18),transparent_35%),linear-gradient(135deg,#0f172a,#111827_55%,#0b2230)] p-8 text-white shadow-[0_24px_80px_rgba(15,23,42,0.18)] md:p-10">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="max-w-3xl">
+                  <div className="inline-flex rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">
+                    Generate MVP
+                  </div>
+                  <h2 className="mt-5 text-4xl font-bold tracking-[-0.04em] md:text-5xl">Turn validation signal into a real MVP blueprint</h2>
+                  <p className="mt-4 text-lg leading-8 text-slate-200">{mvpBrief.summary}</p>
+                </div>
+                <div className="rounded-[24px] border border-white/15 bg-white/10 p-5 backdrop-blur">
+                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200">Current decision</div>
+                  <div className="mt-2 text-2xl font-bold">{decision.label}</div>
+                  <div className="mt-3 text-sm text-slate-200">Confidence · {decision.confidence}</div>
+                </div>
+              </div>
+
+              <div className="mt-8 grid gap-5 lg:grid-cols-3">
+                <MvpListCard title="Build now" items={mvpBrief.features} />
+                <MvpListCard title="Next backlog" items={mvpBrief.backlog} />
+                <MvpListCard title="Do not build yet" items={mvpBrief.doNotBuild} />
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <a href="/dashboard" className="rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-950">Open founder dashboard</a>
+                <a href="#how-it-works" className="rounded-2xl border border-white/20 px-5 py-3 text-sm font-semibold text-white">Review the full flow</a>
+              </div>
+            </div>
+          </section>
+        )}
+
         {variants && (
           <section className="px-4 pb-4 pt-10">
             <div className="mx-auto max-w-6xl">
@@ -329,8 +362,8 @@ export default function StudioClient() {
 
         {activeProject && signal && decision && mvpBrief && (
           <section className="px-4 pb-8 pt-8">
-            <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-3">
-              <div className="rounded-[28px] border border-slate-200 bg-white p-7 shadow-sm lg:col-span-1">
+            <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-2">
+              <div className="rounded-[28px] border border-slate-200 bg-white p-7 shadow-sm">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <div className="text-sm font-semibold text-slate-900">Signal</div>
@@ -352,11 +385,11 @@ export default function StudioClient() {
                   <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Decision</div>
                   <p className="mt-2 text-lg font-semibold text-slate-950">{decision.label}</p>
                   <p className="mt-3 text-sm leading-7 text-slate-600">{decision.rationale}</p>
-                  <div className="mt-4 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 inline-flex">Confidence · {decision.confidence}</div>
+                  <div className="mt-4 inline-flex rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">Confidence · {decision.confidence}</div>
                 </div>
               </div>
 
-              <div className="rounded-[28px] border border-slate-200 bg-white p-7 shadow-sm lg:col-span-1">
+              <div className="rounded-[28px] border border-slate-200 bg-white p-7 shadow-sm">
                 <div className="text-sm font-semibold text-slate-900">Published variants</div>
                 <div className="mt-5 space-y-3">
                   {signal.variants.length === 0 ? (
@@ -375,24 +408,6 @@ export default function StudioClient() {
                       </div>
                     ))
                   )}
-                </div>
-              </div>
-
-              <div className="rounded-[28px] border border-slate-200 bg-white p-7 shadow-sm lg:col-span-1">
-                <div className="text-sm font-semibold text-slate-900">Generate MVP</div>
-                <h3 className="mt-3 text-2xl font-bold tracking-tight text-slate-950">{mvpBrief.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{mvpBrief.summary}</p>
-                <div className="mt-6">
-                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Build now</div>
-                  <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
-                    {mvpBrief.features.map((item) => <li key={item}>• {item}</li>)}
-                  </ul>
-                </div>
-                <div className="mt-6">
-                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Do not build yet</div>
-                  <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
-                    {mvpBrief.doNotBuild.map((item) => <li key={item}>• {item}</li>)}
-                  </ul>
                 </div>
               </div>
             </div>
@@ -446,7 +461,7 @@ export default function StudioClient() {
               <StepCard step="Step 1" title="Describe Your Idea" text="Enter your startup concept, target audience, and value proposition." />
               <StepCard step="Step 2" title="Understand the Market" text="Buildly estimates market urgency, pressure, wedge, and best starting channel." />
               <StepCard step="Step 3" title="Launch Traffic" text="Use ready-made posts and outreach messages to get the first qualified visitors." />
-              <StepCard step="Step 4" title="Build with Confidence" text="Use the decision engine and MVP brief to move only when the signal is strong enough." />
+              <StepCard step="Step 4" title="Generate the MVP" text="Turn live market signal into a narrow blueprint you can actually ship." />
             </div>
           </div>
         </section>
@@ -531,6 +546,17 @@ function MetricCard({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
       <div className="text-3xl font-bold tracking-tight text-slate-950">{value}</div>
       <div className="mt-2 text-sm text-slate-500">{label}</div>
+    </div>
+  );
+}
+
+function MvpListCard({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div className="rounded-[24px] border border-white/10 bg-white/10 p-5 backdrop-blur">
+      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200">{title}</div>
+      <ul className="mt-4 space-y-2 text-sm leading-6 text-slate-100">
+        {items.map((item) => <li key={item}>• {item}</li>)}
+      </ul>
     </div>
   );
 }
