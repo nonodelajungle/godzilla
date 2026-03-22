@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/studio-visual",
+      "permanent": false
+    }
+  ]
+}
