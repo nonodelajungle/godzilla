@@ -1,0 +1,1 @@
+Redeploy trigger after adding validation-grade helpers, investor mode, and capital hub.
