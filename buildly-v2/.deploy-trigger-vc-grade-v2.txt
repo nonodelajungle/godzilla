@@ -1,0 +1,1 @@
+Redeploy trigger after adding evidence room, portfolio compare, and exportable investor memo.
