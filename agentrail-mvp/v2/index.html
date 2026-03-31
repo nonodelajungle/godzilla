@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AgentRail Studio</title>
+  <meta name="description" content="AgentRail Studio — contrôle, simulation, approvals et audit pour agents IA." />
+  <link rel="stylesheet" href="../v2.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">AR</div>
+        <div>
+          <div class="eyebrow">AgentRail Studio</div>
+          <h1>MVP+</h1>
+        </div>
+      </div>
+      <nav class="nav" id="nav"></nav>
+      <section class="sidebar-card">
+        <div class="eyebrow">Workspace</div>
+        <div class="workspace-name">Acme Revenue Ops</div>
+        <div class="small muted">Phase pilote · 4 connecteurs · 3 approbateurs</div>
+      </section>
+      <section class="sidebar-card">
+        <div class="eyebrow">Actions rapides</div>
+        <div class="stack compact">
+          <button class="btn ghost" id="seedScenariosBtn">Injecter 5 runs</button>
+          <button class="btn ghost" id="exportBtn">Exporter l’état JSON</button>
+          <button class="btn ghost" id="resetBtn">Réinitialiser</button>
+        </div>
+      </section>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">Control plane pour agents IA</div>
+          <h2>Autorise, observe, approuve, rejoue.</h2>
+        </div>
+        <div class="topbar-actions">
+          <div class="search">
+            <span>⌘K</span>
+            <input id="globalSearch" placeholder="Rechercher runs, policies, connecteurs..." />
+          </div>
+          <button class="btn primary" id="runScenarioBtn">Lancer un scénario</button>
+        </div>
+      </header>
+
+      <section class="page active" data-page="overview">
+        <div class="hero-grid">
+          <article class="panel gradient">
+            <div class="row between">
+              <div>
+                <div class="eyebrow">Deployment readiness</div>
+                <h3>La couche qui rend les agents déployables en prod.</h3>
+                <p class="muted">Policy engine, approvals, sandbox, audit log et simulation de risque réunis dans une seule console opérable par les équipes Ops, IT et Sécurité.</p>
+              </div>
+              <div class="health-ring" id="healthRing">
+                <div class="ring-value" id="healthValue">86</div>
+                <div class="ring-label">Score</div>
+              </div>
+            </div>
+            <div class="stats-grid" id="heroStats"></div>
+          </article>
+          <article class="panel">
+            <div class="row between">
+              <div>
+                <div class="eyebrow">Déploiement</div>
+                <h3>Go / No-Go cockpit</h3>
+              </div>
+              <span class="badge blue">MCP-ready</span>
+            </div>
+            <div class="stack">
+              <div class="check-row"><span class="dot ok"></span> deny-by-default actif</div>
+              <div class="check-row"><span class="dot ok"></span> approbations Slack simulées</div>
+              <div class="check-row"><span class="dot ok"></span> audit log exportable</div>
+              <div class="check-row"><span class="dot warn"></span> rollback partiel uniquement</div>
+              <div class="check-row"><span class="dot warn"></span> RBAC granulaire v2</div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../v2-data.js"></script>
+  <script src="../v2-render.js"></script>
+  <script src="../v2-main.js"></script>
+</body>
+</html>
