@@ -1,0 +1,2694 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AgentRail — Pilot Workspace</title>
+  <meta name="theme-color" content="#050910" />
+  <style>
+    :root {
+      --bg: #070b18;
+      --bg2: #0b1226;
+      --panel: rgba(11,18,36,.86);
+      --panel2: rgba(12,20,38,.94);
+      --card: rgba(255,255,255,.035);
+      --line: rgba(151,178,233,.16);
+      --line-strong: rgba(151,178,233,.28);
+      --text: #f2f7ff;
+      --muted: #93a8cf;
+      --blue: #6aa8ff;
+      --cyan: #4adcff;
+      --green: #34e7ad;
+      --amber: #ffca58;
+      --red: #ff6d8d;
+      --violet: #a18dff;
+      --radius: 22px;
+      --shadow: 0 24px 60px rgba(0,0,0,.35);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(69,216,255,.10), transparent 22%),
+        radial-gradient(circle at 88% 0%, rgba(97,169,255,.12), transparent 22%),
+        linear-gradient(180deg, #050910 0%, #07101a 54%, #060b12 100%);
+      overflow: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black 38%, transparent 92%);
+      opacity: .22;
+    }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%,100% { opacity: .68; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .hidden { display: none !important; }
+
+    .auth {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 15% 18%, rgba(69,216,255,.12), transparent 20%),
+        radial-gradient(circle at 85% 10%, rgba(97,169,255,.12), transparent 20%),
+        linear-gradient(180deg, rgba(5,9,16,.96), rgba(5,9,16,.94));
+      backdrop-filter: blur(8px);
+    }
+    .auth-card {
+      width: min(1080px, 100%);
+      display: grid;
+      grid-template-columns: 1.08fr .92fr;
+      gap: 18px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
+        linear-gradient(180deg, rgba(10,15,26,.95), rgba(8,13,22,.98));
+      box-shadow: 0 40px 100px rgba(0,0,0,.52);
+      animation: rise .28s ease;
+    }
+    .auth-pane, .card, .sidebar-card, .detail, .item, .metric, .toast, .modal {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.02)),
+        linear-gradient(180deg, rgba(10,15,26,.88), rgba(8,13,22,.95));
+      box-shadow: var(--shadow);
+    }
+    .auth-pane, .card, .sidebar-card, .detail, .item, .metric, .modal { padding: 16px; }
+    .auth-brand, .brand {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+    .auth-brand img, .brand img {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      display: block;
+      box-shadow: 0 16px 36px rgba(0,0,0,.28);
+      background: #000;
+    }
+    .auth-brand h1, .brand h1 {
+      margin: 0;
+      line-height: 1;
+      letter-spacing: -.05em;
+    }
+    .auth-brand h1 { font-size: 30px; }
+    .brand h1 { font-size: 22px; }
+    .auth-brand p, .brand p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .auth-pane h2 {
+      margin: 18px 0 0;
+      font-size: 40px;
+      line-height: 1.03;
+      letter-spacing: -.06em;
+    }
+    .muted, .meta {
+      color: var(--muted);
+      line-height: 1.58;
+      font-size: 13px;
+    }
+    .auth-grid, .row-2, .row-3, .row-4, .row-5, .stats, .health-grid, .decision-grid {
+      display: grid;
+      gap: 12px;
+    }
+    .auth-grid, .row-2, .health-grid { grid-template-columns: repeat(2, 1fr); }
+    .row-3, .decision-grid { grid-template-columns: repeat(3, 1fr); }
+    .row-4, .stats { grid-template-columns: repeat(4, 1fr); }
+    .row-5 { grid-template-columns: repeat(5, 1fr); }
+
+    .app {
+      display: grid;
+      grid-template-columns: 290px 1fr 390px;
+      height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+    .sidebar, .context {
+      height: 100vh;
+      overflow: auto;
+      backdrop-filter: blur(16px);
+      background: rgba(6,10,17,.82);
+    }
+    .sidebar {
+      border-right: 1px solid var(--line);
+      padding: 20px 16px;
+    }
+    .context {
+      border-left: 1px solid var(--line);
+      padding: 20px 18px;
+      background: rgba(6,10,17,.74);
+    }
+    .main {
+      height: 100vh;
+      overflow: auto;
+      padding: 18px 20px 24px;
+    }
+    .nav {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .nav button {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      border-radius: 14px;
+      padding: 12px 14px;
+      transition: .15s ease;
+    }
+    .nav button:hover, .nav button.active {
+      background: rgba(255,255,255,.04);
+      border-color: var(--line);
+      transform: translateY(-1px);
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 8px 0 16px;
+      background: linear-gradient(180deg, rgba(5,9,16,.92), rgba(5,9,16,.70), transparent);
+      backdrop-filter: blur(10px);
+    }
+    .workspace-bar, .toolbar, .itemhead {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .itemhead {
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .workspace-pill, .status-pill, .badge, .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .workspace-pill {
+      padding: 8px 12px;
+      color: #dff0ff;
+      background: rgba(97,169,255,.12);
+      border: 1px solid rgba(97,169,255,.18);
+    }
+    .status-pill, .pill {
+      padding: 8px 12px;
+      color: var(--muted);
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+    }
+    .badge {
+      padding: 6px 10px;
+      border: 1px solid transparent;
+    }
+    .blue {
+      background: rgba(97,169,255,.14);
+      color: #dfebff;
+      border-color: rgba(97,169,255,.18);
+    }
+    .violet {
+      background: rgba(160,135,255,.14);
+      color: #ede6ff;
+      border-color: rgba(160,135,255,.18);
+    }
+    .allow, .executed {
+      background: rgba(49,227,163,.14);
+      color: #b7f6de;
+      border-color: rgba(49,227,163,.18);
+    }
+    .require_approval, .pending_approval {
+      background: rgba(255,203,82,.14);
+      color: #ffe39e;
+      border-color: rgba(255,203,82,.18);
+    }
+    .deny, .blocked {
+      background: rgba(255,113,140,.14);
+      color: #ffc8d2;
+      border-color: rgba(255,113,140,.18);
+    }
+    .btn {
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      padding: 11px 14px;
+      transition: .15s ease;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+      background: rgba(255,255,255,.06);
+    }
+    .btn.primary {
+      border: none;
+      background: linear-gradient(135deg, #2e6dff, #14b7db);
+      box-shadow: 0 16px 28px rgba(46,109,255,.25);
+    }
+    .btn.success {
+      background: rgba(49,227,163,.12);
+      border-color: rgba(49,227,163,.2);
+    }
+    .btn.danger {
+      background: rgba(255,113,140,.12);
+      border-color: rgba(255,113,140,.2);
+    }
+    .headline .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #dcedff;
+      border: 1px solid rgba(97,169,255,.18);
+      background: rgba(97,169,255,.12);
+      margin-bottom: 10px;
+    }
+    .headline h2 {
+      margin: 0;
+      font-size: 38px;
+      line-height: 1.03;
+      letter-spacing: -.06em;
+      max-width: 900px;
+    }
+    .headline p {
+      margin: 10px 0 0;
+      max-width: 900px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .section-title h3 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -.03em;
+    }
+    .section-title p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.56;
+      max-width: 760px;
+    }
+    .grid, .stack, .timeline, .feed {
+      display: grid;
+      gap: 12px;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .timeline { margin-top: 16px; }
+    .step {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 900;
+      color: #dcf0ff;
+      background: rgba(97,169,255,.16);
+      border: 1px solid rgba(97,169,255,.24);
+    }
+    .metric .k {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .metric .n {
+      margin-top: 6px;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -.05em;
+    }
+    .clickable { cursor: pointer; transition: .15s ease; }
+    .clickable:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+    }
+    .clickable.active {
+      border-color: rgba(97,169,255,.28);
+      box-shadow: inset 0 0 0 1px rgba(97,169,255,.16), var(--shadow);
+    }
+    .bar {
+      height: 8px;
+      margin-top: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      overflow: hidden;
+    }
+    .bar > span {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #2e6dff, #49d8ff);
+    }
+    .chart-card {
+      position: relative;
+      overflow: hidden;
+    }
+    .chart-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.03), transparent);
+      background-size: 200% 100%;
+      animation: shimmer 7s linear infinite;
+      opacity: .45;
+    }
+    .sparkline {
+      width: 100%;
+      height: 220px;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+    .sparkline text {
+      font-size: 11px;
+      fill: var(--muted);
+      font-family: Inter, system-ui, sans-serif;
+    }
+    .donut-wrap {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+    .donut {
+      width: 140px;
+      height: 140px;
+      border-radius: 999px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--blue) 0deg, rgba(255,255,255,.06) 0deg);
+    }
+    .donut::after {
+      content: "";
+      position: absolute;
+      width: 94px;
+      height: 94px;
+      border-radius: 999px;
+      background: rgba(6,10,17,.92);
+      border: 1px solid rgba(255,255,255,.04);
+    }
+    .donut-value {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+    .donut-value strong {
+      display: block;
+      font-size: 28px;
+      letter-spacing: -.05em;
+    }
+    .feed {
+      max-height: 440px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .feed-item {
+      display: grid;
+      gap: 6px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      animation: rise .22s ease;
+    }
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--cyan);
+      box-shadow: 0 0 12px rgba(69,216,255,.45);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    .table-wrap { overflow: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 940px;
+    }
+    th, td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .matrix {
+      display: grid;
+      grid-template-columns: 180px repeat(5, minmax(74px, 1fr));
+      gap: 8px;
+      align-items: stretch;
+    }
+    .matrix .head, .matrix .cell {
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      font-size: 13px;
+    }
+    .matrix .head {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      font-weight: 700;
+    }
+    .cell.heat-0 { background: rgba(255,255,255,.03); }
+    .cell.heat-1 { background: rgba(97,169,255,.10); }
+    .cell.heat-2 { background: rgba(255,203,82,.12); }
+    .cell.heat-3 { background: rgba(255,113,140,.14); }
+    .toast-wrap {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      display: grid;
+      gap: 10px;
+      z-index: 50;
+    }
+    .toast {
+      min-width: 280px;
+      max-width: 360px;
+      padding: 12px 14px;
+      animation: toastIn .2s ease;
+    }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.48);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 60;
+      padding: 20px;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      width: min(980px, 100%);
+      max-height: 88vh;
+      overflow: auto;
+    }
+    @media (max-width: 1500px) {
+      .app { grid-template-columns: 280px 1fr; }
+      .context { display: none; }
+    }
+    @media (max-width: 1180px) {
+      html, body { overflow: auto; }
+      .app { grid-template-columns: 1fr; height: auto; }
+      .sidebar { height: auto; border-right: none; border-bottom: 1px solid var(--line); }
+      .main { height: auto; }
+      .auth-card, .hero-grid, .auth-grid, .row-2, .row-3, .row-4, .row-5, .stats, .health-grid, .decision-grid, .donut-wrap {
+        grid-template-columns: 1fr;
+      }
+      .headline h2, .auth-pane h2 { font-size: 32px; }
+      .matrix { grid-template-columns: 1fr 1fr; }
+    }
+  
+    .price-card{
+      padding:16px;border-radius:24px;border:1px solid var(--line);background:rgba(255,255,255,.04)
+    }
+    .price-card.featured{
+      border-color:rgba(106,168,255,.32);box-shadow:inset 0 0 0 1px rgba(106,168,255,.12)
+    }
+    .price{font-size:34px;font-weight:900;letter-spacing:-.05em;margin:8px 0}
+    .price-card ul{margin:12px 0 0;padding-left:18px;color:var(--muted);line-height:1.72}
+    .stripe-note{
+      margin-top:12px;padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,.08);
+      background:linear-gradient(135deg, rgba(99,91,255,.18), rgba(0,212,255,.12))
+    }
+    .wizard-step{display:none}
+    .wizard-step.active{display:grid;gap:14px}
+    .wizard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .wizard-card{
+      border:1px solid var(--line);border-radius:18px;padding:14px;background:rgba(255,255,255,.03);transition:.15s ease
+    }
+    .wizard-card.active{border-color:rgba(106,168,255,.32);background:rgba(255,255,255,.06)}
+    .wizard-nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .member{
+      display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;
+      border:1px solid var(--line);border-radius:18px;padding:14px;background:rgba(255,255,255,.03)
+    }
+    .person{display:flex;align-items:center;gap:12px}
+    .pic{
+      width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.08);font-weight:900
+    }
+    .price-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .checkout-backdrop{
+      position:fixed;inset:0;background:rgba(0,0,0,.48);backdrop-filter:blur(8px);display:none;
+      align-items:center;justify-content:center;z-index:65;padding:20px
+    }
+    .checkout-backdrop.show{display:flex}
+    .checkout-modal{
+      width:min(1080px,100%);max-height:90vh;overflow:auto;border-radius:28px;border:1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
+        linear-gradient(180deg, rgba(10,15,26,.95), rgba(8,13,22,.98));
+      box-shadow:0 40px 100px rgba(0,0,0,.5);padding:20px
+    }
+    .checkout-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+    .seg{display:inline-flex;gap:4px;padding:4px;border-radius:15px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+    .seg button{border:none;background:transparent;color:var(--muted);padding:8px 12px;border-radius:12px;cursor:pointer}
+    .seg button.active{background:rgba(255,255,255,.09);color:var(--text)}
+    .order-box{padding:16px;border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
+    .stripe-card{
+      min-height:180px;padding:16px;border-radius:20px;border:1px solid rgba(255,255,255,.08);
+      background:
+        radial-gradient(circle at 18% 20%, rgba(255,255,255,.16), transparent 24%),
+        linear-gradient(135deg, rgba(99,91,255,.34), rgba(0,212,255,.18));
+      display:grid;align-content:space-between
+    }
+    .card-no{font-size:20px;letter-spacing:.22em}
+    .provider-chip,.orch-chip,.knowledge-chip,.action-chip{
+      display:inline-flex;align-items:center;gap:8px;white-space:nowrap;border-radius:999px;font-size:11px;font-weight:700;
+      padding:7px 10px;border:1px solid var(--line)
+    }
+    .provider-chip{background:rgba(106,168,255,.14);border-color:rgba(106,168,255,.18);color:#dce9ff}
+    .orch-chip{background:rgba(161,141,255,.12);border-color:rgba(161,141,255,.18);color:#efe8ff}
+    .knowledge-chip{background:rgba(52,231,173,.12);border-color:rgba(52,231,173,.18);color:#c8ffeb}
+    .action-chip{background:rgba(255,255,255,.05);color:var(--muted)}
+    @media (max-width:1180px){
+      .checkout-grid,.price-grid,.wizard-grid{grid-template-columns:1fr}
+    }
+
+  </style>
+</head>
+<body>
+  <div id="authScreen" class="auth">
+    <div class="auth-card">
+      <div class="auth-pane">
+        <div class="auth-brand">
+          <img src="data:image/png;base64,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" alt="AgentRail logo" />
+          <div>
+            <h1>Pilot Workspace</h1>
+            <p>Governed agent operations for enterprise teams</p>
+          </div>
+        </div>
+        <h2>Control how AI agents operate across enterprise systems.</h2>
+        <div class="meta" style="margin-top:12px;max-width:560px">
+          Pilot Workspace is the operational workspace for discovering agent activity, enforcing runtime policy, routing human approvals, and maintaining full auditability across business-critical environments.
+        </div>
+        <div class="auth-grid" style="margin-top:18px">
+          <div class="metric"><div class="k">Runtime governance</div><div class="meta" style="margin-top:8px">Evaluate every action against policy, context, thresholds, and risk before it touches production systems.</div></div>
+          <div class="metric"><div class="k">Approval workflows</div><div class="meta" style="margin-top:8px">Route sensitive actions to reviewers with payload, reason, and business justification attached.</div></div>
+          <div class="metric"><div class="k">Audit and replay</div><div class="meta" style="margin-top:8px">Trace every request, policy match, approval outcome, and resulting action with a replayable record.</div></div>
+          <div class="metric"><div class="k">Connector governance</div><div class="meta" style="margin-top:8px">Govern CRM, identity, collaboration, engineering, and workflow systems from one control layer.</div></div>
+        </div>
+      </div>
+
+      <div class="auth-pane">
+        <div class="section-title">
+          <div>
+            <h3 style="margin:0">Sign in</h3>
+            <p>Access your workspace and operational controls.</p>
+          </div>
+          <span class="badge blue">Enterprise SSO</span>
+        </div>
+        <div class="stack">
+          <input id="loginEmail" placeholder="you@company.com" value="arnaud@agentrail.dev" />
+          <input type="password" value="password" />
+          <button class="btn primary" id="enterWorkspaceBtn">Enter workspace</button>
+          <div class="meta">SSO available with Okta, Google Workspace, Azure AD, and SAML.</div>
+        </div>
+        <div class="section-title" style="margin-top:16px">
+          <div>
+            <h3 style="margin:0">Workspace provisioning</h3>
+            <p>Operational setup for production rollout.</p>
+          </div>
+        </div>
+        <div class="stack">
+          <div class="item"><h4>1. Register agent identities</h4><div class="meta">Map agents, service identities, and environments.</div></div>
+          <div class="item"><h4>2. Connect systems</h4><div class="meta">Attach CRM, ticketing, identity, engineering, and workflow systems.</div></div>
+          <div class="item"><h4>3. Activate governance</h4><div class="meta">Apply policy, approvals, audit retention, and deployment mode.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="data:image/png;base64,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" alt="AgentRail logo" />
+        <div>
+          <h1>Pilot Workspace</h1>
+          <p>Governed agent operations for enterprise teams</p>
+        </div>
+      </div>
+
+      <div class="nav" id="nav">
+        <button class="active" data-view="overview">Command Center</button>
+        <button data-view="launch">Auth & Onboarding</button>
+        <button data-view="agents">Agent Registry</button>
+        <button data-view="discovery">Discovery</button>
+        <button data-view="simulation">Simulation</button>
+        <button data-view="approvals">Approval Queue</button>
+        <button data-view="policies">Policy Center</button>
+        <button data-view="audit">Audit Trail</button>
+        <button data-view="workspace">Workspace</button>
+        <button data-view="integrations">Integrations</button>
+        <button data-view="settings">Settings</button>
+        <button data-view="billing">Billing</button>
+      </div>
+
+      <div class="sidebar-card">
+        <div class="meta">
+          Pilot Workspace gives security, operations, and platform teams a shared environment to supervise agent actions in production.
+        </div>
+      </div>
+
+      <div class="sidebar-card">
+        <div class="meta">
+          Coverage:
+          <br>• Discovery and inventory
+          <br>• Runtime policy enforcement
+          <br>• Human approval workflows
+          <br>• Auditability and replay
+          <br>• Connector governance
+          <br>• Workspace administration
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="workspace-bar">
+          <span class="workspace-pill" id="workspaceLabel">Acme Financial Group · Production</span>
+          <span class="status-pill"><span class="status-dot"></span> Workspace healthy</span>
+          <span class="status-pill" id="modeLabel">Shadow mode enabled</span>
+        </div>
+        <div class="toolbar">
+          <button class="btn" id="scenarioBtn">Run scenario</button>
+          <button class="btn primary" id="approvalBtn">Create approval</button>
+          <button class="btn" id="modeBtn">Toggle mode</button>
+          <button class="btn" id="tourBtn">Auto walkthrough</button>
+          <button class="btn" id="openCheckoutTop">Stripe checkout</button>
+          <button class="btn" id="resetBtn">Reset</button>
+        </div>
+      </div>
+
+      <section id="view-overview" class="view">
+        <div class="headline" style="margin-bottom:16px">
+          <div class="eyebrow">AgentRail runtime governance layer</div>
+          <h2>Pilot Workspace governs how AI agents operate across enterprise systems.</h2>
+          <p>Discover agent exposure, evaluate runtime risk, apply policy, route approvals for sensitive operations, and maintain a complete audit trail across the systems that run the business.</p>
+        </div>
+
+        <div class="hero-grid">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Command Center</h3>
+                <p>Central operational view of governed agent activity, approvals, risk, and policy posture.</p>
+              </div>
+              <span class="badge blue" id="modeBadge">Shadow mode enabled</span>
+            </div>
+            <div class="stats" id="heroStats"></div>
+            <div class="timeline">
+              <div class="step"><div class="dot">1</div><div><strong>Discover the agent surface</strong><p>Map agents, service identities, environments, and connected systems before enforcement begins.</p></div></div>
+              <div class="step"><div class="dot">2</div><div><strong>Evaluate each runtime request</strong><p>Use policy, thresholds, context, and risk scoring to decide allow, review, or block.</p></div></div>
+              <div class="step"><div class="dot">3</div><div><strong>Route sensitive actions to humans</strong><p>Reviewers see business context, payload snapshots, and matched policy reasoning in one queue.</p></div></div>
+              <div class="step"><div class="dot">4</div><div><strong>Replay every decision</strong><p>Every action becomes traceable for compliance, debugging, investigations, and operational trust.</p></div></div>
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="card chart-card">
+              <div class="section-title">
+                <div>
+                  <h3>Runtime risk trend</h3>
+                  <p>Seven-day view of observed risk across governed actions.</p>
+                </div>
+                <span class="badge violet">Operational signal</span>
+              </div>
+              <svg id="riskTrend" class="sparkline" viewBox="0 0 620 220" preserveAspectRatio="none"></svg>
+            </div>
+
+            <div class="row-2">
+              <div class="card">
+                <div class="section-title">
+                  <div>
+                    <h3>Approval load</h3>
+                    <p>Share of runtime actions requiring human review.</p>
+                  </div>
+                </div>
+                <div class="donut-wrap">
+                  <div class="donut" id="approvalDonut">
+                    <div class="donut-value"><strong id="approvalPct">0%</strong><span class="meta">review</span></div>
+                  </div>
+                  <div class="stack">
+                    <div class="meta"><strong id="approvalCountText">0</strong> actions currently pending or recently routed through approval.</div>
+                    <div class="meta">Shows where business operations still require human confirmation.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="section-title">
+                  <div>
+                    <h3>Latest decision</h3>
+                    <p>Structured explanation of the most recent runtime action.</p>
+                  </div>
+                </div>
+                <div id="latestDecision" class="metric">
+                  <div class="meta">No decision yet. Run a scenario or use the simulator.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row-4" id="overviewKpis"></div>
+
+        <div class="row-2" style="margin-top:14px">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Most sensitive agents</h3>
+                <p>Top blast-radius entities ranked by observed runtime risk.</p>
+              </div>
+            </div>
+            <div id="sensitiveAgents" class="stack"></div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Operational event stream</h3>
+                <p>Real-time visibility into actions, approvals, and governance decisions flowing through the workspace.</p>
+              </div>
+              <span class="badge blue">Real-time view</span>
+            </div>
+            <div id="eventFeed" class="feed"></div>
+          </div>
+        </div>
+      </section>
+
+      
+      <section id="view-launch" class="view hidden">
+        <div class="row-2">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Authentication</h3>
+                <p>Dedicated authentication and workspace entry flow adapted to the AgentRail product brand.</p>
+              </div>
+              <span class="badge blue">SSO-ready</span>
+            </div>
+            <div class="stack">
+              <div>
+                <label style="display:block;margin-bottom:8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em">Work email</label>
+                <input id="launchEmail" value="arnaud@agentrail.dev" />
+              </div>
+              <div>
+                <label style="display:block;margin-bottom:8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em">Password</label>
+                <input id="launchPassword" type="password" value="password" />
+              </div>
+              <div class="row-2">
+                <button class="btn primary" id="launchSignInBtn">Enter workspace</button>
+                <button class="btn" id="launchSSOBtn">Continue with SSO</button>
+              </div>
+              <div class="meta">SSO available with Okta, Google Workspace, Azure AD, and SAML.</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Onboarding</h3>
+                <p>Provision a new AgentRail workspace in three steps: workspace, systems, governance.</p>
+              </div>
+              <span class="badge violet" id="wizardBadge">Step 1 / 3</span>
+            </div>
+            <div class="bar"><span id="wizardProgress" style="width:33%"></span></div>
+
+            <div class="wizard-step active" id="wizard1" style="margin-top:14px">
+              <div>
+                <label style="display:block;margin-bottom:8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em">Workspace name</label>
+                <input id="workspaceInput" value="AgentRail Labs" />
+              </div>
+              <div class="wizard-grid">
+                <div class="wizard-card active">Founder / Product<div class="meta">Product narrative, GTM, buyer demo.</div></div>
+                <div class="wizard-card">Operations / Support<div class="meta">Automations, approvals, routing.</div></div>
+                <div class="wizard-card">Knowledge / Research<div class="meta">Search, grounding, internal docs.</div></div>
+                <div class="wizard-card">Enterprise IT<div class="meta">Provisioning, controls, governance.</div></div>
+              </div>
+              <div class="wizard-nav">
+                <button class="btn primary" data-next="2">Continue</button>
+              </div>
+            </div>
+
+            <div class="wizard-step" id="wizard2" style="margin-top:14px">
+              <div class="wizard-grid">
+                <div class="wizard-card active">Slack<div class="meta">Approvals routing</div></div>
+                <div class="wizard-card active">HubSpot<div class="meta">Revenue workflows</div></div>
+                <div class="wizard-card active">Google Drive<div class="meta">Knowledge grounding</div></div>
+                <div class="wizard-card active">Notion<div class="meta">Internal knowledge</div></div>
+              </div>
+              <div class="row-2">
+                <div>
+                  <label style="display:block;margin-bottom:8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em">Primary use case</label>
+                  <select><option>Support copilot</option><option selected>Revenue workspace</option><option>Knowledge search</option></select>
+                </div>
+                <div>
+                  <label style="display:block;margin-bottom:8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em">Environment</label>
+                  <select><option selected>Production + Sandbox</option><option>Production only</option></select>
+                </div>
+              </div>
+              <div class="wizard-nav">
+                <button class="btn" data-prev="1">Back</button>
+                <button class="btn primary" data-next="3">Provision</button>
+              </div>
+            </div>
+
+            <div class="wizard-step" id="wizard3" style="margin-top:14px">
+              <div class="row-2">
+                <div class="metric"><div class="k">Environments</div><div class="n">2</div><div class="meta">Production + Sandbox</div></div>
+                <div class="metric"><div class="k">Policies</div><div class="n">8</div><div class="meta">Finance, CRM, export</div></div>
+                <div class="metric"><div class="k">Seats created</div><div class="n">24</div><div class="meta">11 members + 13 agent seats</div></div>
+                <div class="metric"><div class="k">Seed plan</div><div class="n" style="font-size:24px">Growth</div><div class="meta">Governance for live workflows</div></div>
+              </div>
+              <div class="wizard-nav">
+                <button class="btn" data-prev="2">Back</button>
+                <button class="btn primary" id="finishOnboarding">Open workspace</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-workspace" class="view hidden">
+        <div class="row-2">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Workspace management</h3>
+                <p>Member management, governance, and environment posture brought over from the richer Pilot Workspace file.</p>
+              </div>
+              <span class="badge blue">Admin console</span>
+            </div>
+            <div class="stack">
+              <div class="member"><div class="person"><div class="pic">AP</div><div><strong>Arnaud Perret</strong><div class="meta">Owner • Product / Strategy</div></div></div><span class="badge allow">Active</span></div>
+              <div class="member"><div class="person"><div class="pic">LM</div><div><strong>Lina Martin</strong><div class="meta">RevOps • Billing approvals</div></div></div><span class="badge blue">Manager</span></div>
+              <div class="member"><div class="person"><div class="pic">TB</div><div><strong>Tom Besson</strong><div class="meta">Support lead • Sandbox admin</div></div></div><span class="badge require_approval">Pending</span></div>
+              <div class="member"><div class="person"><div class="pic">SG</div><div><strong>Sofia G.</strong><div class="meta">Solutions engineer • Agent builder</div></div></div><span class="badge allow">Active</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Environment governance</h3>
+                <p>Show enterprise buyers how production, sandbox, and audit coverage are managed.</p>
+              </div>
+            </div>
+            <div class="stack">
+              <div class="item"><div class="itemhead"><div><h4>Production</h4><div class="meta">Approvals required for export, finance, CRM write access, and invoice changes.</div></div><span class="badge allow">Healthy</span></div></div>
+              <div class="item"><div class="itemhead"><div><h4>Sandbox</h4><div class="meta">Unsafe actions disabled, experimentation open, lower rate limits.</div></div><span class="badge blue">Open</span></div></div>
+              <div class="item"><div class="itemhead"><div><h4>Audit trail</h4><div class="meta">Runs, approvals, connector access, and billing changes are tracked.</div></div><span class="badge allow">Tracked</span></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+<section id="view-agents" class="view hidden">
+        <div class="row-2">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Agent Registry</h3>
+                <p>Browse registered agent applications, their provenance, permissions, and runtime history.</p>
+              </div>
+              <span class="pill" id="agentPill">0 agents</span>
+            </div>
+            <div id="agentsList" class="stack"></div>
+
+            <div class="section-title" style="margin-top:16px">
+              <div>
+                <h3>Create agent</h3>
+                <p>Register a new governed agent in the workspace.</p>
+              </div>
+            </div>
+            <form id="agentForm" class="stack">
+              <input id="agentName" placeholder="Agent name" required />
+              <div class="row-2">
+                <input id="agentOwner" placeholder="Owner team" required />
+                <input id="agentIdentity" placeholder="Service identity" required />
+              </div>
+              <div class="row-2">
+                <input id="agentModelProvider" placeholder="Model provider" required />
+                <input id="agentModelName" placeholder="Model" required />
+              </div>
+              <div class="row-2">
+                <input id="agentOrchestration" placeholder="Orchestration layer" required />
+                <input id="agentKnowledge" placeholder="Knowledge source" required />
+              </div>
+              <div class="row-2">
+                <input id="agentConnectors" placeholder="Connectors comma-separated" required />
+                <input id="agentCapabilities" placeholder="Capabilities comma-separated" required />
+              </div>
+              <div class="row-2">
+                <select id="agentRiskTier">
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="critical">Critical</option>
+                </select>
+                <input id="agentBlastRadius" placeholder="Blast radius" value="Medium" required />
+              </div>
+              <button class="btn primary" type="submit">Create agent</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Agent Workspace</h3>
+                <p>Operational profile for the selected agent, including provenance, connectors, policy coverage, and recent runs.</p>
+              </div>
+              <span class="badge blue">Agent detail</span>
+            </div>
+            <div id="agentDetail"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-discovery" class="view hidden">
+        <div class="card" style="margin-bottom:14px">
+          <div class="section-title">
+            <div>
+              <h3>Discovery summary</h3>
+              <p>Visibility across agents, service identities, environments, and system exposure.</p>
+            </div>
+            <span class="pill" id="discoveryPill">0 systems</span>
+          </div>
+          <div class="row-4" id="discoverySummary"></div>
+        </div>
+
+        <div class="row-2">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Agent × system matrix</h3>
+                <p>Visual map of exposure and blast radius across core enterprise systems.</p>
+              </div>
+            </div>
+            <div id="discoveryMatrix" class="matrix"></div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Discovery findings</h3>
+                <p>Actionable findings generated from the current runtime inventory.</p>
+              </div>
+              <span class="badge blue">Visibility to governance</span>
+            </div>
+            <div id="discoveryFindings" class="stack"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-simulation" class="view hidden">
+        <div class="row-2">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Runtime simulator</h3>
+                <p>Model the exact request context and evaluate how AgentRail would govern the action.</p>
+              </div>
+              <span class="badge blue">Dry run</span>
+            </div>
+            <form id="simulationForm">
+              <div class="row-2">
+                <select id="simAgent"></select>
+                <select id="simConnector"></select>
+              </div>
+              <div class="row-2">
+                <select id="simAction"></select>
+                <select id="simEnvironment"></select>
+              </div>
+              <div class="row-3">
+                <select id="simContext"></select>
+                <input id="simObjectCount" type="number" min="1" max="100" value="1" />
+                <select id="simIdentity"></select>
+              </div>
+              <textarea id="simJustification" placeholder="Business justification visible to reviewers and preserved in the audit trail."></textarea>
+              <button class="btn primary" type="submit">Evaluate request</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Decision explanation</h3>
+                <p>Every decision is explained through policy, context, thresholds, and risk signals.</p>
+              </div>
+              <span class="badge violet">Explainability</span>
+            </div>
+            <div id="simulationResult" class="metric">
+              <div class="meta">No evaluation yet.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-approvals" class="view hidden">
+        <div class="row-2">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Approval Queue</h3>
+                <p>Human approval workflows for sensitive operations with the context needed to make safe decisions.</p>
+              </div>
+              <span class="pill" id="approvalPill">0 pending</span>
+            </div>
+            <div id="approvalsList" class="stack"></div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Approval review</h3>
+                <p>Structured review surface with payload, policy, risk, and business justification.</p>
+              </div>
+              <span class="badge blue">Review surface</span>
+            </div>
+            <div id="approvalDetail"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-policies" class="view hidden">
+        <div class="row-2">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Policy Center</h3>
+                <p>Versioned governance rules that define the runtime envelope for operational AI agents.</p>
+              </div>
+              <span class="pill" id="policyPill">0 policies</span>
+            </div>
+            <div id="policyList" class="stack"></div>
+            <div class="card" style="margin-top:14px;padding:14px">
+              <div class="section-title">
+                <div>
+                  <h3>Policy versions</h3>
+                  <p>Recent configuration changes applied to the workspace.</p>
+                </div>
+              </div>
+              <div id="policyVersions" class="stack"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Policy Builder</h3>
+                <p>Author and manage policy rules that define the runtime envelope for agent actions.</p>
+              </div>
+              <span class="badge blue">Builder</span>
+            </div>
+            <form id="policyForm" class="stack">
+              <input id="policyName" placeholder="Policy name" required />
+              <div class="row-2">
+                <select id="policyConnector"></select>
+                <input id="policyAction" placeholder="update_deal or delete_*" required />
+              </div>
+              <div class="row-3">
+                <select id="policyConditionType">
+                  <option value="any">Any context</option>
+                  <option value="context">Context equals</option>
+                  <option value="environment">Environment equals</option>
+                </select>
+                <input id="policyConditionValue" value="*" required />
+                <input id="policyMaxObjects" type="number" min="1" value="1" required />
+              </div>
+              <div class="row-2">
+                <select id="policyDecision">
+                  <option value="allow">Allow</option>
+                  <option value="require_approval">Require approval</option>
+                  <option value="deny">Deny</option>
+                </select>
+                <input id="policyPriority" type="number" min="1" value="80" required />
+              </div>
+              <textarea id="policyReason" placeholder="Why this rule exists and what blast radius it protects."></textarea>
+              <button class="btn primary" type="submit">Create policy</button>
+            </form>
+            <div class="metric" style="margin-top:12px">
+              <div class="k">Policy preview</div>
+              <div class="meta" id="policyPreview" style="margin-top:8px">When connector = *, action = *, context = any, objects ≤ 1 → allow.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-audit" class="view hidden">
+        <div class="row-2">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Audit Trail</h3>
+                <p>Search every governed action across systems, identities, environments, and outcomes.</p>
+              </div>
+              <input id="auditFilter" placeholder="Filter by agent, action, connector, identity, or status" style="max-width:320px" />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Agent</th>
+                    <th>Identity</th>
+                    <th>Action</th>
+                    <th>Risk</th>
+                    <th>Decision</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="auditBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Replay viewer</h3>
+                <p>Replay past actions with complete context for security, operations, and compliance teams.</p>
+              </div>
+              <select id="replaySelect" style="max-width:340px"></select>
+            </div>
+            <div id="replayPanel"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-integrations" class="view hidden">
+        <div class="card">
+          <div class="section-title">
+            <div>
+              <h3>Integrations</h3>
+              <p>Connect and govern the systems enterprises already use to run critical workflows.</p>
+            </div>
+            <span class="badge blue">Connector governance</span>
+          </div>
+          <div id="connectorGrid" class="row-5"></div>
+        </div>
+      </section>
+
+      <section id="view-settings" class="view hidden">
+        <div class="row-2">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Workspace settings</h3>
+                <p>Control environments, data retention, approval routing, and enforcement posture.</p>
+              </div>
+              <span class="badge blue">Configuration</span>
+            </div>
+            <div class="health-grid">
+              <div class="metric"><div class="k">Workspace</div><div class="n" style="font-size:22px">Acme Financial Group</div></div>
+              <div class="metric"><div class="k">Retention</div><div class="n">365d</div></div>
+              <div class="metric"><div class="k">Approval SLA</div><div class="n">15m</div></div>
+              <div class="metric"><div class="k">Environments</div><div class="n" style="font-size:22px">2</div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Role coverage</h3>
+                <p>Shared control across platform, security, and operations stakeholders.</p>
+              </div>
+            </div>
+            <div class="stack">
+              <div class="item"><h4>Security Admin</h4><div class="meta">Owns policy guardrails, risk thresholds, and audit retention.</div></div>
+              <div class="item"><h4>Operations Reviewer</h4><div class="meta">Approves business-sensitive actions in CRM, ITSM, and support systems.</div></div>
+              <div class="item"><h4>Platform Owner</h4><div class="meta">Registers agents, manages identities, and governs environments and connectors.</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      
+      <section id="view-billing" class="view hidden">
+        <div class="row-2">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Billing cockpit</h3>
+                <p>Plans, seats, overages, invoices, and a product-grade Stripe checkout flow.</p>
+              </div>
+              <button class="btn primary" id="openCheckoutBilling">Open checkout</button>
+            </div>
+            <div class="price-grid">
+              <div class="price-card">
+                <span class="badge blue">Sandbox</span>
+                <div class="price">Free</div>
+                <div class="meta">Try AgentRail in a controlled sandbox environment.</div>
+                <ul><li>1 connector</li><li>Limited workflow simulation</li><li>Starter templates</li><li>Basic visibility</li><li>No production governance</li></ul>
+              </div>
+              <div class="price-card featured">
+                <span class="badge allow">Growth</span>
+                <div class="price">€2.5k<span class="meta"> / month</span></div>
+                <div class="meta">Bring discovery and governance to live workflows.</div>
+                <ul><li>Up to 5 connectors</li><li>Production workflow discovery</li><li>Connected systems visibility</li><li>Risk surface detection</li><li>Audit trail</li><li>Review workflows</li><li>Standard support</li></ul>
+                <div class="stripe-note"><strong>Stripe enabled</strong><div class="meta">Cards, invoices, renewals, and overages simulated in the product UI.</div></div>
+              </div>
+              <div class="price-card">
+                <span class="badge violet">Enterprise</span>
+                <div class="price">Custom</div>
+                <div class="meta">Full governance infrastructure for critical AI operations.</div>
+                <ul><li>Advanced controls and policy enforcement</li><li>SSO, RBAC, SCIM</li><li>Anomaly detection</li><li>Audit, replay, retention</li><li>Dedicated deployment options</li><li>Premium support</li></ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Current account</h3>
+                <p>Current payment method, renewal, and invoice state for the workspace.</p>
+              </div>
+              <span class="badge allow">Paid</span>
+            </div>
+            <div class="stripe-card">
+              <div>
+                <div class="meta">Primary payment method</div>
+                <div style="margin-top:12px;font-weight:800;font-size:18px">Stripe card</div>
+                <div class="card-no" style="margin-top:18px">4242 •••• •••• 4242</div>
+              </div>
+              <div class="row-2">
+                <div><div class="meta">Cardholder</div><strong>AgentRail Labs</strong></div>
+                <div><div class="meta">Expiry</div><strong>12 / 29</strong></div>
+              </div>
+            </div>
+            <div class="row-2" style="margin-top:12px">
+              <div class="metric"><div class="k">Next invoice</div><div class="n">€3,748</div><div class="meta">Growth plan + projected usage</div></div>
+              <div class="metric"><div class="k">Renewal</div><div class="n" style="font-size:24px">01 May</div><div class="meta">Monthly billing</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row-2" style="margin-top:14px">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Usage pricing</h3>
+                <p>Clear monetization surface for model usage, retrieval, and governed actions.</p>
+              </div>
+            </div>
+            <div class="stack">
+              <div class="item"><div class="itemhead"><div><h4>Model tokens</h4><div class="meta">OpenAI, Anthropic, and Mistral usage rolled into workspace billing.</div></div><span class="pill">€682</span></div></div>
+              <div class="item"><div class="itemhead"><div><h4>Retrieval & search</h4><div class="meta">Glean, Drive, Notion, and internal index usage.</div></div><span class="pill">€214</span></div></div>
+              <div class="item"><div class="itemhead"><div><h4>Action runs</h4><div class="meta">CRM writes, ticket actions, export jobs, and policy-enforced mutations.</div></div><span class="pill">€352</span></div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h3>Invoices</h3>
+                <p>Checkout confirmation appends a new invoice to this table.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Invoice</th><th>Period</th><th>Status</th><th>Total</th></tr></thead>
+                <tbody id="invoiceTable">
+                  <tr><td>INV-2026-041</td><td>Mar 2026</td><td><span class="badge allow">Paid</span></td><td>€2,418</td></tr>
+                  <tr><td>INV-2026-040</td><td>Feb 2026</td><td><span class="badge allow">Paid</span></td><td>€2,156</td></tr>
+                  <tr><td>INV-2026-039</td><td>Jan 2026</td><td><span class="badge allow">Paid</span></td><td>€1,948</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <div class="meta" style="margin-top:16px;text-align:center">Pilot Workspace — enterprise control and governance layer for operational AI agents.</div>
+    </main>
+
+    <aside class="context">
+      <div class="section-title">
+        <div>
+          <h3>Context panel</h3>
+          <p>Live operational context.</p>
+        </div>
+        <span class="badge blue" id="contextBadge">Workspace</span>
+      </div>
+      <div id="contextPanel" class="stack">
+        <div class="detail">
+          <h4>Workspace overview</h4>
+          <div class="meta">Select an agent, approval, or audit event to inspect the operational context.</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div id="toastWrap" class="toast-wrap"></div>
+
+
+  <div id="checkoutBackdrop" class="checkout-backdrop">
+    <div class="checkout-modal">
+      <div class="section-title">
+        <div>
+          <h3>Stripe checkout</h3>
+          <p>Plan, interval, card, taxes, confirmation, and invoice generation in one modal.</p>
+        </div>
+        <button class="btn" id="closeCheckoutBtn">Close</button>
+      </div>
+
+      <div class="checkout-grid">
+        <div class="grid">
+          <div>
+            <label style="display:block;margin-bottom:8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em">Billing contact</label>
+            <input value="finance@agentrail.dev" />
+          </div>
+          <div class="row-2">
+            <div><label style="display:block;margin-bottom:8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em">Company</label><input value="AgentRail Labs" /></div>
+            <div><label style="display:block;margin-bottom:8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em">Country</label><select><option selected>France</option><option>United States</option><option>United Kingdom</option></select></div>
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em">Plan</label>
+            <select id="planSelect">
+              <option value="0">Sandbox — Free</option>
+              <option value="2500" selected>Growth — €2.5k / month</option>
+              <option value="custom">Enterprise — Custom</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em">Billing interval</label>
+            <div class="seg">
+              <button class="active intervalBtn" data-multiplier="1">Monthly</button>
+              <button class="intervalBtn" data-multiplier="10">Yearly</button>
+            </div>
+          </div>
+          <div class="row-2">
+            <div><label style="display:block;margin-bottom:8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em">Card number</label><input value="4242 4242 4242 4242" /></div>
+            <div><label style="display:block;margin-bottom:8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em">Name on card</label><input value="AgentRail Labs" /></div>
+          </div>
+          <div class="row-3">
+            <div><label style="display:block;margin-bottom:8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em">Expiry</label><input value="12/29" /></div>
+            <div><label style="display:block;margin-bottom:8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em">CVC</label><input value="123" /></div>
+            <div><label style="display:block;margin-bottom:8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em">VAT / Tax ID</label><input value="FRXX123456789" /></div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="order-box">
+            <div class="section-title">
+              <div><h4>Order summary</h4><p class="meta">The total updates with the selected plan and interval.</p></div>
+              <span class="badge blue" id="summaryPlan">Growth</span>
+            </div>
+            <div class="stack">
+              <div class="item"><div class="itemhead"><div><h4>Base plan</h4><div class="meta" id="basePlanText">Growth plan • live governance for production workflows</div></div><span class="pill" id="basePlanPrice">€2,500</span></div></div>
+              <div class="item"><div class="itemhead"><div><h4>Expected overage</h4><div class="meta">Projected model + retrieval usage</div></div><span class="pill">€1,248</span></div></div>
+              <div class="item"><div class="itemhead"><div><h4>Taxes</h4><div class="meta">Estimated VAT and payment processing</div></div><span class="pill" id="taxPrice">€298</span></div></div>
+            </div>
+            <div class="bar"><span style="width:88%"></span></div>
+            <div class="itemhead" style="margin-top:14px">
+              <div>
+                <div class="meta">Total due now</div>
+                <div style="font-size:34px;font-weight:900;letter-spacing:-.05em" id="checkoutTotal">€3,036</div>
+              </div>
+              <button class="btn primary" id="confirmCheckout">Confirm payment</button>
+            </div>
+          </div>
+
+          <div class="order-box">
+            <div class="section-title">
+              <div><h4>Unlocks</h4><p class="meta">Useful commercial narrative during demos.</p></div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <span class="pill">Seats & plans</span>
+              <span class="pill">Invoices</span>
+              <span class="pill">Usage pricing</span>
+              <span class="pill">Approvals</span>
+              <span class="pill">Procurement-ready</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="section-title">
+        <div>
+          <h3 id="modalTitle">Request detail</h3>
+          <p id="modalSubtitle">Operational context</p>
+        </div>
+        <button class="btn" id="closeModalBtn">Close</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const initialState = {
+      shadowMode: true,
+      workspaceName: 'Acme Financial Group',
+      environmentLabel: 'Production',
+      trend: [28, 31, 36, 44, 39, 53, 61],
+      connectors: [
+        { id: 'salesforce', name: 'Salesforce', type: 'crm', scopes: ['read_account','update_opportunity'], description: 'Revenue operations, ownership changes, forecast fields.' },
+        { id: 'jira', name: 'Jira', type: 'ticketing', scopes: ['create_issue','update_issue','delete_issue'], description: 'Issue creation, workflow state changes, incident tickets.' },
+        { id: 'slack', name: 'Slack', type: 'collaboration', scopes: ['post_message','post_approvals'], description: 'Approvals, incident updates, internal collaboration.' },
+        { id: 'okta', name: 'Okta', type: 'identity', scopes: ['add_group','suspend_user','reset_mfa'], description: 'Identity administration and highly sensitive actions.' },
+        { id: 'github', name: 'GitHub', type: 'engineering', scopes: ['open_pr','comment_pr','merge_pr'], description: 'PR workflows and engineering automation.' },
+        { id: 'zendesk', name: 'Zendesk', type: 'support', scopes: ['create_ticket','update_ticket','close_ticket'], description: 'Customer support workflows and escalations.' },
+        { id: 'drive', name: 'Google Drive', type: 'documents', scopes: ['read_doc','list_folder'], description: 'Document access and knowledge retrieval.' },
+        { id: 'servicenow', name: 'ServiceNow', type: 'workflows', scopes: ['create_change','update_request'], description: 'Internal workflows and service operations.' },
+        { id: 'hubspot', name: 'HubSpot', type: 'crm', scopes: ['update_deal','create_contact','delete_contact'], description: 'Go-to-market operations and lifecycle changes.' },
+        { id: 'notion', name: 'Notion', type: 'knowledge', scopes: ['read_page','create_page'], description: 'Knowledge systems and structured internal content.' }
+      ],
+      agents: [
+        { id: 'support-bot', name: 'Support Bot', owner: 'Support Ops', identity: 'support-service', environments: ['prod'], connectors: ['jira','slack','zendesk'], riskTier: 'medium', blastRadius: 'Low', capabilities: ['create_issue','close_ticket','post_message'], modelProvider: 'OpenAI', modelName: 'GPT-4.1', orchestrationLayer: 'LangGraph', knowledgeSource: 'Zendesk + internal support knowledge base' },
+        { id: 'revops-bot', name: 'RevOps Bot', owner: 'Revenue Ops', identity: 'revops-service', environments: ['prod','staging'], connectors: ['salesforce','hubspot','slack'], riskTier: 'high', blastRadius: 'High', capabilities: ['update_opportunity','update_deal','create_contact'], modelProvider: 'Anthropic', modelName: 'Claude 3.7 Sonnet', orchestrationLayer: 'Temporal workflows', knowledgeSource: 'CRM records + pipeline playbooks' },
+        { id: 'it-access-bot', name: 'IT Access Bot', owner: 'IT & Security', identity: 'it-admin-service', environments: ['prod'], connectors: ['okta','slack','servicenow'], riskTier: 'critical', blastRadius: 'Critical', capabilities: ['suspend_user','add_group','reset_mfa'], modelProvider: 'OpenAI', modelName: 'GPT-4.1', orchestrationLayer: 'ServiceNow orchestration', knowledgeSource: 'HRIS events + identity policy sources' },
+        { id: 'engineering-bot', name: 'Engineering Bot', owner: 'Platform', identity: 'engineering-service', environments: ['staging','prod'], connectors: ['github','jira','slack'], riskTier: 'high', blastRadius: 'Medium', capabilities: ['open_pr','comment_pr','merge_pr'], modelProvider: 'Anthropic', modelName: 'Claude 3.7 Sonnet', orchestrationLayer: 'GitHub Actions + internal runner', knowledgeSource: 'Repository context + CI metadata' },
+        { id: 'knowledge-bot', name: 'Knowledge Bot', owner: 'Operations', identity: 'ops-shared-token', environments: ['staging'], connectors: ['drive','notion','slack'], riskTier: 'medium', blastRadius: 'Medium', capabilities: ['read_doc','create_page','post_message'], modelProvider: 'OpenAI', modelName: 'GPT-4.1 mini', orchestrationLayer: 'LangChain', knowledgeSource: 'Google Drive + Notion workspaces' },
+        { id: 'dust-agent', name: 'Dust Workspace Agent', owner: 'Knowledge Ops', identity: 'dust-service', environments: ['prod'], connectors: ['slack','drive','notion'], riskTier: 'medium', blastRadius: 'Medium', capabilities: ['read_doc','post_message'], modelProvider: 'Multi-model', modelName: 'Workspace configured', orchestrationLayer: 'Dust', knowledgeSource: 'Company knowledge graph + connected apps' },
+        { id: 'glean-agent', name: 'Glean Assistant', owner: 'Enterprise Search', identity: 'glean-service', environments: ['prod'], connectors: ['slack','drive','salesforce'], riskTier: 'medium', blastRadius: 'Medium', capabilities: ['read_doc','read_account','post_message'], modelProvider: 'Multi-model', modelName: 'Workspace configured', orchestrationLayer: 'Glean', knowledgeSource: 'Enterprise search index + connected systems' }
+      ],
+      policies: [
+        { id: 'p1', name: 'Support ticket creation auto-allow', connector: 'jira', action: 'create_issue', conditionType: 'context', conditionValue: 'support', maxObjects: 1, decision: 'allow', priority: 110, reason: 'Support agents can create a single support ticket automatically.', active: true },
+        { id: 'p2', name: 'Revenue bulk changes require review', connector: 'hubspot', action: 'update_deal', conditionType: 'any', conditionValue: '*', maxObjects: 5, decision: 'require_approval', priority: 100, reason: 'Bulk revenue updates require human review above threshold.', active: true },
+        { id: 'p3', name: 'Block destructive deletes', connector: '*', action: 'delete_*', conditionType: 'any', conditionValue: '*', maxObjects: 999, decision: 'deny', priority: 999, reason: 'Destructive actions are blocked globally by default.', active: true },
+        { id: 'p4', name: 'Identity actions require approval in prod', connector: 'okta', action: '*', conditionType: 'environment', conditionValue: 'prod', maxObjects: 20, decision: 'require_approval', priority: 120, reason: 'Identity changes in production must be reviewed.', active: true },
+        { id: 'p5', name: 'Engineering merges require approval', connector: 'github', action: 'merge_pr', conditionType: 'environment', conditionValue: 'prod', maxObjects: 10, decision: 'require_approval', priority: 90, reason: 'Merging into production branches requires human confirmation.', active: true }
+      ],
+      policyVersions: [
+        { version: 'v1.12', timestamp: '2026-04-15 10:42', summary: 'Updated GitHub production merge approval thresholds.' },
+        { version: 'v1.11', timestamp: '2026-04-14 16:20', summary: 'Expanded HubSpot review routing for bulk deal mutations.' },
+        { version: 'v1.10', timestamp: '2026-04-14 09:05', summary: 'Activated identity controls for production Okta actions.' }
+      ],
+      runs: [
+        { id: 'run-001', timestamp: '2026-04-15 09:14', agent: 'support-bot', identity: 'support-service', connector: 'jira', action: 'create_issue', objectCount: 1, context: 'support', environment: 'prod', risk: 24, decision: 'allow', status: 'executed', summary: 'Create Jira issue from customer escalation', justification: 'High-priority billing complaint requires a ticket for the support queue.', payload: { project: 'SUP', priority: 'P2', title: 'Refund issue on order #8484' }, matchedPolicy: 'Support ticket creation auto-allow', reason: 'Support agents can create a single support ticket automatically.' },
+        { id: 'run-002', timestamp: '2026-04-15 09:32', agent: 'revops-bot', identity: 'revops-service', connector: 'hubspot', action: 'update_deal', objectCount: 8, context: 'pipeline', environment: 'prod', risk: 76, decision: 'require_approval', status: 'pending_approval', summary: 'Move 8 opportunities to Negotiation', justification: 'Batch progression suggested by the RevOps workflow after recent calls.', payload: { dealIds: [102,104,111,116,118,120,128,132], stage: 'Negotiation' }, matchedPolicy: 'Revenue bulk changes require review', reason: 'Bulk revenue updates require human review above threshold.' },
+        { id: 'run-003', timestamp: '2026-04-15 10:01', agent: 'knowledge-bot', identity: 'ops-shared-token', connector: 'hubspot', action: 'delete_contact', objectCount: 1, context: 'crm', environment: 'staging', risk: 94, decision: 'deny', status: 'blocked', summary: 'Delete contact requested by cleanup workflow', justification: 'Cleanup workflow attempted to remove an archived contact.', payload: { contactId: 8871 }, matchedPolicy: 'Block destructive deletes', reason: 'Destructive actions are blocked globally by default.' },
+        { id: 'run-004', timestamp: '2026-04-15 10:18', agent: 'it-access-bot', identity: 'it-admin-service', connector: 'okta', action: 'suspend_user', objectCount: 1, context: 'identity', environment: 'prod', risk: 91, decision: 'require_approval', status: 'pending_approval', summary: 'Suspend a departing employee account', justification: 'Automated offboarding detected account removal requirement.', payload: { user: 'lucy@company.com' }, matchedPolicy: 'Identity actions require approval in prod', reason: 'Identity changes in production must be reviewed.' },
+        { id: 'run-005', timestamp: '2026-04-15 10:33', agent: 'engineering-bot', identity: 'engineering-service', connector: 'github', action: 'merge_pr', objectCount: 1, context: 'release', environment: 'prod', risk: 78, decision: 'require_approval', status: 'pending_approval', summary: 'Merge release PR into production branch', justification: 'Patch release includes fix for login failures.', payload: { repo: 'agentrail/app', pr: 184, branch: 'main' }, matchedPolicy: 'Engineering merges require approval', reason: 'Merging into production branches requires human confirmation.' }
+      ],
+      scenarios: [
+        { agent: 'support-bot', connector: 'zendesk', action: 'close_ticket', objectCount: 1, context: 'support', environment: 'prod', identity: 'support-service', summary: 'Close a resolved customer support ticket', justification: 'The issue has been resolved and the customer confirmed the fix.', payload: { ticketId: 'ZD-4811', resolution: 'Invoice regenerated' } },
+        { agent: 'revops-bot', connector: 'hubspot', action: 'update_deal', objectCount: 12, context: 'pipeline', environment: 'prod', identity: 'revops-service', summary: 'Bulk update 12 opportunities to Closed Lost', justification: 'Automated forecast cleanup after no-response window.', payload: { dealIds: [1,2,3,4,5,6,7,8,9,10,11,12], stage: 'Closed Lost' } },
+        { agent: 'it-access-bot', connector: 'okta', action: 'add_group', objectCount: 3, context: 'identity', environment: 'prod', identity: 'it-admin-service', summary: 'Add users to Finance-Admin in Okta', justification: 'Quarter-close support requires temporary elevated access.', payload: { users: ['amy@company.com','leo@company.com','nina@company.com'], group: 'Finance-Admin' } },
+        { agent: 'engineering-bot', connector: 'github', action: 'merge_pr', objectCount: 1, context: 'release', environment: 'prod', identity: 'engineering-service', summary: 'Merge a release PR into the production branch', justification: 'Patch release includes a production fix for login failures.', payload: { repo: 'agentrail/app', pr: 184, branch: 'main' } }
+      ]
+    };
+
+    let state = JSON.parse(JSON.stringify(initialState));
+    let activeAgentId = state.agents[0].id;
+    let activeApprovalId = state.runs.find(r => r.status === 'pending_approval')?.id || null;
+    let activeContext = { type: 'workspace' };
+    let scenarioIndex = 0;
+    let tourTimer = null;
+
+    const connectorActions = {
+      salesforce: ['read_account','update_opportunity'],
+      jira: ['create_issue','update_issue','delete_issue'],
+      slack: ['post_message','post_approvals'],
+      okta: ['add_group','suspend_user','reset_mfa'],
+      github: ['open_pr','comment_pr','merge_pr'],
+      zendesk: ['create_ticket','update_ticket','close_ticket'],
+      drive: ['read_doc','list_folder'],
+      servicenow: ['create_change','update_request'],
+      hubspot: ['update_deal','create_contact','delete_contact'],
+      notion: ['read_page','create_page']
+    };
+    const contexts = ['support','pipeline','crm','identity','release','knowledge','incident'];
+    const environments = ['staging','prod'];
+
+    const $ = (s) => document.querySelector(s);
+    const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+    function esc(v) {
+      return String(v)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function badge(text, cls) {
+      return `<span class="badge ${cls}">${esc(text)}</span>`;
+    }
+
+    function toast(title, body) {
+      const wrap = $('#toastWrap');
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.innerHTML = `<strong>${esc(title)}</strong><div class="meta" style="margin-top:4px">${esc(body)}</div>`;
+      wrap.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
+
+    function statusClass(status) {
+      return ['executed','shadow_executed'].includes(status) ? 'executed' : status;
+    }
+
+    function agentRiskClass(riskTier) {
+      return riskTier === 'critical' ? 'deny' : riskTier === 'high' ? 'require_approval' : 'blue';
+    }
+
+    function getAgent(id) {
+      return state.agents.find(a => a.id === id);
+    }
+
+    function getConnector(id) {
+      return state.connectors.find(c => c.id === id);
+    }
+
+    function nowStamp() {
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function matches(pattern, action) {
+      if (pattern === '*') return true;
+      if (pattern.endsWith('*')) return action.startsWith(pattern.slice(0, -1));
+      return pattern === action;
+    }
+
+    function scoreRisk(req) {
+      let score = 10;
+      if (['hubspot', 'salesforce'].includes(req.connector)) score += 18;
+      if (req.connector === 'okta') score += 42;
+      if (req.connector === 'github') score += 22;
+      if ((req.action || '').includes('update')) score += 10;
+      if ((req.action || '').includes('delete')) score += 55;
+      if ((req.action || '').includes('merge')) score += 20;
+      if ((req.action || '').includes('suspend') || (req.action || '').includes('reset')) score += 30;
+      if ((req.action || '').includes('close_ticket')) score += 4;
+      if (req.objectCount > 1) score += Math.min(30, req.objectCount * 3);
+      if (req.environment === 'prod') score += 18;
+      if (['pipeline','release'].includes(req.context)) score += 8;
+      if ((req.identity || '').includes('shared')) score += 12;
+      return Math.min(100, score);
+    }
+
+    function findPolicy(req) {
+      return state.policies
+        .filter(p => p.active)
+        .sort((a,b) => b.priority - a.priority)
+        .find(p => {
+          const connectorMatch = p.connector === '*' || p.connector === req.connector;
+          const actionMatch = matches(p.action, req.action);
+          const conditionMatch =
+            p.conditionType === 'any' ||
+            (p.conditionType === 'context' && p.conditionValue === req.context) ||
+            (p.conditionType === 'environment' && p.conditionValue === req.environment);
+          const thresholdMatch = req.objectCount <= p.maxObjects || p.decision === 'require_approval';
+          return connectorMatch && actionMatch && conditionMatch && thresholdMatch;
+        });
+    }
+
+    function evaluateRequest(req) {
+      const risk = scoreRisk(req);
+
+      if ((req.action || '').includes('delete')) {
+        return {
+          decision: 'deny',
+          risk,
+          policy: 'Block destructive deletes',
+          reason: 'Destructive actions are blocked globally by default.',
+          executionPath: state.shadowMode ? 'Observed only in shadow mode' : 'Blocked before execution',
+          reviewerNote: 'A destructive request cannot proceed unless the global policy stack changes.'
+        };
+      }
+
+      const matched = findPolicy(req);
+      if (!matched) {
+        return {
+          decision: 'deny',
+          risk,
+          policy: 'Default deny',
+          reason: 'No active policy matched this request.',
+          executionPath: state.shadowMode ? 'Observed only in shadow mode' : 'Blocked before execution',
+          reviewerNote: 'A policy must exist before this action can be trusted in production.'
+        };
+      }
+
+      if (matched.decision === 'require_approval') {
+        return {
+          decision: 'require_approval',
+          risk: Math.max(risk, 68),
+          policy: matched.name,
+          reason: matched.reason || `Approval required by ${matched.name}.`,
+          executionPath: 'Route to approval queue',
+          reviewerNote: 'A human reviewer should validate scope, intent, and business impact.'
+        };
+      }
+
+      if (req.objectCount > matched.maxObjects) {
+        return {
+          decision: 'require_approval',
+          risk: Math.max(risk, 72),
+          policy: matched.name,
+          reason: `Threshold exceeded. Policy allows only ${matched.maxObjects} objects.`,
+          executionPath: 'Route to approval queue',
+          reviewerNote: 'Bulk changes exceed the auto-allow threshold.'
+        };
+      }
+
+      return {
+        decision: 'allow',
+        risk,
+        policy: matched.name,
+        reason: matched.reason || `Matched policy ${matched.name}.`,
+        executionPath: state.shadowMode ? 'Allowed in shadow mode only' : 'Execute automatically',
+        reviewerNote: 'This action stays inside the approved runtime envelope.'
+      };
+    }
+
+    function pushTrend(risk) {
+      state.trend.push(risk);
+      if (state.trend.length > 7) state.trend.shift();
+    }
+
+    function setContext(type, id = null) {
+      activeContext = { type, id };
+      renderContextPanel();
+    }
+
+    function switchView(view) {
+      $$('.view').forEach(v => v.classList.add('hidden'));
+      $('#view-' + view).classList.remove('hidden');
+      $$('#nav button').forEach(btn => btn.classList.toggle('active', btn.dataset.view === view));
+    }
+
+    function syncControls() {
+      $('#workspaceLabel').textContent = `${state.workspaceName} · ${state.environmentLabel}`;
+      $('#modeLabel').textContent = state.shadowMode ? 'Shadow mode enabled' : 'Enforcement mode enabled';
+      $('#modeBadge').textContent = state.shadowMode ? 'Shadow mode enabled' : 'Enforcement mode enabled';
+
+      $('#simAgent').innerHTML = state.agents.map(a => `<option value="${a.id}">${esc(a.name)}</option>`).join('');
+      $('#simConnector').innerHTML = state.connectors.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+      $('#simContext').innerHTML = contexts.map(c => `<option>${esc(c)}</option>`).join('');
+      $('#simEnvironment').innerHTML = environments.map(e => `<option>${esc(e)}</option>`).join('');
+      $('#simIdentity').innerHTML = [...new Set(state.agents.map(a => a.identity))].map(i => `<option>${esc(i)}</option>`).join('');
+      $('#policyConnector').innerHTML = ['<option value="*">*</option>'].concat(state.connectors.map(c => `<option value="${c.id}">${esc(c.name)}</option>`)).join('');
+      syncSimulationActions();
+      updatePolicyPreview();
+    }
+
+    function syncSimulationActions() {
+      const connector = $('#simConnector').value;
+      $('#simAction').innerHTML = (connectorActions[connector] || []).map(a => `<option>${esc(a)}</option>`).join('');
+    }
+
+    function renderTrendChart() {
+      const svg = $('#riskTrend');
+      const values = state.trend;
+      const w = 620, h = 220, left = 28, right = 22, top = 14, bottom = 28;
+      const innerW = w - left - right, innerH = h - top - bottom;
+      const points = values.map((v, i) => {
+        const x = left + (innerW / (values.length - 1 || 1)) * i;
+        const y = top + innerH - (v / 100) * innerH;
+        return [x, y];
+      });
+      const line = points.map(p => p.join(',')).join(' ');
+      const area = `M ${left} ${top + innerH} L ` + points.map(p => p.join(' ')).join(' L ') + ` L ${left + innerW} ${top + innerH} Z`;
+      const yLines = [20, 40, 60, 80];
+      svg.innerHTML = `
+        <defs>
+          <linearGradient id="lineGradV1" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stop-color="#61a9ff" />
+            <stop offset="100%" stop-color="#45d8ff" />
+          </linearGradient>
+          <linearGradient id="areaGradV1" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="rgba(69,216,255,.24)" />
+            <stop offset="100%" stop-color="rgba(69,216,255,0)" />
+          </linearGradient>
+        </defs>
+        ${yLines.map(v => {
+          const y = top + innerH - (v / 100) * innerH;
+          return `<line x1="${left}" y1="${y}" x2="${left + innerW}" y2="${y}" stroke="rgba(255,255,255,.06)" stroke-dasharray="4 6"></line><text x="2" y="${y + 4}">${v}</text>`;
+        }).join('')}
+        <path d="${area}" fill="url(#areaGradV1)"></path>
+        <polyline points="${line}" fill="none" stroke="url(#lineGradV1)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+        ${points.map((p, idx) => `<circle cx="${p[0]}" cy="${p[1]}" r="${idx === points.length - 1 ? 5 : 4}" fill="#45d8ff" stroke="#08111d" stroke-width="3"></circle>`).join('')}
+      `;
+    }
+
+    function renderLatestDecision(req, result) {
+      $('#latestDecision').innerHTML = `
+        <div class="itemhead">
+          <div>
+            <h4>${esc(req.connector)}.${esc(req.action)}</h4>
+            <div class="meta">${esc(req.agent)} · ${esc(req.identity)} · ${esc(req.environment)} · context ${esc(req.context)}</div>
+          </div>
+          ${badge(result.decision.replaceAll('_',' '), result.decision)}
+        </div>
+        <div class="decision-grid">
+          <div class="metric"><div class="k">Matched policy</div><div class="n" style="font-size:18px">${esc(result.policy)}</div></div>
+          <div class="metric"><div class="k">Risk score</div><div class="n">${result.risk}</div></div>
+          <div class="metric"><div class="k">Execution path</div><div class="n" style="font-size:18px">${esc(result.executionPath)}</div></div>
+        </div>
+        <div class="meta" style="margin-top:10px"><strong>Reason:</strong> ${esc(result.reason)}<br><strong>Reviewer note:</strong> ${esc(result.reviewerNote)}</div>
+      `;
+    }
+
+    function addRun(req) {
+      const result = evaluateRequest(req);
+      const status = result.decision === 'allow'
+        ? (state.shadowMode ? 'shadow_executed' : 'executed')
+        : result.decision === 'require_approval'
+          ? 'pending_approval'
+          : 'blocked';
+
+      const run = {
+        id: 'run-' + Math.floor(Math.random() * 1000000),
+        timestamp: nowStamp(),
+        agent: req.agent,
+        identity: req.identity,
+        connector: req.connector,
+        action: req.action,
+        objectCount: req.objectCount,
+        context: req.context,
+        environment: req.environment,
+        risk: result.risk,
+        decision: result.decision,
+        status,
+        summary: req.summary || `${req.connector}.${req.action} evaluated in Pilot Workspace`,
+        justification: req.justification || 'No justification provided.',
+        payload: req.payload || {},
+        matchedPolicy: result.policy,
+        reason: result.reason
+      };
+      state.runs.push(run);
+      pushTrend(result.risk);
+      if (status === 'pending_approval') activeApprovalId = run.id;
+      renderLatestDecision(req, result);
+      setContext('run', run.id);
+      showWizard(1);
+    updateCheckout();
+    render();
+      toast('Runtime decision recorded', run.summary);
+      return run;
+    }
+
+    function resolveApproval(runId, approved) {
+      const run = state.runs.find(r => r.id === runId);
+      if (!run) return;
+      state.runs = state.runs.map(item => {
+        if (item.id !== runId) return item;
+        return {
+          ...item,
+          status: approved ? (state.shadowMode ? 'shadow_executed' : 'executed') : 'blocked',
+          decision: approved ? 'allow' : 'deny',
+          summary: item.summary + (approved ? ' · approved' : ' · rejected'),
+          reason: approved ? 'Approved by human reviewer.' : 'Rejected by human reviewer.'
+        };
+      });
+      activeApprovalId = state.runs.find(r => r.status === 'pending_approval')?.id || null;
+      render();
+      toast(approved ? 'Approval completed' : 'Request rejected', run.summary);
+    }
+
+    function renderOverview() {
+      const pending = state.runs.filter(r => r.status === 'pending_approval').length;
+      const blocked = state.runs.filter(r => r.status === 'blocked').length;
+      const criticalAgents = state.agents.filter(a => a.riskTier === 'critical').length;
+      const avgRisk = Math.round(state.runs.reduce((sum, run) => sum + run.risk, 0) / state.runs.length);
+      const executed = state.runs.filter(r => ['executed','shadow_executed'].includes(r.status)).length;
+
+      $('#heroStats').innerHTML = `
+        <div class="metric"><div class="k">Managed actions</div><div class="n">${state.runs.length}</div></div>
+        <div class="metric"><div class="k">Pending approvals</div><div class="n">${pending}</div></div>
+        <div class="metric"><div class="k">Blocked actions</div><div class="n">${blocked}</div></div>
+        <div class="metric"><div class="k">Critical agents</div><div class="n">${criticalAgents}</div></div>
+      `;
+
+      const sharedIdentities = [...new Set(state.agents.filter(a => a.identity.includes('shared')).map(a => a.identity))].length;
+      const reviewCount = state.runs.filter(r => r.decision === 'require_approval').length;
+
+      $('#overviewKpis').innerHTML = `
+        <div class="metric"><div class="k">Executed / observed</div><div class="n">${executed}</div></div>
+        <div class="metric"><div class="k">Review routed</div><div class="n">${reviewCount}</div></div>
+        <div class="metric"><div class="k">Average risk</div><div class="n">${Number.isFinite(avgRisk) ? avgRisk : 0}</div></div>
+        <div class="metric"><div class="k">Shared identities</div><div class="n">${sharedIdentities}</div></div>
+      `;
+
+      const approvalPct = state.runs.length ? Math.round((reviewCount / state.runs.length) * 100) : 0;
+      $('#approvalPct').textContent = `${approvalPct}%`;
+      $('#approvalCountText').textContent = String(reviewCount);
+      $('#approvalDonut').style.background = `conic-gradient(var(--blue) 0deg, var(--cyan) ${approvalPct * 3.6}deg, rgba(255,255,255,.06) ${approvalPct * 3.6}deg)`;
+
+      const sensitivity = state.agents.map(agent => {
+        const runs = state.runs.filter(r => r.agent === agent.id);
+        const avg = runs.length ? Math.round(runs.reduce((s, r) => s + r.risk, 0) / runs.length) : 0;
+        return { agent, avg, count: runs.length };
+      }).sort((a,b) => b.avg - a.avg);
+
+      $('#sensitiveAgents').innerHTML = sensitivity.map(row => `
+        <div class="item clickable" onclick="openAgent('${row.agent.id}')">
+          <div class="itemhead">
+            <div>
+              <h4>${esc(row.agent.name)}</h4>
+              <div class="meta">${esc(row.agent.owner)} · blast radius: ${esc(row.agent.blastRadius)}</div>
+            </div>
+            ${badge(row.agent.riskTier, agentRiskClass(row.agent.riskTier))}
+          </div>
+          <div class="meta">Average runtime risk: <strong>${row.avg}</strong> · Observed runs: <strong>${row.count}</strong></div>
+          <div class="bar"><span style="width:${Math.min(100, row.avg)}%"></span></div>
+        </div>
+      `).join('');
+
+      const recent = state.runs.slice().reverse().slice(0, 8);
+      $('#eventFeed').innerHTML = recent.map(run => `
+        <div class="feed-item">
+          <div class="status-row"><span class="status-dot"></span> ${run.timestamp}</div>
+          <div><strong>${esc(run.summary)}</strong></div>
+          <div class="meta">${esc(run.agent)} · ${esc(run.connector)}.${esc(run.action)} · risk ${run.risk} · ${esc(run.status.replaceAll('_',' '))}</div>
+        </div>
+      `).join('');
+
+      renderTrendChart();
+    }
+
+    function renderAgents() {
+      $('#agentPill').textContent = `${state.agents.length} agents`;
+      $('#agentsList').innerHTML = state.agents.map(agent => {
+        const runs = state.runs.filter(r => r.agent === agent.id);
+        const avg = runs.length ? Math.round(runs.reduce((s, r) => s + r.risk, 0) / runs.length) : 0;
+        return `
+          <div class="item clickable ${activeAgentId === agent.id ? 'active' : ''}" onclick="openAgent('${agent.id}')">
+            <div class="itemhead">
+              <div>
+                <h4>${esc(agent.name)}</h4>
+                <div class="meta">${esc(agent.owner)} · identity: ${esc(agent.identity)}</div>
+              </div>
+              ${badge(agent.riskTier, agentRiskClass(agent.riskTier))}
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="provider-chip">${esc(agent.modelProvider)}</span><span class="provider-chip">${esc(agent.modelName)}</span><span class="orch-chip">${esc(agent.orchestrationLayer)}</span><span class="knowledge-chip">${esc(agent.knowledgeSource)}</span></div><div class="meta"><strong>Action layer:</strong> ${agent.capabilities.join(', ')}</div>
+            <div class="meta">Connectors: ${agent.connectors.join(', ')}</div>
+            <div class="meta">Average runtime risk: <strong>${avg}</strong> · Blast radius: <strong>${esc(agent.blastRadius)}</strong></div>
+            <div class="bar"><span style="width:${Math.min(100, avg)}%"></span></div>
+          </div>
+        `;
+      }).join('');
+
+      const agent = getAgent(activeAgentId) || state.agents[0];
+      const runs = state.runs.filter(r => r.agent === agent.id).slice().reverse();
+      const applicablePolicies = state.policies.filter(p => p.connector === '*' || agent.connectors.includes(p.connector));
+      const avgRisk = runs.length ? Math.round(runs.reduce((s, r) => s + r.risk, 0) / runs.length) : 0;
+
+      $('#agentDetail').innerHTML = `
+        <div class="stack">
+          <div class="detail">
+            <div class="itemhead">
+              <div>
+                <h4>${esc(agent.name)}</h4>
+                <div class="meta">${esc(agent.owner)} · ${esc(agent.identity)}</div>
+              </div>
+              ${badge(agent.riskTier, agentRiskClass(agent.riskTier))}
+            </div>
+            <div class="row-3" style="margin-top:12px">
+              <div class="metric"><div class="k">Blast radius</div><div class="n">${esc(agent.blastRadius)}</div></div>
+              <div class="metric"><div class="k">Average risk</div><div class="n">${avgRisk}</div></div>
+              <div class="metric"><div class="k">Observed runs</div><div class="n">${runs.length}</div></div>
+            </div>
+          </div>
+          <div class="detail">
+            <h4>Agent provenance</h4>
+            <div class="meta" style="margin-top:10px"><strong>Model provider:</strong> ${esc(agent.modelProvider)}</div>
+            <div class="meta"><strong>Model:</strong> ${esc(agent.modelName)}</div>
+            <div class="meta"><strong>Orchestration layer:</strong> ${esc(agent.orchestrationLayer)}</div>
+            <div class="meta"><strong>Knowledge source:</strong> ${esc(agent.knowledgeSource)}</div>
+          </div>
+          <div class="detail">
+            <h4>Capability surface</h4>
+            <div class="meta" style="margin-top:10px"><strong>Environments:</strong> ${agent.environments.join(', ')}</div>
+            <div class="meta"><strong>Connectors:</strong> ${agent.connectors.join(', ')}</div>
+            <div class="meta"><strong>Capabilities:</strong> ${agent.capabilities.join(', ')}</div>
+          </div>
+          <div class="detail">
+            <h4>Applicable policies</h4>
+            ${applicablePolicies.map(p => `<div class="meta">• ${esc(p.name)} → ${esc(p.decision.replaceAll('_',' '))}</div>`).join('')}
+          </div>
+          <div class="detail">
+            <h4>Recent runs</h4>
+            ${runs.length ? runs.slice(0,4).map(run => `<div class="meta">• ${run.timestamp} · ${esc(run.connector)}.${esc(run.action)} · risk ${run.risk} · ${esc(run.status.replaceAll('_',' '))}</div>`).join('') : '<div class="meta">No runs yet.</div>'}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDiscovery() {
+      const uniqueSurfaces = new Set(state.agents.flatMap(a => a.connectors)).size;
+      const sharedCreds = state.agents.filter(a => a.identity.includes('shared')).length;
+      const prodAgents = state.agents.filter(a => a.environments.includes('prod')).length;
+      const critical = state.agents.filter(a => a.riskTier === 'critical').length;
+
+      $('#discoveryPill').textContent = `${uniqueSurfaces} systems`;
+      $('#discoverySummary').innerHTML = `
+        <div class="metric"><div class="k">Agents discovered</div><div class="n">${state.agents.length}</div></div>
+        <div class="metric"><div class="k">Systems touched</div><div class="n">${uniqueSurfaces}</div></div>
+        <div class="metric"><div class="k">Shared identities</div><div class="n">${sharedCreds}</div></div>
+        <div class="metric"><div class="k">Prod-capable agents</div><div class="n">${prodAgents}</div></div>
+      `;
+
+      const focusConnectors = ['okta', 'hubspot', 'github', 'salesforce', 'zendesk'];
+      const matrix = [];
+      matrix.push(`<div class="head">Agent</div>` + focusConnectors.map(c => `<div class="head">${esc(getConnector(c)?.name || c)}</div>`).join(''));
+      state.agents.forEach(agent => {
+        matrix.push(`<div class="cell head">${esc(agent.name)}</div>`);
+        focusConnectors.forEach(connectorId => {
+          const level = !agent.connectors.includes(connectorId) ? 0 : agent.riskTier === 'critical' ? 3 : agent.riskTier === 'high' ? 2 : 1;
+          matrix.push(`<div class="cell heat-${level}">${agent.connectors.includes(connectorId) ? 'Access' : '—'}</div>`);
+        });
+      });
+      $('#discoveryMatrix').innerHTML = matrix.join('');
+
+      const findings = [
+        sharedCreds ? `${sharedCreds} shared execution identity path(s) detected.` : 'No shared execution identities detected.',
+        `${critical} critical admin agent(s) can touch identity or privileged systems.`,
+        `${prodAgents} agent(s) can act directly in production.`,
+        `${state.policies.filter(p => p.decision === 'require_approval').length} policy rule(s) currently route actions to human review.`
+      ];
+      $('#discoveryFindings').innerHTML = findings.map(text => `<div class="item"><h4>Finding</h4><div class="meta">${esc(text)}</div></div>`).join('');
+    }
+
+    function renderApprovals() {
+      const pending = state.runs.filter(r => r.status === 'pending_approval').slice().reverse();
+      $('#approvalPill').textContent = `${pending.length} pending`;
+
+      $('#approvalsList').innerHTML = pending.length ? pending.map(run => `
+        <div class="item clickable ${activeApprovalId === run.id ? 'active' : ''}" onclick="openApproval('${run.id}')">
+          <div class="itemhead">
+            <div>
+              <h4>${esc(run.summary)}</h4>
+              <div class="meta">${run.timestamp} · ${esc(run.agent)} · ${esc(run.identity)}</div>
+            </div>
+            ${badge(`risk ${run.risk}`, 'require_approval')}
+          </div>
+          <div class="meta"><strong>Action:</strong> ${esc(run.connector)}.${esc(run.action)} · ${run.objectCount} object(s) · ${esc(run.environment)}</div>
+          <div class="meta"><strong>Policy:</strong> ${esc(run.matchedPolicy)}</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+            <button class="btn" onclick="event.stopPropagation(); openApprovalModal('${run.id}')">Open request</button>
+          </div>
+        </div>
+      `).join('') : `<div class="item"><div class="meta">No approvals currently waiting for review.</div></div>`;
+
+      const selected = state.runs.find(r => r.id === activeApprovalId) || pending[0];
+      if (!selected) {
+        $('#approvalDetail').innerHTML = `<div class="detail"><div class="meta">No pending approval selected.</div></div>`;
+        return;
+      }
+
+      $('#approvalDetail').innerHTML = `
+        <div class="stack">
+          <div class="detail">
+            <div class="itemhead">
+              <div>
+                <h4>${esc(selected.summary)}</h4>
+                <div class="meta">${selected.timestamp} · ${esc(selected.agent)} · ${esc(selected.identity)}</div>
+              </div>
+              ${badge(`risk ${selected.risk}`, 'require_approval')}
+            </div>
+            <div class="decision-grid">
+              <div class="metric"><div class="k">System action</div><div class="n" style="font-size:18px">${esc(selected.connector)}.${esc(selected.action)}</div></div>
+              <div class="metric"><div class="k">Objects</div><div class="n">${selected.objectCount}</div></div>
+              <div class="metric"><div class="k">Environment</div><div class="n" style="font-size:18px">${esc(selected.environment)}</div></div>
+            </div>
+          </div>
+          <div class="detail">
+            <h4>Review context</h4>
+            <div class="meta" style="margin-top:10px"><strong>Matched policy:</strong> ${esc(selected.matchedPolicy)}</div>
+            <div class="meta"><strong>Why review is required:</strong> ${esc(selected.reason)}</div>
+            <div class="meta"><strong>Business justification:</strong> ${esc(selected.justification)}</div>
+            <div class="meta"><strong>Payload snapshot:</strong> ${esc(JSON.stringify(selected.payload))}</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+              <button class="btn success" onclick="resolveApprovalFromUI('${selected.id}', true)">Approve</button>
+              <button class="btn danger" onclick="resolveApprovalFromUI('${selected.id}', false)">Reject</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPolicies() {
+      $('#policyPill').textContent = `${state.policies.length} policies`;
+      $('#policyList').innerHTML = state.policies.slice().sort((a,b) => b.priority - a.priority).map(policy => `
+        <div class="item">
+          <div class="itemhead">
+            <div>
+              <h4>${esc(policy.name)}</h4>
+              <div class="meta">${esc(policy.connector)}.${esc(policy.action)} · priority ${policy.priority}</div>
+            </div>
+            ${badge(policy.decision.replaceAll('_',' '), policy.decision)}
+          </div>
+          <div class="meta"><strong>Condition:</strong> ${policy.conditionType === 'any' ? 'Any context' : `${policy.conditionType} = ${policy.conditionValue}`}</div>
+          <div class="meta"><strong>Max objects:</strong> ${policy.maxObjects}</div>
+          <div class="meta"><strong>Reason:</strong> ${esc(policy.reason)}</div>
+        </div>
+      `).join('');
+
+      $('#policyVersions').innerHTML = state.policyVersions.map(v => `
+        <div class="item">
+          <div class="itemhead">
+            <h4>${esc(v.version)}</h4>
+            <span class="pill">${esc(v.timestamp)}</span>
+          </div>
+          <div class="meta">${esc(v.summary)}</div>
+        </div>
+      `).join('');
+    }
+
+    function updatePolicyPreview() {
+      const connector = $('#policyConnector')?.value || '*';
+      const action = $('#policyAction')?.value || '*';
+      const type = $('#policyConditionType')?.value || 'any';
+      const value = $('#policyConditionValue')?.value || '*';
+      const maxObjects = $('#policyMaxObjects')?.value || '1';
+      const decision = $('#policyDecision')?.value || 'allow';
+      $('#policyPreview').textContent = `When connector = ${connector}, action = ${action}, ${type === 'any' ? 'context = any' : `${type} = ${value}`}, objects ≤ ${maxObjects} → ${decision.replaceAll('_', ' ')}.`;
+    }
+
+    function renderAudit() {
+      const q = ($('#auditFilter').value || '').toLowerCase();
+      const filtered = state.runs.filter(run => !q || [run.agent, run.connector, run.action, run.identity, run.status, run.decision, run.summary].join(' ').toLowerCase().includes(q));
+
+      $('#auditBody').innerHTML = filtered.slice().reverse().map(run => `
+        <tr onclick="openRun('${run.id}')" style="cursor:pointer">
+          <td>${run.timestamp}</td>
+          <td>${esc(run.agent)}</td>
+          <td>${esc(run.identity)}</td>
+          <td>${esc(run.connector)}.${esc(run.action)}<br><span class="meta">${esc(run.environment)} · ${esc(run.context)} · ${run.objectCount} object(s)</span></td>
+          <td>${run.risk}</td>
+          <td>${badge(run.decision.replaceAll('_',' '), run.decision)}</td>
+          <td>${badge(run.status.replaceAll('_',' '), statusClass(run.status))}</td>
+        </tr>
+      `).join('');
+
+      const replaySelect = $('#replaySelect');
+      const prev = replaySelect.value;
+      replaySelect.innerHTML = state.runs.slice().reverse().map(run => `<option value="${run.id}">${run.timestamp} · ${run.agent} · ${run.connector}.${run.action}</option>`).join('');
+      if (prev && state.runs.some(r => r.id === prev)) replaySelect.value = prev;
+      renderReplay();
+    }
+
+    function renderReplay() {
+      const id = $('#replaySelect').value || state.runs[state.runs.length - 1]?.id;
+      const run = state.runs.find(r => r.id === id);
+      if (!run) {
+        $('#replayPanel').innerHTML = `<div class="detail"><div class="meta">No run selected.</div></div>`;
+        return;
+      }
+
+      $('#replayPanel').innerHTML = `
+        <div class="detail">
+          <div class="itemhead">
+            <div>
+              <h4>${esc(run.summary)}</h4>
+              <div class="meta">${run.timestamp} · ${esc(run.agent)} · ${esc(run.identity)}</div>
+            </div>
+            ${badge(run.status.replaceAll('_',' '), statusClass(run.status))}
+          </div>
+          <div class="timeline" style="margin-top:12px">
+            <div class="step"><div class="dot">1</div><div><strong>Request received</strong><p>${esc(run.connector)}.${esc(run.action)} in ${esc(run.environment)} touching ${run.objectCount} object(s).</p></div></div>
+            <div class="step"><div class="dot">2</div><div><strong>Business justification</strong><p>${esc(run.justification)}</p></div></div>
+            <div class="step"><div class="dot">3</div><div><strong>Policy matched</strong><p>${esc(run.matchedPolicy)} — ${esc(run.reason)}</p></div></div>
+            <div class="step"><div class="dot">4</div><div><strong>Decision</strong><p>Risk ${run.risk}/100 · Decision ${esc(run.decision.replaceAll('_',' '))} · Status ${esc(run.status.replaceAll('_',' '))}</p></div></div>
+            <div class="step"><div class="dot">5</div><div><strong>Payload snapshot</strong><p><code>${esc(JSON.stringify(run.payload))}</code></p></div></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderIntegrations() {
+      $('#connectorGrid').innerHTML = state.connectors.map(connector => {
+        const runs = state.runs.filter(r => r.connector === connector.id);
+        const avgRisk = runs.length ? Math.round(runs.reduce((s, r) => s + r.risk, 0) / runs.length) : 0;
+        const attachedAgents = state.agents.filter(a => a.connectors.includes(connector.id)).length;
+        return `
+          <div class="item">
+            <h4>${esc(connector.name)}</h4>
+            <div class="meta">${esc(connector.description)}</div>
+            <div style="margin-top:10px">${badge(connector.type, 'blue')}</div>
+            <div class="meta" style="margin-top:10px"><strong>Connected agents:</strong> ${attachedAgents}</div>
+            <div class="meta"><strong>Average risk:</strong> ${avgRisk}</div>
+            <div class="meta"><strong>Scopes:</strong> ${connector.scopes.join(', ')}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderContextPanel() {
+      let label = 'Workspace';
+      let html = `<div class="detail"><h4>Workspace overview</h4><div class="meta">Select an agent, approval, or audit event to inspect the operational context.</div></div>`;
+
+      if (activeContext.type === 'agent' && activeContext.id) {
+        const agent = getAgent(activeContext.id);
+        if (agent) {
+          label = 'Agent';
+          const runs = state.runs.filter(r => r.agent === agent.id);
+          const avgRisk = runs.length ? Math.round(runs.reduce((s,r) => s + r.risk, 0) / runs.length) : 0;
+          html = `
+            <div class="detail">
+              <div class="itemhead">
+                <div>
+                  <h4>${esc(agent.name)}</h4>
+                  <div class="meta">${esc(agent.owner)} · ${esc(agent.identity)}</div>
+                </div>
+                ${badge(agent.riskTier, agentRiskClass(agent.riskTier))}
+              </div>
+              <div class="meta" style="margin-top:10px"><strong>Blast radius:</strong> ${esc(agent.blastRadius)}</div>
+              <div class="meta"><strong>Average risk:</strong> ${avgRisk}</div>
+              <div class="meta"><strong>Model provider:</strong> ${esc(agent.modelProvider)}</div>
+              <div class="meta"><strong>Orchestration layer:</strong> ${esc(agent.orchestrationLayer)}</div>
+              <div class="meta"><strong>Knowledge source:</strong> ${esc(agent.knowledgeSource)}</div>
+            </div>
+          `;
+        }
+      }
+
+      if (activeContext.type === 'approval' && activeContext.id) {
+        const run = state.runs.find(r => r.id === activeContext.id);
+        if (run) {
+          label = 'Approval';
+          html = `
+            <div class="detail">
+              <div class="itemhead">
+                <div>
+                  <h4>${esc(run.summary)}</h4>
+                  <div class="meta">${run.timestamp} · ${esc(run.agent)}</div>
+                </div>
+                ${badge(`risk ${run.risk}`, 'require_approval')}
+              </div>
+              <div class="meta" style="margin-top:10px"><strong>Policy:</strong> ${esc(run.matchedPolicy)}</div>
+              <div class="meta"><strong>Reason:</strong> ${esc(run.reason)}</div>
+              <div class="meta"><strong>Payload:</strong> ${esc(JSON.stringify(run.payload))}</div>
+            </div>
+          `;
+        }
+      }
+
+      if (activeContext.type === 'run' && activeContext.id) {
+        const run = state.runs.find(r => r.id === activeContext.id);
+        if (run) {
+          label = 'Run';
+          html = `
+            <div class="detail">
+              <div class="itemhead">
+                <div>
+                  <h4>${esc(run.summary)}</h4>
+                  <div class="meta">${run.timestamp} · ${esc(run.agent)} · ${esc(run.identity)}</div>
+                </div>
+                ${badge(run.status.replaceAll('_',' '), statusClass(run.status))}
+              </div>
+              <div class="meta" style="margin-top:10px"><strong>Action:</strong> ${esc(run.connector)}.${esc(run.action)} in ${esc(run.environment)}</div>
+              <div class="meta"><strong>Risk:</strong> ${run.risk} / 100</div>
+              <div class="meta"><strong>Matched policy:</strong> ${esc(run.matchedPolicy)}</div>
+            </div>
+          `;
+        }
+      }
+
+      $('#contextBadge').textContent = label;
+      $('#contextPanel').innerHTML = html;
+    }
+
+    function render() {
+      syncControls();
+      renderOverview();
+      renderAgents();
+      renderDiscovery();
+      renderApprovals();
+      renderPolicies();
+      renderAudit();
+      renderIntegrations();
+      renderContextPanel();
+    }
+
+    function openAgent(id) {
+      activeAgentId = id;
+      setContext('agent', id);
+      switchView('agents');
+      renderAgents();
+    }
+
+    function openApproval(id) {
+      activeApprovalId = id;
+      setContext('approval', id);
+      switchView('approvals');
+      renderApprovals();
+    }
+
+    function openRun(id) {
+      $('#replaySelect').value = id;
+      setContext('run', id);
+      switchView('audit');
+      renderReplay();
+    }
+
+    function openApprovalModal(id) {
+      const run = state.runs.find(r => r.id === id);
+      if (!run) return;
+      $('#modalTitle').textContent = run.summary;
+      $('#modalSubtitle').textContent = `${run.agent} · ${run.connector}.${run.action} · risk ${run.risk}`;
+      $('#modalBody').innerHTML = `
+        <div class="stack">
+          <div class="detail">
+            <h4>Request context</h4>
+            <div class="meta" style="margin-top:10px"><strong>Identity:</strong> ${esc(run.identity)}</div>
+            <div class="meta"><strong>Environment:</strong> ${esc(run.environment)}</div>
+            <div class="meta"><strong>Objects affected:</strong> ${run.objectCount}</div>
+            <div class="meta"><strong>Matched policy:</strong> ${esc(run.matchedPolicy)}</div>
+          </div>
+          <div class="detail">
+            <h4>Justification and payload</h4>
+            <div class="meta" style="margin-top:10px"><strong>Business justification:</strong> ${esc(run.justification)}</div>
+            <div class="meta"><strong>Payload:</strong> ${esc(JSON.stringify(run.payload))}</div>
+          </div>
+          <div class="detail">
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn success" onclick="resolveApprovalFromUI('${run.id}', true); closeModal()">Approve</button>
+              <button class="btn danger" onclick="resolveApprovalFromUI('${run.id}', false); closeModal()">Reject</button>
+            </div>
+          </div>
+        </div>
+      `;
+      $('#modalBackdrop').classList.add('show');
+    }
+
+    function closeModal() {
+      $('#modalBackdrop').classList.remove('show');
+    }
+
+    function resolveApprovalFromUI(id, approved) {
+      resolveApproval(id, approved);
+      setContext('approval', id);
+    }
+
+    function handleSimulationSubmit(event) {
+      event.preventDefault();
+      const request = {
+        agent: $('#simAgent').value,
+        connector: $('#simConnector').value,
+        action: $('#simAction').value,
+        environment: $('#simEnvironment').value,
+        context: $('#simContext').value,
+        objectCount: Number($('#simObjectCount').value),
+        identity: $('#simIdentity').value,
+        summary: `Simulation: ${$('#simConnector').value}.${$('#simAction').value}`,
+        justification: $('#simJustification').value || 'No justification provided.',
+        payload: {}
+      };
+      const result = evaluateRequest(request);
+      $('#simulationResult').innerHTML = `
+        <div class="itemhead">
+          <div>
+            <h4>${esc(request.connector)}.${esc(request.action)}</h4>
+            <div class="meta">${esc(request.agent)} · ${esc(request.identity)} · ${esc(request.environment)} · context ${esc(request.context)}</div>
+          </div>
+          ${badge(result.decision.replaceAll('_',' '), result.decision)}
+        </div>
+        <div class="decision-grid">
+          <div class="metric"><div class="k">Matched policy</div><div class="n" style="font-size:18px">${esc(result.policy)}</div></div>
+          <div class="metric"><div class="k">Risk score</div><div class="n">${result.risk}</div></div>
+          <div class="metric"><div class="k">Execution path</div><div class="n" style="font-size:18px">${esc(result.executionPath)}</div></div>
+        </div>
+        <div class="meta" style="margin-top:10px"><strong>Reason:</strong> ${esc(result.reason)}<br><strong>Reviewer note:</strong> ${esc(result.reviewerNote)}<br><strong>Business justification:</strong> ${esc(request.justification)}</div>
+      `;
+      addRun(request);
+    }
+
+    function handlePolicySubmit(event) {
+      event.preventDefault();
+      const newPolicy = {
+        id: 'p-' + Date.now(),
+        name: $('#policyName').value.trim(),
+        connector: $('#policyConnector').value,
+        action: $('#policyAction').value.trim(),
+        conditionType: $('#policyConditionType').value,
+        conditionValue: $('#policyConditionValue').value.trim(),
+        maxObjects: Number($('#policyMaxObjects').value),
+        decision: $('#policyDecision').value,
+        priority: Number($('#policyPriority').value),
+        reason: $('#policyReason').value.trim() || 'User-created policy from Pilot Workspace.',
+        active: true
+      };
+      state.policies.push(newPolicy);
+      state.policyVersions.unshift({
+        version: 'v1.' + String(10 + state.policyVersions.length + 1),
+        timestamp: nowStamp(),
+        summary: `Added policy "${newPolicy.name}" for ${newPolicy.connector}.${newPolicy.action}`
+      });
+      event.target.reset();
+      $('#policyConditionValue').value = '*';
+      $('#policyMaxObjects').value = '1';
+      $('#policyPriority').value = '80';
+      updatePolicyPreview();
+      render();
+      toast('Policy published', newPolicy.name);
+      switchView('policies');
+    }
+
+    function handleAgentSubmit(event) {
+      event.preventDefault();
+      const name = $('#agentName').value.trim();
+      const agent = {
+        id: 'agent-' + Date.now(),
+        name,
+        owner: $('#agentOwner').value.trim(),
+        identity: $('#agentIdentity').value.trim(),
+        environments: ['staging'],
+        connectors: $('#agentConnectors').value.split(',').map(v => v.trim()).filter(Boolean),
+        riskTier: $('#agentRiskTier').value,
+        blastRadius: $('#agentBlastRadius').value.trim(),
+        capabilities: $('#agentCapabilities').value.split(',').map(v => v.trim()).filter(Boolean),
+        modelProvider: $('#agentModelProvider').value.trim(),
+        modelName: $('#agentModelName').value.trim(),
+        orchestrationLayer: $('#agentOrchestration').value.trim(),
+        knowledgeSource: $('#agentKnowledge').value.trim()
+      };
+      state.agents.unshift(agent);
+      activeAgentId = agent.id;
+      event.target.reset();
+      $('#agentBlastRadius').value = 'Medium';
+      toast('Agent registered', name);
+      render();
+      switchView('agents');
+      setContext('agent', agent.id);
+    }
+
+    function runScenario() {
+      const scenario = JSON.parse(JSON.stringify(state.scenarios[scenarioIndex % state.scenarios.length]));
+      scenarioIndex += 1;
+      addRun(scenario);
+      switchView('overview');
+    }
+
+    function seedApproval() {
+      addRun({
+        agent: 'it-access-bot',
+        connector: 'okta',
+        action: 'add_group',
+        objectCount: 3,
+        context: 'identity',
+        environment: 'prod',
+        identity: 'it-admin-service',
+        summary: 'Add 3 users to Finance-Admin in Okta',
+        justification: 'Quarter-close support requires temporary elevated access.',
+        payload: { users: ['amy@company.com','leo@company.com','nina@company.com'], group: 'Finance-Admin' }
+      });
+      switchView('approvals');
+    }
+
+    function toggleMode() {
+      state.shadowMode = !state.shadowMode;
+      render();
+      toast('Deployment mode updated', state.shadowMode ? 'Workspace switched to shadow mode.' : 'Workspace switched to enforcement mode.');
+    }
+
+    function autoWalkthrough() {
+      clearInterval(tourTimer);
+      const sequence = [
+        () => switchView('overview'),
+        () => switchView('discovery'),
+        () => runScenario(),
+        () => switchView('approvals'),
+        () => switchView('audit')
+      ];
+      let i = 0;
+      sequence[i++]();
+      tourTimer = setInterval(() => {
+        if (i >= sequence.length) {
+          clearInterval(tourTimer);
+          tourTimer = null;
+          return;
+        }
+        sequence[i++]();
+      }, 1500);
+    }
+
+    function resetWorkspace() {
+      state = JSON.parse(JSON.stringify(initialState));
+      activeAgentId = state.agents[0].id;
+      activeApprovalId = state.runs.find(r => r.status === 'pending_approval')?.id || null;
+      activeContext = { type: 'workspace' };
+      scenarioIndex = 0;
+      clearInterval(tourTimer);
+      tourTimer = null;
+      $('#simulationResult').innerHTML = '<div class="meta">No evaluation yet.</div>';
+      $('#latestDecision').innerHTML = '<div class="meta">No decision yet. Run a scenario or use the simulator.</div>';
+      render();
+      switchView('overview');
+      toast('Workspace reset', 'Operational state restored to baseline.');
+    }
+
+
+    let currentWizardStep = 1;
+    let billingMultiplier = 1;
+
+    function showWizard(step) {
+      currentWizardStep = step;
+      [1,2,3].forEach(i => {
+        const el = document.getElementById('wizard' + i);
+        if (el) el.classList.toggle('active', i === step);
+      });
+      const badge = document.getElementById('wizardBadge');
+      const progress = document.getElementById('wizardProgress');
+      if (badge) badge.textContent = 'Step ' + step + ' / 3';
+      if (progress) progress.style.width = (step === 1 ? 33 : step === 2 ? 66 : 100) + '%';
+    }
+
+    function openCheckout() {
+      const el = document.getElementById('checkoutBackdrop');
+      if (el) el.classList.add('show');
+    }
+
+    function closeCheckout() {
+      const el = document.getElementById('checkoutBackdrop');
+      if (el) el.classList.remove('show');
+    }
+
+    function updateCheckout() {
+      const select = document.getElementById('planSelect');
+      if (!select) return;
+      const planValue = select.value;
+      const isYearly = billingMultiplier !== 1;
+
+      let label = 'Growth';
+      let base = 2500 * billingMultiplier;
+      let tax = Math.round(base * 0.20);
+      let overage = 1248;
+      let baseText = isYearly
+        ? 'Growth plan • annual billing for live governance'
+        : 'Growth plan • live governance for production workflows';
+
+      if (planValue === '0') {
+        label = 'Sandbox';
+        base = 0;
+        tax = 0;
+        overage = 0;
+        baseText = 'Sandbox plan • controlled test environment';
+      } else if (planValue === 'custom') {
+        label = 'Enterprise';
+        base = 0;
+        tax = 0;
+        overage = 0;
+        baseText = 'Enterprise plan • pricing handled with the sales team';
+      }
+
+      const total = base + tax + overage;
+
+      document.getElementById('summaryPlan').textContent = label;
+      document.getElementById('basePlanText').textContent = baseText;
+      document.getElementById('basePlanPrice').textContent = base === 0 ? (label === 'Enterprise' ? 'Custom' : 'Free') : '€' + base.toLocaleString('fr-FR');
+      document.getElementById('taxPrice').textContent = tax === 0 ? '€0' : '€' + tax.toLocaleString('fr-FR');
+      document.getElementById('checkoutTotal').textContent = base === 0 && overage === 0
+        ? (label === 'Enterprise' ? 'Custom' : '€0')
+        : '€' + total.toLocaleString('fr-FR');
+    }
+
+    function confirmCheckout() {
+      closeCheckout();
+      const tbody = document.getElementById('invoiceTable');
+      if (tbody) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td>INV-2026-042</td><td>Apr 2026</td><td><span class="badge require_approval">Processing</span></td><td>' + document.getElementById('checkoutTotal').textContent + '</td>';
+        tbody.prepend(tr);
+      }
+      const planValue = document.getElementById('planSelect')?.value;
+      toast(
+        planValue === 'custom' ? 'Enterprise request created' : 'Payment confirmed',
+        planValue === 'custom'
+          ? 'Enterprise pricing request simulated and sent to the sales team.'
+          : 'Stripe checkout simulated and a new invoice was generated.'
+      );
+      switchView('billing');
+    }
+
+    function launchSignIn() {
+      const email = document.getElementById('launchEmail')?.value || 'workspace@agentrail.dev';
+      document.getElementById('loginEmail').value = email;
+      enterWorkspace();
+      toast('Authentication succeeded', 'Session opened for ' + email);
+      switchView('overview');
+    }
+
+    function launchSSO() {
+      toast('SSO started', 'Google / SAML flow simulated.');
+      switchView('launch');
+    }
+
+    function finishOnboardingFlow() {
+      const name = document.getElementById('workspaceInput')?.value || 'AgentRail Labs';
+      state.workspaceName = name;
+      render();
+      toast('Workspace provisioned', name + ' is ready with billing, members, and governed agents.');
+      switchView('workspace');
+    }
+
+
+    function enterWorkspace() {
+      $('#authScreen').classList.add('hidden');
+      toast('Welcome back', $('#loginEmail').value || 'Workspace access granted.');
+    }
+
+
+    document.getElementById('launchSignInBtn').addEventListener('click', launchSignIn);
+    document.getElementById('launchSSOBtn').addEventListener('click', launchSSO);
+    document.querySelectorAll('[data-next]').forEach(btn => btn.addEventListener('click', () => showWizard(Number(btn.dataset.next))));
+    document.querySelectorAll('[data-prev]').forEach(btn => btn.addEventListener('click', () => showWizard(Number(btn.dataset.prev))));
+    document.getElementById('finishOnboarding').addEventListener('click', finishOnboardingFlow);
+    document.getElementById('openCheckoutBilling').addEventListener('click', openCheckout);
+    document.getElementById('closeCheckoutBtn').addEventListener('click', closeCheckout);
+    document.getElementById('confirmCheckout').addEventListener('click', confirmCheckout);
+    document.getElementById('planSelect').addEventListener('change', updateCheckout);
+    document.querySelectorAll('.intervalBtn').forEach(btn => btn.addEventListener('click', () => {
+      document.querySelectorAll('.intervalBtn').forEach(x => x.classList.remove('active'));
+      btn.classList.add('active');
+      billingMultiplier = Number(btn.dataset.multiplier);
+      updateCheckout();
+    }));
+
+    document.getElementById('enterWorkspaceBtn').addEventListener('click', enterWorkspace);
+    document.getElementById('loginEmail').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') enterWorkspace();
+    });
+    document.getElementById('scenarioBtn').addEventListener('click', runScenario);
+    document.getElementById('approvalBtn').addEventListener('click', seedApproval);
+    document.getElementById('modeBtn').addEventListener('click', toggleMode);
+    document.getElementById('tourBtn').addEventListener('click', autoWalkthrough);
+    document.getElementById('openCheckoutTop').addEventListener('click', openCheckout);
+    document.getElementById('resetBtn').addEventListener('click', resetWorkspace);
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    document.getElementById('simConnector').addEventListener('change', syncSimulationActions);
+    document.getElementById('simulationForm').addEventListener('submit', handleSimulationSubmit);
+    document.getElementById('policyForm').addEventListener('submit', handlePolicySubmit);
+    document.getElementById('agentForm').addEventListener('submit', handleAgentSubmit);
+    document.getElementById('auditFilter').addEventListener('input', renderAudit);
+    document.getElementById('replaySelect').addEventListener('change', () => {
+      const id = $('#replaySelect').value;
+      setContext('run', id);
+      renderReplay();
+    });
+    ['policyConnector','policyAction','policyConditionType','policyConditionValue','policyMaxObjects','policyDecision'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updatePolicyPreview);
+      document.getElementById(id).addEventListener('change', updatePolicyPreview);
+    });
+    document.querySelectorAll('#nav button').forEach(btn => {
+      btn.addEventListener('click', () => switchView(btn.dataset.view));
+    });
+    document.getElementById('modalBackdrop').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('modalBackdrop')) closeModal();
+    });
+    document.getElementById('checkoutBackdrop').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('checkoutBackdrop')) closeCheckout();
+    });
+
+    window.openAgent = openAgent;
+    window.openApproval = openApproval;
+    window.openRun = openRun;
+    window.openApprovalModal = openApprovalModal;
+    window.resolveApprovalFromUI = resolveApprovalFromUI;
+    window.closeModal = closeModal;
+
+    render();
+  </script>
+</body>
+</html>
