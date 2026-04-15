@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>AgentRail — Pilot Workspace</title>
   <meta name="theme-color" content="#050910" />
+  <link id="site-favicon" rel="icon" href="" />
   <style>
     :root {
       --bg: #070b18;
@@ -2689,6 +2690,11 @@
     window.closeModal = closeModal;
 
     render();
+    const favicon = document.getElementById('site-favicon');
+const embeddedLogo = document.querySelector('.auth-brand img') || document.querySelector('.brand img');
+if (favicon && embeddedLogo) {
+  favicon.href = embeddedLogo.src;
+}
   </script>
 </body>
 </html>
