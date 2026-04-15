@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AgentRail Studio</title>
+<meta name="theme-color" content="#0b1425">
+<style>
+:root{
+  --bg:#08111f; --line:#243553; --text:#eef4ff; --muted:#9db2d3; --blue:#60a5fa;
+  --green:#34d399; --amber:#fbbf24; --red:#fb7185; --violet:#8b5cf6;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:radial-gradient(circle at top right,rgba(34,211,238,.06),transparent 25%),radial-gradient(circle at top left,rgba(139,92,246,.10),transparent 30%),linear-gradient(180deg,var(--bg),#07101b 55%,#060d16);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif}
+button,input,select{font:inherit} button{cursor:pointer}
+.app{max-width:1320px;margin:0 auto;padding:28px}
+.topbar,.brand,.actions,.panel-title,.itemhead,.toolbar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{align-items:center}.actions{align-items:center}
+.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,rgba(96,165,250,.9),rgba(139,92,246,.95));display:grid;place-items:center;box-shadow:0 12px 30px rgba(58,110,255,.35)}
+.logo span{font-weight:900;font-size:18px;color:#fff}
+.brand h1{margin:0;font-size:24px}.brand p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.btn{padding:11px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text)}
+.btn.primary{border:none;background:linear-gradient(135deg,#2563eb,#0891b2);box-shadow:0 12px 30px rgba(37,99,235,.25)}
+.btn.ghost{background:rgba(255,255,255,.02)}
+.grid{display:grid;gap:16px}.hero{grid-template-columns:1.18fr .82fr;margin-top:18px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.015));backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 20px 45px rgba(0,0,0,.22)}
+.gradient{background:radial-gradient(circle at top right,rgba(34,211,238,.10),transparent 25%),radial-gradient(circle at bottom left,rgba(96,165,250,.12),transparent 30%),linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01))}
+.label{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border-radius:999px;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.18);color:#cde3ff;font-size:12px;font-weight:700}
+.hero h2{font-size:40px;line-height:1.05;letter-spacing:-.04em;margin:14px 0 10px;max-width:760px}
+.subhead{margin:0;max-width:760px;color:var(--muted);font-size:17px;line-height:1.6}
+.statline,.kpis,.row2,.row3,.discovery-grid,.form2,.form3,.explain{display:grid;gap:12px}
+.statline{grid-template-columns:repeat(4,1fr);margin-top:18px}
+.kpis{grid-template-columns:repeat(4,1fr);margin-top:16px}
+.row2{grid-template-columns:1fr 1fr;margin-top:16px}
+.row3{grid-template-columns:1.05fr .95fr;margin-top:16px}
+.discovery-grid{grid-template-columns:1fr 1fr;margin-top:12px}
+.form2{grid-template-columns:1fr 1fr}.form3{grid-template-columns:1fr 1fr 1fr}
+.stat,.mini,.item,.tile,.box,.decision-card{padding:14px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.02)}
+.stat .n,.mini .n{font-size:28px;font-weight:900}
+.stat .k,.mini .k,.box .t,.small{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.badge{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid transparent;font-size:12px;font-weight:700}
+.allow,.executed{background:rgba(52,211,153,.14);color:#9ff7cb;border-color:rgba(52,211,153,.2)}
+.require_approval,.pending_approval,.review{background:rgba(251,191,36,.14);color:#fde68a;border-color:rgba(251,191,36,.2)}
+.deny,.blocked{background:rgba(251,113,133,.14);color:#ffb4c1;border-color:rgba(251,113,133,.2)}
+.blue{background:rgba(96,165,250,.14);color:#bfdcff;border-color:rgba(96,165,250,.2)}
+.violet{background:rgba(139,92,246,.14);color:#ddd1ff;border-color:rgba(139,92,246,.22)}
+.muted{color:var(--muted)} .panel-title h3,.item h4{margin:0}
+.list{display:grid;gap:12px;margin-top:12px}.meta{margin-top:5px;color:var(--muted);font-size:13px}.sub{margin-top:10px;color:var(--muted);font-size:14px;line-height:1.5}
+.timeline{display:grid;gap:12px;margin-top:14px}.step{display:grid;grid-template-columns:auto 1fr;gap:12px}.dot{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;background:rgba(96,165,250,.16);border:1px solid rgba(96,165,250,.22);color:#d5e6ff}.step strong{display:block;margin-bottom:4px}.step p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+.box .v{margin-top:6px;font-weight:700}.env{display:inline-flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+input,select{width:100%;padding:12px 13px;border-radius:14px;background:#0b1425;border:1px solid var(--line);color:var(--text);outline:none}
+table{width:100%;border-collapse:collapse;margin-top:8px} th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.pill{padding:7px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
+footer{padding:18px 0 8px;color:var(--muted);font-size:13px;text-align:center}
+@media (max-width:1060px){.hero,.row2,.row3,.kpis,.statline,.discovery-grid,.form2,.form3,.explain{grid-template-columns:1fr}.hero h2{font-size:34px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"><span>AR</span></div>
+      <div>
+        <h1>AgentRail Studio</h1>
+        <p>Interactive MVP for runtime governance, approvals, auditability, and agent discovery.</p>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="reset">Reset demo</button>
+      <button class="btn" id="runScenario">Run next scenario</button>
+      <button class="btn primary" id="seedApproval">Create approval request</button>
+    </div>
+  </div>
+
+  <section class="grid hero">
+    <div class="card gradient">
+      <span class="label">Runtime governance for enterprise AI actions</span>
+      <h2>Let agents act in production — without giving them the keys to the kingdom.</h2>
+      <p class="subhead">AgentRail evaluates every action in context, applies policy, scores risk, routes sensitive operations for review, and records an audit trail that security and operations teams can trust.</p>
+      <div class="statline" id="heroStats"></div>
+      <div class="timeline">
+        <div class="step"><div class="dot">1</div><div><strong>Discover</strong><p>Inventory agents, connectors, execution identities, and high-risk capabilities across your workspace.</p></div></div>
+        <div class="step"><div class="dot">2</div><div><strong>Decide</strong><p>Evaluate actions against policy with structured context: actor, agent, system, environment, object count, and risk.</p></div></div>
+        <div class="step"><div class="dot">3</div><div><strong>Review & record</strong><p>Route sensitive actions to human approval, then preserve a replayable audit trail for investigation and compliance.</p></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="panel-title">
+        <h3>Decision simulator</h3>
+        <span class="badge violet">Allow / Review / Block</span>
+      </div>
+      <p class="muted" style="margin:8px 0 14px">Model a real action request and see how AgentRail explains its decision.</p>
+      <form id="sim">
+        <div class="form2">
+          <select id="agent"></select>
+          <select id="conn"></select>
+        </div>
+        <div class="form2" style="margin-top:10px">
+          <select id="action"></select>
+          <select id="env"></select>
+        </div>
+        <div class="form3" style="margin-top:10px">
+          <select id="ctx"></select>
+          <input id="count" type="number" min="1" max="100" value="1">
+          <select id="identity"></select>
+        </div>
+        <button class="btn primary" type="submit" style="margin-top:10px">Evaluate action</button>
+      </form>
+      <div class="decision-card" id="result">
+        <div class="muted">No evaluation yet. Pick a scenario to see how policy, risk, and approval routing behave.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid kpis" id="kpis"></section>
+
+  <section class="grid row3">
+    <section class="card">
+      <div class="panel-title">
+        <h3>Agent discovery</h3>
+        <span class="pill" id="discoveryCount">0 agents</span>
+      </div>
+      <p class="muted" style="margin:8px 0 0">A governance layer starts with visibility. See which agents exist, what they can touch, and where the risk sits.</p>
+      <div class="discovery-grid" id="discovery"></div>
+    </section>
+    <section class="card">
+      <div class="panel-title">
+        <h3>Policy posture</h3>
+        <span class="pill" id="policySummary">0 active rules</span>
+      </div>
+      <div class="list" id="policies"></div>
+    </section>
+  </section>
+
+  <section class="grid row2">
+    <section class="card">
+      <div class="panel-title">
+        <h3>Approval inbox</h3>
+        <span class="pill" id="approvalsCount">0 pending</span>
+      </div>
+      <div id="approvals" class="list"></div>
+    </section>
+    <section class="card">
+      <div class="panel-title">
+        <h3>Recent runs</h3>
+        <span class="pill" id="runsCount">0 runs</span>
+      </div>
+      <div id="runs" class="list"></div>
+    </section>
+  </section>
+
+  <section class="grid row2">
+    <section class="card">
+      <div class="panel-title">
+        <h3>Create a policy</h3>
+        <span class="badge blue">Fast prototyping</span>
+      </div>
+      <p class="muted" style="margin:8px 0 14px">Define decision logic for a connector/action pair, set an environment threshold, and choose how sensitive actions should be handled.</p>
+      <form id="policyForm">
+        <input id="pname" placeholder="Policy name" required>
+        <div class="form2" style="margin-top:10px">
+          <select id="pconn"></select>
+          <input id="paction" placeholder="update_deal or delete_*" required>
+        </div>
+        <div class="form3" style="margin-top:10px">
+          <select id="ptype">
+            <option value="any">Any context</option>
+            <option value="project">Context equals</option>
+            <option value="environment">Environment equals</option>
+          </select>
+          <input id="pvalue" value="*" required>
+          <input id="pmax" type="number" min="1" value="1" required>
+        </div>
+        <div class="form2" style="margin-top:10px">
+          <select id="pdecision">
+            <option value="allow">Allow</option>
+            <option value="require_approval">Require approval</option>
+            <option value="deny">Deny</option>
+          </select>
+          <input id="pprio" type="number" min="1" value="80" required>
+        </div>
+        <button class="btn primary" type="submit" style="margin-top:10px">Create policy</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="toolbar">
+        <div class="panel-title" style="display:block">
+          <h3>Audit log</h3>
+          <div class="small">Trace every request, policy match, and execution outcome.</div>
+        </div>
+        <input id="q" placeholder="Filter by agent, action, status, or connector" style="max-width:340px">
+      </div>
+      <div style="overflow:auto">
+        <table>
+          <thead>
+            <tr><th>Time</th><th>Agent</th><th>Execution identity</th><th>Action</th><th>Risk</th><th>Decision</th><th>Status</th></tr>
+          </thead>
+          <tbody id="audit"></tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <footer>AgentRail MVP — Discovery, policy evaluation, approval routing, and auditability in one interactive surface.</footer>
+</div>
+
+<script>
+const base={connectors:[{id:'jira',name:'Jira',kind:'write',scopes:['create_issue','update_issue','delete_issue']},{id:'hubspot',name:'HubSpot',kind:'write',scopes:['update_deal','create_contact','delete_contact']},{id:'slack',name:'Slack',kind:'write',scopes:['post_message','post_approvals']},{id:'okta',name:'Okta',kind:'admin',scopes:['add_group','suspend_user','reset_mfa']}],agents:[{id:'support-bot',name:'Support Bot',owner:'Support Ops',identity:'support-service',environments:['prod'],connectors:['jira','slack'],riskTier:'medium',capabilities:['create_issue','post_message']},{id:'revops-bot',name:'RevOps Bot',owner:'Revenue Ops',identity:'revops-service',environments:['prod','staging'],connectors:['hubspot','slack'],riskTier:'high',capabilities:['update_deal','create_contact']},{id:'it-bot',name:'IT Access Bot',owner:'IT & Security',identity:'it-admin-service',environments:['prod'],connectors:['okta','slack'],riskTier:'critical',capabilities:['add_group','suspend_user','reset_mfa']},{id:'ops-assistant',name:'Ops Assistant',owner:'Business Ops',identity:'ops-shared-token',environments:['staging'],connectors:['hubspot'],riskTier:'medium',capabilities:['update_deal']}],policies:[{id:'p1',name:'Jira support auto-create',connector:'jira',action:'create_issue',conditionType:'project',conditionValue:'SUP',maxObjects:1,decision:'allow',priority:100,active:true,reason:'Support issues in SUP can auto-execute.'},{id:'p2',name:'HubSpot bulk updates require review',connector:'hubspot',action:'update_deal',conditionType:'any',conditionValue:'*',maxObjects:5,decision:'require_approval',priority:90,active:true,reason:'Revenue mutations above threshold must be reviewed.'},{id:'p3',name:'Block destructive actions',connector:'*',action:'delete_*',conditionType:'any',conditionValue:'*',maxObjects:999,decision:'deny',priority:1000,active:true,reason:'Delete operations are blocked by default.'},{id:'p4',name:'Okta admin actions require approval',connector:'okta',action:'*',conditionType:'environment',conditionValue:'prod',maxObjects:20,decision:'require_approval',priority:120,active:true,reason:'Identity changes in production require human approval.'}],runs:[{id:'run-001',timestamp:'2026-03-27 09:14',actor:'support-bot',identity:'support-service',connector:'jira',action:'create_issue',objectCount:1,context:'SUP',environment:'prod',risk:22,decision:'allow',status:'executed',summary:'Create Jira issue from customer escalation',payload:{project:'SUP',priority:'P2',title:'Refund issue on order #8484'},matchedPolicy:'Jira support auto-create',reason:'Matched policy Jira support auto-create.'},{id:'run-002',timestamp:'2026-03-27 09:32',actor:'revops-bot',identity:'revops-service',connector:'hubspot',action:'update_deal',objectCount:8,context:'pipeline',environment:'prod',risk:74,decision:'require_approval',status:'pending_approval',summary:'Move 8 deals to Negotiation',payload:{dealIds:[102,104,111,116,118,120,128,132],stage:'Negotiation'},matchedPolicy:'HubSpot bulk updates require review',reason:'Approval required by HubSpot bulk updates require review.'},{id:'run-003',timestamp:'2026-03-27 10:01',actor:'ops-assistant',identity:'ops-shared-token',connector:'hubspot',action:'delete_contact',objectCount:1,context:'crm',environment:'staging',risk:96,decision:'deny',status:'blocked',summary:'Delete contact requested by workflow',payload:{contactId:8871},matchedPolicy:'Block destructive actions',reason:'Delete actions are blocked globally.'}]};
+let state=structuredClone(base),scenarioIndex=0;
+const scenarios=[{actor:'support-bot',connector:'jira',action:'create_issue',objectCount:1,context:'SUP',environment:'prod',identity:'support-service',payload:{project:'SUP',priority:'P3',title:'Customer cannot download invoice'}},{actor:'revops-bot',connector:'hubspot',action:'update_deal',objectCount:2,context:'pipeline',environment:'prod',identity:'revops-service',payload:{dealIds:[411,412],owner:'AE-France'}},{actor:'revops-bot',connector:'hubspot',action:'update_deal',objectCount:12,context:'pipeline',environment:'prod',identity:'revops-service',payload:{dealIds:[1,2,3,4,5,6,7,8,9,10,11,12],stage:'Closed Lost'}},{actor:'it-bot',connector:'okta',action:'suspend_user',objectCount:1,context:'identity',environment:'prod',identity:'it-admin-service',payload:{user:'lucy@company.com'}}];
+const connectorActions={jira:['create_issue','update_issue','delete_issue'],hubspot:['update_deal','create_contact','delete_contact'],slack:['post_message'],okta:['add_group','suspend_user','reset_mfa']},contexts=['SUP','pipeline','crm','identity','incident'],environments=['staging','prod'];
+const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,'0'),now=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`},badge=(txt,cls)=>`<span class="badge ${cls}">${txt}</span>`;
+const matches=(pattern,action)=>pattern==='*'||(pattern.endsWith('*')?action.startsWith(pattern.slice(0,-1)):pattern===action);
+function scoreRisk(req){let score=8;if(req.connector==='hubspot')score+=20;if(req.connector==='okta')score+=42;if(req.action.includes('update'))score+=12;if(req.action.includes('delete'))score+=55;if(req.action.includes('suspend')||req.action.includes('reset'))score+=30;if(req.objectCount>1)score+=Math.min(28,req.objectCount*3);if(req.environment==='prod')score+=18;if(req.context==='pipeline')score+=8;if(req.identity.includes('shared'))score+=12;return Math.min(100,score)}
+function findPolicy(req){return state.policies.filter(p=>p.active).sort((a,b)=>b.priority-a.priority).find(p=>{const connectorMatch=p.connector==='*'||p.connector===req.connector,actionMatch=matches(p.action,req.action),conditionMatch=p.conditionType==='any'||p.conditionType==='project'&&p.conditionValue===req.context||p.conditionType==='environment'&&p.conditionValue===req.environment,thresholdMatch=req.objectCount<=p.maxObjects||p.decision==='require_approval';return connectorMatch&&actionMatch&&conditionMatch&&thresholdMatch})}
+function evaluate(req){const risk=scoreRisk(req);if(req.action.includes('delete'))return{decision:'deny',risk,policy:'Block destructive actions',reason:'Delete actions are blocked globally.',reviewHint:'Destructive operations are outside the allowed runtime envelope.'};const matched=findPolicy(req);if(!matched)return{decision:'deny',risk,policy:'Default deny',reason:'No active policy matched this request.',reviewHint:'Create a policy or narrow the action scope.'};if(matched.decision==='require_approval')return{decision:'require_approval',risk:Math.max(risk,68),policy:matched.name,reason:matched.reason||`Approval required by ${matched.name}.`,reviewHint:'A human approver must validate the business impact before execution.'};if(req.objectCount>matched.maxObjects)return{decision:'require_approval',risk:Math.max(risk,72),policy:matched.name,reason:`Threshold exceeded (${matched.maxObjects} objects max).`,reviewHint:'Bulk scope exceeds the automatic execution threshold.'};return{decision:'allow',risk,policy:matched.name,reason:matched.reason||`Matched policy ${matched.name}.`,reviewHint:'This action fits the current policy envelope and can execute automatically.'}}
+function syncControls(){$('#agent').innerHTML=state.agents.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');$('#conn').innerHTML=state.connectors.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');$('#ctx').innerHTML=contexts.map(c=>`<option>${c}</option>`).join('');$('#env').innerHTML=environments.map(e=>`<option>${e}</option>`).join('');$('#identity').innerHTML=[...new Set(state.agents.map(a=>a.identity))].map(i=>`<option>${i}</option>`).join('');$('#pconn').innerHTML=['<option value="*">*</option>'].concat(state.connectors.map(c=>`<option value="${c.id}">${c.name}</option>`)).join('');syncActions()}
+function syncActions(){const connector=$('#conn').value;$('#action').innerHTML=(connectorActions[connector]||[]).map(a=>`<option>${a}</option>`).join('')}
+function renderHero(){const runs=state.runs,pending=runs.filter(r=>r.status==='pending_approval').length,blocked=runs.filter(r=>r.status==='blocked').length,criticalAgents=state.agents.filter(a=>a.riskTier==='critical').length;$('#heroStats').innerHTML=`<div class="stat"><div class="k">Managed actions</div><div class="n">${runs.length}</div></div><div class="stat"><div class="k">Pending approvals</div><div class="n">${pending}</div></div><div class="stat"><div class="k">Blocked actions</div><div class="n">${blocked}</div></div><div class="stat"><div class="k">Critical agents</div><div class="n">${criticalAgents}</div></div>`}
+function renderKpis(){const runs=state.runs,avgRisk=Math.round(runs.reduce((s,r)=>s+r.risk,0)/runs.length),executed=runs.filter(r=>r.status==='executed').length,reviewed=runs.filter(r=>r.decision==='require_approval').length,sharedIdentities=[...new Set(state.agents.filter(a=>a.identity.includes('shared')).map(a=>a.identity))].length;$('#kpis').innerHTML=`<div class="mini"><div class="k">Executed</div><div class="n">${executed}</div></div><div class="mini"><div class="k">Reviewed</div><div class="n">${reviewed}</div></div><div class="mini"><div class="k">Average risk</div><div class="n">${Number.isFinite(avgRisk)?avgRisk:0}</div></div><div class="mini"><div class="k">Shared identities</div><div class="n">${sharedIdentities}</div></div>`}
+function renderDiscovery(){$('#discoveryCount').textContent=`${state.agents.length} agents`;$('#discovery').innerHTML=state.agents.map(a=>{const riskClass=a.riskTier==='critical'?'deny':a.riskTier==='high'?'require_approval':'blue';return `<div class="tile"><div class="itemhead"><div><h4>${a.name}</h4><div class="meta">${a.owner} · identity: ${a.identity}</div></div>${badge(a.riskTier,riskClass)}</div><div class="env">${a.connectors.map(c=>badge(c,'blue')).join('')}</div><ul><li><strong>Capabilities:</strong> ${a.capabilities.join(', ')}</li><li><strong>Environments:</strong> ${a.environments.join(', ')}</li><li><strong>Risk note:</strong> ${a.identity.includes('shared')?'Shared token increases blast radius.':'Dedicated service identity.'}</li></ul></div>`}).join('')}
+function renderPolicies(){$('#policySummary').textContent=`${state.policies.length} active rules`;$('#policies').innerHTML=state.policies.slice().sort((a,b)=>b.priority-a.priority).map(p=>`<div class="item"><div class="itemhead"><div><h4>${p.name}</h4><div class="meta">${p.connector}.${p.action} · priority ${p.priority}</div></div>${badge(p.decision.replaceAll('_',' '),p.decision)}</div><div class="sub"><strong>Condition:</strong> ${p.conditionType==='any'?'Any context':`${p.conditionType} = ${p.conditionValue}`}<br><strong>Max objects:</strong> ${p.maxObjects}<br><strong>Why it exists:</strong> ${p.reason||'No reason provided.'}</div></div>`).join('')}
+function renderRuns(){const runs=state.runs.slice().reverse();$('#runsCount').textContent=`${runs.length} runs`;$('#runs').innerHTML=runs.map(r=>`<div class="item"><div class="itemhead"><div><h4>${r.summary}</h4><div class="meta">${r.timestamp} · ${r.actor} · ${r.identity}</div></div>${badge(r.status.replaceAll('_',' '),r.status)}</div><div class="sub">${badge(r.decision.replaceAll('_',' '),r.decision)} &nbsp; risk ${r.risk}/100 · ${r.connector}.${r.action} · ${r.objectCount} object(s) · ${r.environment}<br><strong>Matched policy:</strong> ${r.matchedPolicy}<br><strong>Why:</strong> ${r.reason}</div></div>`).join('')}
+function renderApprovals(){const pending=state.runs.filter(r=>r.status==='pending_approval').slice().reverse();$('#approvalsCount').textContent=`${pending.length} pending`;$('#approvals').innerHTML=pending.length?pending.map(r=>`<div class="item"><div class="itemhead"><div><h4>${r.connector}.${r.action}</h4><div class="meta">${r.actor} · ${r.identity} · ${r.timestamp}</div></div>${badge(`risk ${r.risk}`,'require_approval')}</div><div class="sub"><strong>Requested change:</strong> ${r.summary}<br><strong>Environment:</strong> ${r.environment}<br><strong>Matched policy:</strong> ${r.matchedPolicy}<br><strong>Why approval is required:</strong> ${r.reason}<br><strong>Payload:</strong> ${JSON.stringify(r.payload)}</div><div class="actions" style="margin-top:12px"><button class="btn" onclick="resolveApproval('${r.id}', true)">Approve</button><button class="btn" onclick="resolveApproval('${r.id}', false)">Reject</button></div></div>`).join(''):`<div class="item muted">No approvals are currently waiting for human review.</div>`}
+function renderAudit(){const q=($('#q').value||'').toLowerCase();$('#audit').innerHTML=state.runs.filter(r=>!q||[r.actor,r.identity,r.connector,r.action,r.status,r.decision,r.summary].join(' ').toLowerCase().includes(q)).map(r=>`<tr><td>${r.timestamp}</td><td>${r.actor}</td><td>${r.identity}</td><td>${r.connector}.${r.action}<br><span class="small">${r.environment} · ${r.context}</span></td><td>${r.risk}</td><td>${badge(r.decision.replaceAll('_',' '),r.decision)}</td><td>${badge(r.status.replaceAll('_',' '),r.status)}</td></tr>`).join('')}
+function render(){renderHero();renderKpis();renderDiscovery();renderPolicies();renderRuns();renderApprovals();renderAudit()}
+function showDecision(req,out){$('#result').innerHTML=`<div class="itemhead"><div><h4>${req.connector}.${req.action}</h4><div class="meta">${req.actor} · ${req.identity} · ${req.environment} · context ${req.context}</div></div>${badge(out.decision.replaceAll('_',' '),out.decision)}</div><div class="explain"><div class="box"><div class="t">Matched policy</div><div class="v">${out.policy}</div></div><div class="box"><div class="t">Risk score</div><div class="v">${out.risk}/100</div></div><div class="box"><div class="t">Objects touched</div><div class="v">${req.objectCount}</div></div></div><div class="sub" style="margin-top:12px"><strong>Decision reason:</strong> ${out.reason}<br><strong>Review note:</strong> ${out.reviewHint}<br><strong>Execution path:</strong> ${out.decision==='allow'?'Execute automatically':out.decision==='require_approval'?'Route to approval inbox':'Block before execution'}</div>`}
+function runRequest(req,summary){const out=evaluate(req),run={id:'run-'+Math.floor(Math.random()*1e6),timestamp:now(),actor:req.actor,identity:req.identity,connector:req.connector,action:req.action,objectCount:req.objectCount,context:req.context,environment:req.environment,risk:out.risk,decision:out.decision,status:out.decision==='allow'?'executed':out.decision==='require_approval'?'pending_approval':'blocked',summary:summary||`${req.connector}.${req.action} evaluated by simulator`,payload:req.payload||{},matchedPolicy:out.policy,reason:out.reason};state.runs.push(run);showDecision(req,out);render()}
+function resolveApproval(id,approved){state.runs=state.runs.map(r=>r.id!==id?r:{...r,status:approved?'executed':'blocked',decision:approved?'allow':'deny',summary:r.summary+(approved?' · approved':' · rejected'),reason:approved?'Approved by human reviewer.':'Rejected by human reviewer.'});render()}
+window.resolveApproval=resolveApproval;
+$('#sim').onsubmit=e=>{e.preventDefault();runRequest({actor:$('#agent').value,connector:$('#conn').value,action:$('#action').value,environment:$('#env').value,context:$('#ctx').value,objectCount:Number($('#count').value),identity:$('#identity').value,payload:{}})};
+$('#policyForm').onsubmit=e=>{e.preventDefault();state.policies.push({id:'p'+Date.now(),name:$('#pname').value.trim(),connector:$('#pconn').value,action:$('#paction').value.trim(),conditionType:$('#ptype').value,conditionValue:$('#pvalue').value.trim(),maxObjects:Number($('#pmax').value),decision:$('#pdecision').value,priority:Number($('#pprio').value),active:true,reason:'User-created policy from the MVP studio.'});e.target.reset();$('#pvalue').value='*';$('#pmax').value=1;$('#pprio').value=80;render()};
+$('#q').oninput=render;$('#conn').onchange=()=>{$('#action').innerHTML=(connectorActions[$('#conn').value]||[]).map(a=>`<option>${a}</option>`).join('')};
+$('#runScenario').onclick=()=>{const req=structuredClone(scenarios[scenarioIndex%scenarios.length]);scenarioIndex+=1;runRequest(req,`${req.actor} requests ${req.connector}.${req.action}`)};
+$('#seedApproval').onclick=()=>{runRequest({actor:'it-bot',connector:'okta',action:'add_group',objectCount:3,context:'identity',environment:'prod',identity:'it-admin-service',payload:{users:['amy@company.com','leo@company.com','nina@company.com'],group:'Finance-Admin'}},'Add 3 users to Finance-Admin in Okta')};
+$('#reset').onclick=()=>{state=structuredClone(base);scenarioIndex=0;$('#result').innerHTML='<div class="muted">No evaluation yet. Pick a scenario to see how policy, risk, and approval routing behave.</div>';syncControls();render()};
+function syncControls(){$('#agent').innerHTML=state.agents.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');$('#conn').innerHTML=state.connectors.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');$('#ctx').innerHTML=contexts.map(c=>`<option>${c}</option>`).join('');$('#env').innerHTML=environments.map(e=>`<option>${e}</option>`).join('');$('#identity').innerHTML=[...new Set(state.agents.map(a=>a.identity))].map(i=>`<option>${i}</option>`).join('');$('#pconn').innerHTML=['<option value="*">*</option>'].concat(state.connectors.map(c=>`<option value="${c.id}">${c.name}</option>`)).join('');$('#action').innerHTML=(connectorActions[$('#conn').value]||[]).map(a=>`<option>${a}</option>`).join('')}
+syncControls();render();
+</script>
+</body>
+</html>
