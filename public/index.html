@@ -3,17 +3,339 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AgentRail — Connecte. Automatise. Avance.</title>
+  <title>AgentRail — Discovery-first governance</title>
   <style>
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(135deg,#fcfcff,#f6f7ff 45%,#fbf5ff);color:#0f172a}button,input{font:inherit}a{text-decoration:none;color:inherit}.wrap{max-width:1240px;margin:0 auto;padding:0 20px}.topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.75);backdrop-filter:blur(14px);border-bottom:1px solid rgba(226,232,240,.9)}.nav{display:flex;align-items:center;justify-content:space-between;height:78px;gap:16px}.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-weight:800;box-shadow:0 16px 32px rgba(124,58,237,.25)}.muted{color:#64748b}.navlinks,.cta{display:flex;align-items:center;gap:10px}.btn{border:0;border-radius:18px;padding:12px 18px;font-weight:700;cursor:pointer;transition:.2s transform,.2s opacity,.2s background}.btn:hover{transform:translateY(-1px)}.btn.dark{background:#0f172a;color:#fff}.btn.purple{background:#7c3aed;color:#fff}.btn.light{background:#fff;border:1px solid #e2e8f0;color:#0f172a}.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;padding:56px 0 28px;align-items:center}.chip{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#fff;border:1px solid #eadcff;color:#7c3aed;box-shadow:0 10px 30px rgba(15,23,42,.05)}h1{font-size:74px;line-height:.94;letter-spacing:-.05em;margin:18px 0}h1 span{color:#7c3aed}.lead{font-size:20px;line-height:1.7;color:#475569;max-width:620px}.row{display:flex;gap:12px;flex-wrap:wrap}.mt24{margin-top:24px}.cards3,.pricing{display:grid;gap:16px}.cards3{grid-template-columns:repeat(3,1fr)}.card{background:#fff;border:1px solid #e2e8f0;border-radius:28px;box-shadow:0 18px 56px rgba(15,23,42,.06)}.p18{padding:18px}.p22{padding:22px}.p28{padding:28px}.builder-shell{overflow:hidden}.builder-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid #eef2f7}.dots{display:flex;gap:8px}.dot{width:10px;height:10px;border-radius:999px}.r{background:#fda4af}.y{background:#fcd34d}.g{background:#86efac}.builder-body{padding:20px;background:linear-gradient(135deg,#fafaff,#fff,#faf5ff)}.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.stepcard{padding:18px;border-radius:24px;border:1px solid rgba(255,255,255,.8);min-height:175px;box-shadow:0 14px 30px rgba(15,23,42,.08)}.s1{background:linear-gradient(135deg,#ede9fe,#fdf4ff)}.s2{background:linear-gradient(135deg,#e0f2fe,#ecfeff)}.s3{background:linear-gradient(135deg,#fef3c7,#fff7ed)}.icon{width:44px;height:44px;border-radius:16px;background:rgba(255,255,255,.9);display:grid;place-items:center;box-shadow:0 8px 18px rgba(15,23,42,.08)}.eyebrow{margin-top:26px;font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:#64748b}.stepcard h3{margin:8px 0 5px;font-size:20px}.stepcard p{margin:0;color:#475569}.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.kpi{padding:16px;border-radius:20px;background:#fff;border:1px solid #eef2f7}.kpi strong{display:block;font-size:29px;margin-bottom:4px}.section{padding:30px 0}.section h2{font-size:42px;letter-spacing:-.04em;margin:8px 0 0}.section-top{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:16px}.template h3,.plan h3{font-size:24px;margin:14px 0 10px}.template p,.plan p{color:#64748b;line-height:1.7}.pill{display:inline-block;background:#f5f3ff;color:#7c3aed;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:800}.pricing{grid-template-columns:repeat(3,1fr)}.plan strong{font-size:42px;letter-spacing:-.05em}.plan ul{margin:14px 0 0;padding:0;list-style:none}.plan li{padding:7px 0;color:#475569}.featured{outline:2px solid #8b5cf6}.cta-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:34px;background:linear-gradient(135deg,#020617,#111827,#4c1d95);color:#fff;border-radius:32px}.app{display:none;padding:30px 0 60px}.app.active{display:block}.shell{display:grid;grid-template-columns:286px 1fr;gap:18px}.sidebar{padding:18px}.navbtn{width:100%;text-align:left;border:0;background:#fff;padding:14px 16px;border-radius:18px;margin-top:8px;font-weight:700;cursor:pointer}.navbtn.active{background:#0f172a;color:#fff}.promo{margin-top:18px;padding:18px;border-radius:24px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}.header-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.header-row h2{font-size:38px;letter-spacing:-.04em;margin:6px 0 0}.search{padding:12px 14px;border:1px solid #e2e8f0;border-radius:18px;background:#fff;min-width:240px}.dash{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.metric{padding:18px}.metric strong{display:block;font-size:34px}.split{display:grid;grid-template-columns:1.45fr .95fr;gap:16px;margin-top:16px}.feature{overflow:hidden}.feature-head{display:flex;justify-content:space-between;align-items:center;padding:18px;border-bottom:1px solid #eef2f7}.feature-body{padding:18px;background:linear-gradient(135deg,#fafaff,#f8fbff,#faf5ff)}.list-item{display:flex;justify-content:space-between;align-items:center;padding:14px;border:1px solid #eef2f7;border-radius:18px;margin-top:12px;background:#fff}.screen{display:none}.screen.active{display:block}.flowline{display:flex;gap:14px;overflow:auto;padding-bottom:4px}.flowcard{min-width:250px;padding:18px;border-radius:24px;border:1px solid rgba(255,255,255,.85);box-shadow:0 14px 30px rgba(15,23,42,.08)}.flowcard:nth-child(1){background:linear-gradient(135deg,#ede9fe,#fdf4ff)}.flowcard:nth-child(2){background:linear-gradient(135deg,#e0f2fe,#ecfeff)}.flowcard:nth-child(3){background:linear-gradient(135deg,#fef3c7,#fff7ed)}.flowcard:nth-child(4){background:linear-gradient(135deg,#fee2e2,#fff1f2)}.adder{min-width:160px;display:grid;place-items:center;border:2px dashed #ddd6fe;background:#fff;color:#7c3aed;font-weight:800;cursor:pointer}.grid2{display:grid;grid-template-columns:1fr 320px;gap:16px;margin-top:16px}.helpgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.mini-title{font-size:14px;color:#7c3aed;font-weight:700}.footer-space{height:30px}@media (max-width:980px){h1{font-size:54px}.hero,.shell,.split,.grid2,.helpgrid{grid-template-columns:1fr}.cards3,.pricing,.dash,.flow,.kpis{grid-template-columns:1fr}.navlinks{display:none}.header-row{flex-direction:column;align-items:flex-start}.search{width:100%}}
+    :root {
+      --bg:#07111f;
+      --bg2:#0b1629;
+      --panel:rgba(10,18,34,.82);
+      --panel-2:rgba(15,25,45,.88);
+      --line:rgba(155,184,255,.14);
+      --soft:#8ea3c7;
+      --text:#edf3ff;
+      --cyan:#36d7e8;
+      --blue:#67a9ff;
+      --violet:#b56cff;
+      --good:#2dd4bf;
+      --warn:#f59e0b;
+      --danger:#fb7185;
+      --shadow:0 20px 70px rgba(0,0,0,.28);
+      --radius:24px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(54,215,232,.12), transparent 28%),
+        radial-gradient(circle at 80% 10%, rgba(181,108,255,.14), transparent 34%),
+        linear-gradient(180deg, #07111f 0%, #091425 100%);
+      min-height:100vh;
+    }
+    .app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+    .sidebar{
+      border-right:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(5,10,18,.72), rgba(7,12,24,.94));
+      padding:24px 18px;
+      position:sticky; top:0; height:100vh;
+    }
+    .brand{display:flex;align-items:center;gap:14px;padding:6px 8px 18px}
+    .brand img{width:44px;height:44px;border-radius:14px;object-fit:cover;background:white;padding:2px;box-shadow:0 12px 30px rgba(76,163,255,.18)}
+    .brand h1{font-size:26px;line-height:1;margin:0 0 2px}
+    .brand p{margin:0;color:var(--soft);font-size:13px}
+    .sidebar-copy{font-size:15px;line-height:1.5;color:#dbe6ff;margin:18px 8px 18px;max-width:220px}
+    .nav{display:grid;gap:8px;margin-top:10px}
+    .nav button{
+      width:100%;text-align:left;border:1px solid transparent;background:transparent;color:#dce8ff;
+      padding:14px 16px;border-radius:16px;font-weight:600;cursor:pointer;transition:.18s ease;
+    }
+    .nav button:hover{background:rgba(255,255,255,.04);border-color:var(--line)}
+    .nav button.active{background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));border-color:var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+    .sidebar-card{
+      margin-top:18px;padding:18px;border-radius:22px;
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+    }
+    .sidebar-card h3{margin:0 0 10px;font-size:16px}
+    .sidebar-card p{margin:0;color:var(--soft);line-height:1.55;font-size:14px}
+    .main{padding:26px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+    .workspace{display:flex;align-items:center;gap:12px}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;
+      border:1px solid var(--line);background:rgba(255,255,255,.04);color:#dce8ff;font-weight:600;font-size:14px;
+    }
+    .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 20px var(--good)}
+    .actions{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{
+      border:0;border-radius:18px;padding:14px 18px;font-weight:700;cursor:pointer;color:white;transition:.18s ease;box-shadow:var(--shadow)
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:linear-gradient(135deg, var(--blue), var(--cyan));color:#041121}
+    .btn-secondary{background:rgba(255,255,255,.04);border:1px solid var(--line);box-shadow:none}
+    .hero{
+      margin-top:20px;padding:26px;border-radius:28px;
+      border:1px solid var(--line);
+      background:linear-gradient(135deg, rgba(11,22,41,.96), rgba(8,16,30,.84));
+      box-shadow:var(--shadow);
+      display:grid;grid-template-columns:1.1fr .9fr;gap:18px;
+    }
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:#d7e7ff;font-weight:700}
+    .hero h2{font-size:62px;line-height:.95;letter-spacing:-.05em;margin:16px 0}
+    .hero p{max-width:760px;color:var(--soft);font-size:20px;line-height:1.55;margin:0}
+    .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;align-content:start}
+    .kpi{
+      padding:18px;border-radius:22px;background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+      border:1px solid var(--line);
+    }
+    .kpi label{display:block;font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);margin-bottom:12px}
+    .kpi strong{display:block;font-size:40px;line-height:1;margin-bottom:6px}
+    .kpi span{color:#dce8ff}
+    .section{margin-top:18px;display:grid;grid-template-columns:1.08fr .92fr;gap:18px}
+    .panel{
+      padding:22px;border-radius:26px;border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
+      box-shadow:var(--shadow);
+    }
+    .panel h3{margin:0;font-size:18px;color:#dfe9ff}
+    .panel-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+    .title-block h4{font-size:42px;line-height:.98;letter-spacing:-.045em;margin:10px 0 0}
+    .title-block p{color:var(--soft);font-size:15px;line-height:1.6;margin:12px 0 0;max-width:780px}
+    .steps{display:grid;gap:12px;margin-top:18px}
+    .step{
+      display:grid;grid-template-columns:42px 1fr;gap:14px;align-items:start;
+      padding:14px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(155,184,255,.08)
+    }
+    .num{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-weight:800;background:linear-gradient(135deg, rgba(103,169,255,.25), rgba(181,108,255,.25));border:1px solid var(--line)}
+    .step h5{margin:0 0 6px;font-size:20px}
+    .step p{margin:0;color:var(--soft);line-height:1.55}
+    .stack{display:grid;gap:12px}
+    .mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .mini{
+      padding:16px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(155,184,255,.08)
+    }
+    .mini label{display:block;font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);margin-bottom:8px}
+    .mini strong{font-size:34px;display:block}
+    .risk-list{display:grid;gap:12px;margin-top:4px}
+    .risk{
+      display:flex;justify-content:space-between;gap:16px;align-items:center;
+      padding:16px 18px;border-radius:20px;background:rgba(255,255,255,.035);border:1px solid rgba(155,184,255,.08)
+    }
+    .risk h5{margin:0 0 4px;font-size:24px;letter-spacing:-.03em}
+    .risk p{margin:0;color:var(--soft)}
+    .score{display:flex;align-items:center;gap:10px;font-weight:800}
+    .score .chip{padding:8px 12px;border-radius:999px;font-size:13px;border:1px solid rgba(255,255,255,.08)}
+    .red{color:#ffd6dc;background:rgba(251,113,133,.12)}
+    .amber{color:#ffe6b8;background:rgba(245,158,11,.12)}
+    .green{color:#c7fff3;background:rgba(45,212,191,.12)}
+    .footer-note{margin-top:18px;color:var(--soft);font-size:14px}
+    @media (max-width: 1080px){
+      .app{grid-template-columns:1fr}
+      .sidebar{position:relative;height:auto}
+      .hero,.section{grid-template-columns:1fr}
+      .hero h2{font-size:48px}
+    }
+    @media (max-width: 720px){
+      .main{padding:16px}
+      .hero h2{font-size:38px}
+      .kpi-grid,.mini-grid{grid-template-columns:1fr}
+      .risk{flex-direction:column;align-items:flex-start}
+    }
   </style>
 </head>
 <body>
-  <div class="topbar"><div class="wrap nav"><div class="brand"><div class="logo">A</div><div><div style="font-weight:800">AgentRail</div><div class="muted" style="font-size:13px">Automatisation visuelle ultra simple</div></div></div><div class="navlinks"><button class="btn light" onclick="showHome()">Produit</button><button class="btn light" onclick="openApp('pricing')">Tarifs</button><button class="btn light" onclick="openApp('help')">Ressources</button></div><div class="cta"><button class="btn light" onclick="openApp('dashboard')">Connexion</button><button class="btn purple" onclick="openApp('dashboard')">Essayer gratuitement</button></div></div></div>
-  <main class="wrap">
-    <section id="home"><div class="hero"><div><div class="chip">✨ Templates intelligents prêts à lancer</div><h1>Connecte.<br>Automatise.<br><span>Avance.</span></h1><div class="lead">AgentRail transforme les actions répétitives en workflows visuels, simples et rapides à lancer. Pas de code. Pas de friction. Juste des résultats.</div><div class="row mt24"><button class="btn dark" onclick="openApp('dashboard')">Ouvrir l’app</button><button class="btn light" onclick="openApp('builder')">Voir le builder</button></div><div class="cards3 mt24"><div class="card p18"><div>⚡</div><h3>Ultra simple</h3><div class="muted">Créer un flow en 30 secondes.</div></div><div class="card p18"><div>🔒</div><h3>Sécurisé</h3><div class="muted">Espaces et permissions contrôlés.</div></div><div class="card p18"><div>⏱️</div><h3>Rapide</h3><div class="muted">Du temps gagné chaque jour.</div></div></div></div><div class="card builder-shell"><div class="builder-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="muted">Builder AgentRail</div><div class="pill">Actif</div></div><div class="builder-body"><div class="flow"><div class="stepcard s1"><div class="icon">📩</div><div class="eyebrow">Étape 1</div><h3>Nouveau message</h3><p>Instagram</p></div><div class="stepcard s2"><div class="icon">✨</div><div class="eyebrow">Étape 2</div><h3>Répondre automatiquement</h3><p>IA AgentRail</p></div><div class="stepcard s3"><div class="icon">📊</div><div class="eyebrow">Étape 3</div><h3>Ajouter le lead</h3><p>Google Sheets</p></div></div><div class="kpis"><div class="kpi"><strong>128</strong><span class="muted">Exécutions aujourd’hui</span></div><div class="kpi"><strong>98%</strong><span class="muted">Taux de succès</span></div><div class="kpi"><strong>2h14</strong><span class="muted">Temps gagné</span></div></div></div></div></div><div class="section"><div class="section-top"><div><div class="mini-title">Templates</div><h2>Démarre sans réfléchir</h2></div><button class="btn light" onclick="openApp('builder')">Voir tous les templates</button></div><div class="cards3"><div class="card template p22"><span class="pill">Le plus populaire</span><h3>DM Instagram → Réponse auto → CRM</h3><p>Répond automatiquement aux nouveaux messages et enregistre le contact.</p><button class="btn dark" onclick="openApp('builder')">Utiliser</button></div><div class="card template p22"><span class="pill">Growth</span><h3>Formulaire → Qualification → Email</h3><p>Trie les leads et envoie une réponse personnalisée.</p><button class="btn dark" onclick="openApp('builder')">Utiliser</button></div><div class="card template p22"><span class="pill">E-commerce</span><h3>Paiement → Confirmation → Sheet</h3><p>Confirme chaque achat et met à jour le suivi en temps réel.</p><button class="btn dark" onclick="openApp('builder')">Utiliser</button></div></div></div><div class="section"><div class="section-top"><div><div class="mini-title">Tarifs</div><h2>Une grille simple pour lancer vite</h2></div></div><div class="pricing"><div class="card plan p22"><h3>Starter</h3><strong>19€<span style="font-size:16px;font-weight:500;color:#64748b">/mois</span></strong><p>Pour démarrer rapidement.</p><ul><li>✓ 3 automatisations</li><li>✓ 1 000 exécutions/mois</li><li>✓ Templates inclus</li><li>✓ Support email</li></ul></div><div class="card plan p22 featured"><span class="pill">Recommandé</span><h3>Pro</h3><strong>49€<span style="font-size:16px;font-weight:500;color:#64748b">/mois</span></strong><p>Pour les équipes ambitieuses.</p><ul><li>✓ Flows illimités</li><li>✓ 25 000 exécutions/mois</li><li>✓ Collaboration équipe</li><li>✓ Analytics avancés</li></ul></div><div class="card plan p22"><h3>Scale</h3><strong>149€<span style="font-size:16px;font-weight:500;color:#64748b">/mois</span></strong><p>Pour déployer à grande échelle.</p><ul><li>✓ Multi-espaces</li><li>✓ Priorité d’exécution</li><li>✓ SSO & sécurité</li><li>✓ Onboarding dédié</li></ul></div></div></div><div class="section"><div class="cta-banner"><div><div style="color:#c4b5fd;font-size:14px">Prêt à lancer ?</div><div style="font-size:38px;font-weight:800;letter-spacing:-.04em;margin-top:6px">Construis ton premier workflow aujourd’hui</div></div><button class="btn light" onclick="openApp('dashboard')">Ouvrir l’app</button></div></div></section>
-    <section id="app" class="app"><div class="shell"><aside class="card sidebar"><div class="brand"><div class="logo">A</div><div><div style="font-weight:800">AgentRail</div><div class="muted" style="font-size:13px">Workspace</div></div></div><button class="navbtn active" data-screen="dashboard" onclick="switchScreen('dashboard', this)">Dashboard</button><button class="navbtn" data-screen="builder" onclick="switchScreen('builder', this)">Builder</button><button class="navbtn" data-screen="pricing" onclick="switchScreen('pricing', this)">Tarifs</button><button class="navbtn" data-screen="help" onclick="switchScreen('help', this)">Aide</button><div class="promo"><div style="font-size:13px;opacity:.85">Upgrade</div><div style="font-size:22px;font-weight:800;line-height:1.3;margin-top:8px">Passe à Pro pour débloquer les analytics avancés</div><button class="btn light" style="margin-top:14px">Découvrir Pro</button></div></aside><div><div class="header-row"><div><div class="mini-title">Espace AgentRail</div><h2 id="title">Dashboard</h2></div><div class="row"><input class="search" placeholder="Rechercher..." /><button class="btn light">Partager</button></div></div><div id="dashboard" class="screen active"><div class="dash"><div class="card metric"><strong>24</strong><span class="muted">Automatisations actives</span></div><div class="card metric"><strong>12 480</strong><span class="muted">Exécutions ce mois-ci</span></div><div class="card metric"><strong>98,4%</strong><span class="muted">Taux de succès</span></div><div class="card metric"><strong>31h</strong><span class="muted">Temps gagné</span></div></div><div class="split"><div class="card feature"><div class="feature-head"><div><strong>Automatisation vedette</strong><div class="muted">DM Instagram → Réponse → Lead Sheet</div></div><button class="btn dark" onclick="switchScreen('builder', document.querySelector('[data-screen=builder]'))">Ouvrir le builder</button></div><div class="feature-body"><div class="flow"><div class="stepcard s1"><div class="icon">📩</div><div class="eyebrow">Étape 1</div><h3>Nouveau message</h3><p>Instagram</p></div><div class="stepcard s2"><div class="icon">✨</div><div class="eyebrow">Étape 2</div><h3>Répondre automatiquement</h3><p>IA AgentRail</p></div><div class="stepcard s3"><div class="icon">📊</div><div class="eyebrow">Étape 3</div><h3>Ajouter le lead</h3><p>Google Sheets</p></div></div></div></div><div class="card p22"><strong>Applications connectées</strong><div class="list-item"><span>Instagram</span><span style="color:#16a34a">Connecté</span></div><div class="list-item"><span>Gmail</span><span style="color:#16a34a">Connecté</span></div><div class="list-item"><span>Google Sheets</span><span style="color:#16a34a">Connecté</span></div><div class="list-item"><span>Stripe</span><span style="color:#16a34a">Connecté</span></div></div></div></div><div id="builder" class="screen"><div class="card p28"><div class="section-top"><div><div class="mini-title">Builder</div><h2 style="font-size:36px">Crée ton workflow</h2></div><div class="row"><button class="btn light">Tester</button><button class="btn purple" onclick="addStep()">Ajouter une étape</button></div></div><div class="flowline" id="flowline"><div class="flowcard"><div class="icon">📩</div><div class="eyebrow">Étape 1</div><h3>Nouveau message</h3><p>Instagram</p></div><div class="flowcard"><div class="icon">✨</div><div class="eyebrow">Étape 2</div><h3>Répondre automatiquement</h3><p>IA AgentRail</p></div><div class="flowcard"><div class="icon">📊</div><div class="eyebrow">Étape 3</div><h3>Ajouter le lead</h3><p>Google Sheets</p></div><div class="flowcard adder" onclick="addStep()">+ Ajouter</div></div></div><div class="grid2"><div class="card p22"><strong>Journal d’exécution</strong><div class="list-item"><span>Il y a 2 min · Nouveau message Instagram</span><span style="color:#16a34a">Succès</span></div><div class="list-item"><span>Il y a 7 min · Réponse envoyée</span><span style="color:#16a34a">Succès</span></div><div class="list-item"><span>Il y a 9 min · Lead ajouté dans Google Sheets</span><span style="color:#16a34a">Succès</span></div></div><div class="card p22"><strong>Panneau rapide</strong><div class="list-item"><span>Suggestions IA</span><span>›</span></div><div class="list-item"><span>Partager avec l’équipe</span><span>›</span></div><div class="list-item"><span>Réglages du flow</span><span>›</span></div></div></div></div><div id="pricing" class="screen"><div class="pricing"><div class="card plan p22"><h3>Starter</h3><strong>19€<span style="font-size:16px;font-weight:500;color:#64748b">/mois</span></strong><p>Pour démarrer rapidement.</p></div><div class="card plan p22 featured"><span class="pill">Recommandé</span><h3>Pro</h3><strong>49€<span style="font-size:16px;font-weight:500;color:#64748b">/mois</span></strong><p>Pour les équipes ambitieuses.</p></div><div class="card plan p22"><h3>Scale</h3><strong>149€<span style="font-size:16px;font-weight:500;color:#64748b">/mois</span></strong><p>Pour déployer à grande échelle.</p></div></div></div><div id="help" class="screen"><div class="helpgrid"><div class="card p22"><strong>Centre d’aide</strong><div class="list-item"><span>Créer une première automatisation</span><span>›</span></div><div class="list-item"><span>Connecter Instagram et Gmail</span><span>›</span></div><div class="list-item"><span>Comprendre les exécutions</span><span>›</span></div><div class="list-item"><span>Inviter son équipe</span><span>›</span></div></div><div class="card p22" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff"><strong>Besoin d’un onboarding ?</strong><p style="line-height:1.7;opacity:.88">Planifie une démo avec l’équipe AgentRail pour déployer ton premier use case en conditions réelles.</p><button class="btn light">Réserver une démo</button></div></div></div></div></div><div class="footer-space"></div></section>
-  </main>
-  <script>const extraSteps=[['📧','Envoyer un email','Gmail'],['🔔','Notifier l’équipe','Slack'],['🧠','Qualifier le lead','Agent IA'],['💳','Confirmer le paiement','Stripe']];let stepIndex=0;function showHome(){document.getElementById('home').style.display='block';document.getElementById('app').classList.remove('active');window.scrollTo({top:0,behavior:'smooth'});}function openApp(screen){document.getElementById('home').style.display='none';document.getElementById('app').classList.add('active');switchScreen(screen,document.querySelector('[data-screen="'+screen+'"]'));window.scrollTo({top:0,behavior:'smooth'});}function switchScreen(screen,el){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(screen).classList.add('active');document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));if(el){el.classList.add('active')}document.getElementById('title').textContent=screen.charAt(0).toUpperCase()+screen.slice(1);}function addStep(){const [emoji,title,sub]=extraSteps[stepIndex%extraSteps.length];stepIndex++;const card=document.createElement('div');card.className='flowcard';card.innerHTML='<div class="icon">'+emoji+'</div><div class="eyebrow">Étape '+(document.querySelectorAll('#flowline .flowcard').length)+'</div><h3>'+title+'</h3><p>'+sub+'</p>';document.getElementById('flowline').insertBefore(card,document.querySelector('.adder'));}</script>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAMgCAYAAADbcAZoAAAACXBIWXMAAAsTAAALEwEAmpwYAAAgAElEQVR4nO3dW4xd5X3/8c/3zNw9jQ1Sm7YNE1mPZbQKp4qoChTQVCIikipEX0ml1bY/ACRSo9anvhoQKlSg2lLv8h4gkZcE9YFX0BKoCjVTUFBAjCaQ6nTqJm0iHfHj+cc89+jr3Pmed+Y8r5k1mT1j7z3n3HvmnPecw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4ePV+Nn9h9rB8q7f7t5k2mZb8b8JgAA0J6z2f2JAAAA8FhAAgAAhAEIAAAQBiAAAECYgAABAGIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABA2H8B1iV6S6aJ9WgAAAAASUVORK5CYII=" alt="AgentRail logo" />
+        <div>
+          <h1>AgentRail</h1>
+          <p>Pilot Workspace</p>
+        </div>
+      </div>
+
+      <div class="sidebar-copy">
+        Start with visibility. Scale with governance.
+      </div>
+
+      <nav class="nav">
+        <button class="active">Overview</button>
+        <button>Discovery</button>
+        <button>Activation</button>
+        <button>Runtime</button>
+        <button>Approvals</button>
+        <button>Audit</button>
+        <button>Platform</button>
+      </nav>
+
+      <div class="sidebar-card">
+        <h3>Why this MVP exists</h3>
+        <p>
+          AgentRail shows the real agent surface first — runtimes, identities, connectors and sensitive paths —
+          then turns policy, approvals and auditability on around the riskiest actions.
+        </p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="workspace">
+          <div class="badge"><span class="dot"></span> Workspace: Production</div>
+          <div class="badge">Shadow mode ON</div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-secondary">See discovery view</button>
+          <button class="btn btn-primary">Run discovery scan</button>
+        </div>
+      </div>
+
+      <section class="hero">
+        <div>
+          <div class="eyebrow">Enterprise runtime governance for AI agents</div>
+          <h2>Discover the real agent surface before you govern it.</h2>
+          <p>
+            Lovablized, not reinvented: the product stays discovery-first. AgentRail maps runtimes, identities,
+            connectors and sensitive action paths first — then activates approvals, policy checks and replayable audit trails.
+          </p>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi">
+            <label>Agents discovered</label>
+            <strong>5</strong>
+            <span>Across internal and production surfaces</span>
+          </div>
+          <div class="kpi">
+            <label>Production-capable</label>
+            <strong>5</strong>
+            <span>With write or privileged execution paths</span>
+          </div>
+          <div class="kpi">
+            <label>Pending approvals</label>
+            <strong>3</strong>
+            <span>Human review still required</span>
+          </div>
+          <div class="kpi">
+            <label>Critical paths</label>
+            <strong>1</strong>
+            <span>Immediate governance focus</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="panel">
+          <div class="panel-title">
+            <div class="title-block">
+              <div class="eyebrow">Visibility first</div>
+              <h4>The wedge is discovery, not blind enforcement.</h4>
+              <p>
+                Buyers should understand where agentic risk already exists across Dust, Glean, MCP tools, service identities
+                and production systems — before AgentRail asks them to change how they work.
+              </p>
+            </div>
+          </div>
+
+          <div class="steps">
+            <div class="step">
+              <div class="num">1</div>
+              <div>
+                <h5>Map runtimes and identities</h5>
+                <p>Know which agents exist, who they run as, and which environments they can reach.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="num">2</div>
+              <div>
+                <h5>Find sensitive action paths</h5>
+                <p>Highlight bulk writes, shared service identities, privileged actions and missing review gates.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="num">3</div>
+              <div>
+                <h5>Turn control on around the risky edge</h5>
+                <p>Activate policy checks, approvals and audit trails only where the scan proves they matter.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="panel">
+            <div class="panel-title">
+              <h3>Workspace posture</h3>
+              <div class="badge">Shadow mode</div>
+            </div>
+
+            <div class="mini-grid">
+              <div class="mini">
+                <label>Identities</label>
+                <strong>12</strong>
+              </div>
+              <div class="mini">
+                <label>Connectors</label>
+                <strong>8</strong>
+              </div>
+              <div class="mini">
+                <label>Runtimes</label>
+                <strong>4</strong>
+              </div>
+              <div class="mini">
+                <label>Policies ready</label>
+                <strong>6</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">
+              <h3>Critical actions needing review</h3>
+              <div class="badge">Actionable now</div>
+            </div>
+
+            <div class="risk-list">
+              <div class="risk">
+                <div>
+                  <h5>GitHub.merge_pr</h5>
+                  <p>Engineering MCP Agent · pending human approval</p>
+                </div>
+                <div class="score">
+                  <span class="chip amber">Risk 83</span>
+                </div>
+              </div>
+
+              <div class="risk">
+                <div>
+                  <h5>Okta.suspend_user</h5>
+                  <p>Identity Admin Bot · privileged identity action</p>
+                </div>
+                <div class="score">
+                  <span class="chip red">Risk 92</span>
+                </div>
+              </div>
+
+              <div class="risk">
+                <div>
+                  <h5>Notion.export_workspace</h5>
+                  <p>Ops Knowledge Agent · exfiltration-capable path</p>
+                </div>
+                <div class="score">
+                  <span class="chip amber">Risk 78</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="footer-note">
+              Next best action: run a discovery scan, review the critical path, then activate approvals in shadow mode before enforcement.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 </body>
 </html>
