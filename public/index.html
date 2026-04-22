@@ -1,25 +1,25 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AgentRail — Discovery-first governance</title>
+  <title>AgentRail — Control for autonomous systems</title>
   <style>
-    :root {
-      --bg:#07111f;
-      --bg2:#0b1629;
-      --panel:rgba(10,18,34,.82);
-      --panel-2:rgba(15,25,45,.88);
-      --line:rgba(155,184,255,.14);
-      --soft:#8ea3c7;
-      --text:#edf3ff;
-      --cyan:#36d7e8;
-      --blue:#67a9ff;
-      --violet:#b56cff;
-      --good:#2dd4bf;
-      --warn:#f59e0b;
-      --danger:#fb7185;
-      --shadow:0 20px 70px rgba(0,0,0,.28);
+    :root{
+      --bg:#050816;
+      --bg-2:#0b1224;
+      --panel:rgba(12,18,36,.78);
+      --panel-2:rgba(16,24,49,.88);
+      --line:rgba(136,165,255,.14);
+      --soft:#8fa4cb;
+      --text:#eef4ff;
+      --cyan:#42def1;
+      --blue:#73a4ff;
+      --violet:#b66cff;
+      --green:#39d7a3;
+      --amber:#f6b23d;
+      --red:#ff6f8b;
+      --shadow:0 24px 80px rgba(0,0,0,.34);
       --radius:24px;
     }
     *{box-sizing:border-box}
@@ -29,313 +29,347 @@
       font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       color:var(--text);
       background:
-        radial-gradient(circle at 20% 0%, rgba(54,215,232,.12), transparent 28%),
-        radial-gradient(circle at 80% 10%, rgba(181,108,255,.14), transparent 34%),
-        linear-gradient(180deg, #07111f 0%, #091425 100%);
+        radial-gradient(circle at 15% 0%, rgba(66,222,241,.10), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(182,108,255,.14), transparent 34%),
+        linear-gradient(180deg, #050816 0%, #07101f 100%);
       min-height:100vh;
+      overflow-x:hidden;
     }
-    .app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+    .shell{display:grid;grid-template-columns:270px 1fr;min-height:100vh}
     .sidebar{
       border-right:1px solid var(--line);
-      background:linear-gradient(180deg, rgba(5,10,18,.72), rgba(7,12,24,.94));
+      background:linear-gradient(180deg, rgba(7,11,24,.86), rgba(8,12,26,.98));
       padding:24px 18px;
-      position:sticky; top:0; height:100vh;
+      position:sticky;top:0;height:100vh;
     }
-    .brand{display:flex;align-items:center;gap:14px;padding:6px 8px 18px}
-    .brand img{width:44px;height:44px;border-radius:14px;object-fit:cover;background:white;padding:2px;box-shadow:0 12px 30px rgba(76,163,255,.18)}
-    .brand h1{font-size:26px;line-height:1;margin:0 0 2px}
-    .brand p{margin:0;color:var(--soft);font-size:13px}
-    .sidebar-copy{font-size:15px;line-height:1.5;color:#dbe6ff;margin:18px 8px 18px;max-width:220px}
+    .brand{display:flex;align-items:center;gap:14px;padding:6px 6px 22px}
+    .brand img{width:44px;height:44px;border-radius:14px;background:#fff;padding:2px;box-shadow:0 14px 34px rgba(115,164,255,.2)}
+    .brand h1{margin:0;font-size:26px;letter-spacing:-.04em}
+    .brand p{margin:3px 0 0;color:var(--soft);font-size:13px}
+    .sidebar-copy{font-size:14px;line-height:1.55;color:#dbe7ff;margin:10px 6px 18px;max-width:220px}
     .nav{display:grid;gap:8px;margin-top:10px}
     .nav button{
-      width:100%;text-align:left;border:1px solid transparent;background:transparent;color:#dce8ff;
-      padding:14px 16px;border-radius:16px;font-weight:600;cursor:pointer;transition:.18s ease;
+      text-align:left;border:1px solid transparent;background:transparent;color:#dfe9ff;padding:13px 14px;border-radius:16px;
+      font-weight:700;cursor:pointer;transition:.18s ease
     }
-    .nav button:hover{background:rgba(255,255,255,.04);border-color:var(--line)}
-    .nav button.active{background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));border-color:var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
-    .sidebar-card{
-      margin-top:18px;padding:18px;border-radius:22px;
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:1px solid var(--line);
-    }
-    .sidebar-card h3{margin:0 0 10px;font-size:16px}
-    .sidebar-card p{margin:0;color:var(--soft);line-height:1.55;font-size:14px}
-    .main{padding:26px}
+    .nav button.active,.nav button:hover{background:rgba(255,255,255,.04);border-color:var(--line)}
+    .sidecard{margin-top:18px;padding:18px;border-radius:22px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line)}
+    .sidecard h3{margin:0 0 10px;font-size:15px}
+    .sidecard p{margin:0;color:var(--soft);line-height:1.55;font-size:14px}
+    .main{padding:24px}
     .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-    .workspace{display:flex;align-items:center;gap:12px}
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;
-      border:1px solid var(--line);background:rgba(255,255,255,.04);color:#dce8ff;font-weight:600;font-size:14px;
-    }
-    .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 20px var(--good)}
-    .actions{display:flex;gap:12px;flex-wrap:wrap}
-    .btn{
-      border:0;border-radius:18px;padding:14px 18px;font-weight:700;cursor:pointer;color:white;transition:.18s ease;box-shadow:var(--shadow)
-    }
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-weight:800;font-size:13px;color:#dce8ff}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 18px var(--green)}
+    .btn{border:0;border-radius:18px;padding:14px 18px;font-weight:800;cursor:pointer;transition:.18s ease;color:white}
     .btn:hover{transform:translateY(-1px)}
-    .btn-primary{background:linear-gradient(135deg, var(--blue), var(--cyan));color:#041121}
-    .btn-secondary{background:rgba(255,255,255,.04);border:1px solid var(--line);box-shadow:none}
-    .hero{
-      margin-top:20px;padding:26px;border-radius:28px;
-      border:1px solid var(--line);
-      background:linear-gradient(135deg, rgba(11,22,41,.96), rgba(8,16,30,.84));
-      box-shadow:var(--shadow);
-      display:grid;grid-template-columns:1.1fr .9fr;gap:18px;
-    }
-    .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:#d7e7ff;font-weight:700}
-    .hero h2{font-size:62px;line-height:.95;letter-spacing:-.05em;margin:16px 0}
-    .hero p{max-width:760px;color:var(--soft);font-size:20px;line-height:1.55;margin:0}
-    .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;align-content:start}
-    .kpi{
-      padding:18px;border-radius:22px;background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
-      border:1px solid var(--line);
-    }
-    .kpi label{display:block;font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);margin-bottom:12px}
-    .kpi strong{display:block;font-size:40px;line-height:1;margin-bottom:6px}
-    .kpi span{color:#dce8ff}
-    .section{margin-top:18px;display:grid;grid-template-columns:1.08fr .92fr;gap:18px}
-    .panel{
-      padding:22px;border-radius:26px;border:1px solid var(--line);
-      background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
-      box-shadow:var(--shadow);
-    }
-    .panel h3{margin:0;font-size:18px;color:#dfe9ff}
-    .panel-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
-    .title-block h4{font-size:42px;line-height:.98;letter-spacing:-.045em;margin:10px 0 0}
-    .title-block p{color:var(--soft);font-size:15px;line-height:1.6;margin:12px 0 0;max-width:780px}
-    .steps{display:grid;gap:12px;margin-top:18px}
-    .step{
-      display:grid;grid-template-columns:42px 1fr;gap:14px;align-items:start;
-      padding:14px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(155,184,255,.08)
-    }
-    .num{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-weight:800;background:linear-gradient(135deg, rgba(103,169,255,.25), rgba(181,108,255,.25));border:1px solid var(--line)}
-    .step h5{margin:0 0 6px;font-size:20px}
-    .step p{margin:0;color:var(--soft);line-height:1.55}
-    .stack{display:grid;gap:12px}
-    .mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-    .mini{
-      padding:16px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(155,184,255,.08)
-    }
-    .mini label{display:block;font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);margin-bottom:8px}
-    .mini strong{font-size:34px;display:block}
-    .risk-list{display:grid;gap:12px;margin-top:4px}
-    .risk{
-      display:flex;justify-content:space-between;gap:16px;align-items:center;
-      padding:16px 18px;border-radius:20px;background:rgba(255,255,255,.035);border:1px solid rgba(155,184,255,.08)
-    }
-    .risk h5{margin:0 0 4px;font-size:24px;letter-spacing:-.03em}
-    .risk p{margin:0;color:var(--soft)}
-    .score{display:flex;align-items:center;gap:10px;font-weight:800}
-    .score .chip{padding:8px 12px;border-radius:999px;font-size:13px;border:1px solid rgba(255,255,255,.08)}
-    .red{color:#ffd6dc;background:rgba(251,113,133,.12)}
-    .amber{color:#ffe6b8;background:rgba(245,158,11,.12)}
-    .green{color:#c7fff3;background:rgba(45,212,191,.12)}
-    .footer-note{margin-top:18px;color:var(--soft);font-size:14px}
-    @media (max-width: 1080px){
-      .app{grid-template-columns:1fr}
-      .sidebar{position:relative;height:auto}
-      .hero,.section{grid-template-columns:1fr}
-      .hero h2{font-size:48px}
-    }
-    @media (max-width: 720px){
-      .main{padding:16px}
-      .hero h2{font-size:38px}
-      .kpi-grid,.mini-grid{grid-template-columns:1fr}
-      .risk{flex-direction:column;align-items:flex-start}
-    }
+    .btn-primary{background:linear-gradient(135deg,var(--blue),var(--cyan));color:#06111d;box-shadow:0 18px 42px rgba(66,222,241,.18)}
+    .btn-secondary{background:rgba(255,255,255,.04);border:1px solid var(--line)}
+    .hero{margin-top:18px;display:grid;grid-template-columns:1.04fr .96fr;gap:18px}
+    .panel{border:1px solid var(--line);background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));border-radius:28px;box-shadow:var(--shadow)}
+    .hero-left{padding:28px}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:12px;color:#d7e7ff;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+    .hero h2{font-size:68px;line-height:.93;letter-spacing:-.055em;margin:16px 0}
+    .hero p{max-width:760px;color:var(--soft);font-size:19px;line-height:1.55;margin:0}
+    .metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}
+    .metric{padding:16px;border-radius:20px;background:rgba(255,255,255,.03);border:1px solid rgba(136,165,255,.09)}
+    .metric label{display:block;font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.14em;margin-bottom:8px}
+    .metric strong{font-size:34px;line-height:1;display:block}
+    .graph-wrap{padding:16px;display:grid;grid-template-rows:auto 1fr auto;gap:12px;min-height:520px}
+    .graph-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 8px 0}
+    .graph-title{font-size:15px;color:#dfe9ff;font-weight:800}
+    .network{position:relative;overflow:hidden;border-radius:24px;background:radial-gradient(circle at center, rgba(66,222,241,.08), transparent 48%), linear-gradient(180deg, rgba(7,11,24,.88), rgba(10,15,30,.98));border:1px solid rgba(136,165,255,.1);min-height:360px}
+    .network svg{position:absolute;inset:0;width:100%;height:100%}
+    .node{position:absolute;padding:10px 12px;border-radius:14px;border:1px solid rgba(136,165,255,.15);background:rgba(12,19,38,.9);font-size:13px;font-weight:800;box-shadow:0 12px 30px rgba(0,0,0,.22);backdrop-filter:blur(8px)}
+    .node small{display:block;font-size:11px;color:var(--soft);font-weight:700;margin-top:3px}
+    .node-core{background:linear-gradient(135deg, rgba(115,164,255,.22), rgba(66,222,241,.22));border-color:rgba(66,222,241,.28)}
+    .node-risk{box-shadow:0 0 0 1px rgba(255,111,139,.18), 0 0 40px rgba(255,111,139,.12)}
+    .pulse{animation:pulse 2.4s infinite}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+    .scanlog{padding:12px 14px;border-radius:20px;background:rgba(255,255,255,.03);border:1px solid rgba(136,165,255,.09);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;line-height:1.65;color:#d9ebff;max-height:180px;overflow:auto}
+    .scanline{display:flex;justify-content:space-between;gap:16px;white-space:nowrap}
+    .scanline span:last-child{color:var(--soft)}
+    .section{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .section .panel{padding:22px}
+    .section h3{margin:0;font-size:18px}
+    .sub{margin:10px 0 0;color:var(--soft);line-height:1.55}
+    .risk-list{display:grid;gap:12px;margin-top:16px}
+    .risk{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:16px 18px;border-radius:20px;background:rgba(255,255,255,.035);border:1px solid rgba(136,165,255,.08)}
+    .risk h4{margin:0 0 4px;font-size:24px;letter-spacing:-.03em}
+    .risk p{margin:0;color:var(--soft);line-height:1.5}
+    .risk-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .chip{padding:7px 10px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid rgba(255,255,255,.08)}
+    .chip.red{background:rgba(255,111,139,.12);color:#ffd5de}
+    .chip.amber{background:rgba(246,178,61,.12);color:#ffe7ba}
+    .chip.green{background:rgba(57,215,163,.12);color:#cffff0}
+    .score{text-align:right}
+    .score strong{font-size:40px;display:block;line-height:1}
+    .score small{color:var(--soft)}
+    .action-stack{display:grid;gap:12px;margin-top:16px}
+    .action-card{padding:18px;border-radius:20px;background:rgba(255,255,255,.035);border:1px solid rgba(136,165,255,.08)}
+    .action-card h4{margin:0;font-size:22px;letter-spacing:-.03em}
+    .action-card p{margin:8px 0 0;color:var(--soft);line-height:1.55}
+    .action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .timeline{display:grid;gap:12px;margin-top:14px}
+    .event{display:grid;grid-template-columns:88px 1fr;gap:14px;padding:14px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(136,165,255,.08)}
+    .event time{color:var(--soft);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+    .event h5{margin:0 0 4px;font-size:18px}
+    .event p{margin:0;color:var(--soft);line-height:1.5}
+    .footer-note{margin-top:16px;color:var(--soft);font-size:14px}
+    @media (max-width:1180px){.hero,.section{grid-template-columns:1fr}.hero h2{font-size:52px}.metric-row{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:980px){.shell{grid-template-columns:1fr}.sidebar{position:relative;height:auto}}
+    @media (max-width:720px){.main{padding:16px}.metric-row{grid-template-columns:1fr}.hero h2{font-size:40px}.risk{flex-direction:column}.event{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <div class="app">
+  <div class="shell">
     <aside class="sidebar">
       <div class="brand">
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAMgCAYAAADbcAZoAAAACXBIWXMAAAsTAAALEwEAmpwYAAAgAElEQVR4nO3dW4xd5X3/8c/3zNw9jQ1Sm7YNE1mPZbQKp4qoChTQVCIikipEX0ml1bY/ACRSo9anvhoQKlSg2lLv8h4gkZcE9YFX0BKoCjVTUFBAjCaQ6nTqJm0iHfHj+cc89+jr3Pmed+Y8r5k1mT1j7z3n3HvmnPecw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4ePV+Nn9h9rB8q7f7t5k2mZb8b8JgAA0J6z2f2JAAAA8FhAAgAAhAEIAAAQBiAAAECYgAABAGIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABA2H8B1iV6S6aJ9WgAAAAASUVORK5CYII=" alt="AgentRail logo" />
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAMgCAYAAADbcAZoAAAACXBIWXMAAAsTAAALEwEAmpwYAAAgAElEQVR4nO3dW4xd5X3/8c/3zNw9jQ1Sm7YNE1mPZbQKp4qoChTQVCIikipEX0ml1bY/ACRSo9anvhoQKlSg2lLv8h4gkZcE9YFX0BKoCjVTUFBAjCaQ6nTqJm0iHfHj+cc89+jr3Pmed+Y8r5k1mT1j7z3n3HvmnPecw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4cPHz58+PDhw4ePV+Nn9h9rB8q7f7t5k2mZb8b8JgAA0J6z2f2JAAAA8FhAAgAAhAEIAAAQBiAAAECYgAABAGIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABAmIAAAQJiAAAECYgAABA2H8B1iV6S6aJ9WgAAAAASUVORK5CYII=" alt="AgentRail logo" />
         <div>
           <h1>AgentRail</h1>
-          <p>Pilot Workspace</p>
+          <p>Autonomous systems control plane</p>
         </div>
       </div>
-
-      <div class="sidebar-copy">
-        Start with visibility. Scale with governance.
-      </div>
-
+      <div class="sidebar-copy">See the full autonomous surface. Detect the dangerous path. Turn control on in one move.</div>
       <nav class="nav">
-        <button class="active">Overview</button>
-        <button>Discovery</button>
-        <button>Activation</button>
-        <button>Runtime</button>
+        <button class="active">Mission Control</button>
+        <button>Discovery Scan</button>
+        <button>Critical Paths</button>
         <button>Approvals</button>
-        <button>Audit</button>
-        <button>Platform</button>
+        <button>Runtime Graph</button>
+        <button>Audit Replay</button>
+        <button>Policy Engine</button>
       </nav>
-
-      <div class="sidebar-card">
-        <h3>Why this MVP exists</h3>
-        <p>
-          AgentRail shows the real agent surface first — runtimes, identities, connectors and sensitive paths —
-          then turns policy, approvals and auditability on around the riskiest actions.
-        </p>
+      <div class="sidecard">
+        <h3>What feels impossible</h3>
+        <p>One scan maps agent runtimes, identities, tools, environments and privileged action paths. Then AgentRail activates approvals, replayable audit, and human override exactly where it matters.</p>
       </div>
     </aside>
 
     <main class="main">
       <div class="topbar">
-        <div class="workspace">
-          <div class="badge"><span class="dot"></span> Workspace: Production</div>
-          <div class="badge">Shadow mode ON</div>
+        <div class="row">
+          <div class="badge"><span class="dot"></span> Production workspace</div>
+          <div class="badge">Shadow mode engaged</div>
+          <div class="badge">Live graph linked</div>
         </div>
-
-        <div class="actions">
-          <button class="btn btn-secondary">See discovery view</button>
-          <button class="btn btn-primary">Run discovery scan</button>
+        <div class="row">
+          <button class="btn btn-secondary" id="reviewBtn">Review critical path</button>
+          <button class="btn btn-primary" id="scanBtn">Run planetary scan</button>
         </div>
       </div>
 
       <section class="hero">
-        <div>
-          <div class="eyebrow">Enterprise runtime governance for AI agents</div>
-          <h2>Discover the real agent surface before you govern it.</h2>
+        <div class="panel hero-left">
+          <div class="eyebrow">The operating system for governing autonomous work</div>
+          <h2>Watch the entire agent surface resolve in real time.</h2>
           <p>
-            Lovablized, not reinvented: the product stays discovery-first. AgentRail maps runtimes, identities,
-            connectors and sensitive action paths first — then activates approvals, policy checks and replayable audit trails.
+            AgentRail is not a dashboard theme. It is a live control layer for autonomous systems: discovery, topology,
+            risk scoring, approvals, enforcement, and audit — compressed into one immediate decision surface.
           </p>
+          <div class="metric-row">
+            <div class="metric"><label>Agents</label><strong id="agentsMetric">0</strong></div>
+            <div class="metric"><label>Identities</label><strong id="identitiesMetric">0</strong></div>
+            <div class="metric"><label>Risks</label><strong id="risksMetric">0</strong></div>
+            <div class="metric"><label>Critical</label><strong id="criticalMetric">0</strong></div>
+          </div>
         </div>
 
-        <div class="kpi-grid">
-          <div class="kpi">
-            <label>Agents discovered</label>
-            <strong>5</strong>
-            <span>Across internal and production surfaces</span>
+        <div class="panel graph-wrap">
+          <div class="graph-head">
+            <div class="graph-title">Live autonomous topology</div>
+            <div class="badge" id="graphStatus">Awaiting scan</div>
           </div>
-          <div class="kpi">
-            <label>Production-capable</label>
-            <strong>5</strong>
-            <span>With write or privileged execution paths</span>
+          <div class="network" id="network">
+            <svg viewBox="0 0 800 420" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#42def1" stop-opacity="0.9"/>
+                  <stop offset="100%" stop-color="#b66cff" stop-opacity="0.9"/>
+                </linearGradient>
+              </defs>
+              <path d="M172 122 L392 210" stroke="url(#glow)" stroke-width="2" opacity=".35"/>
+              <path d="M392 210 L630 110" stroke="url(#glow)" stroke-width="2" opacity=".28"/>
+              <path d="M392 210 L628 305" stroke="url(#glow)" stroke-width="2" opacity=".35"/>
+              <path d="M172 302 L392 210" stroke="url(#glow)" stroke-width="2" opacity=".24"/>
+              <path d="M628 305 L628 110" stroke="#ff6f8b" stroke-width="2" opacity=".28"/>
+              <circle cx="392" cy="210" r="58" fill="rgba(66,222,241,.08)" />
+              <circle cx="392" cy="210" r="86" fill="rgba(66,222,241,.035)" />
+            </svg>
+            <div class="node" style="left:6%;top:18%">GitHub MCP<small>merge · write</small></div>
+            <div class="node" style="left:9%;top:66%">Notion Agent<small>export · knowledge</small></div>
+            <div class="node node-core pulse" style="left:39%;top:35%">AgentRail Core<small>scan · score · enforce</small></div>
+            <div class="node node-risk pulse" style="left:73%;top:16%">Okta Admin Bot<small>suspend_user · privileged</small></div>
+            <div class="node" style="left:73%;top:66%">Prod Runtime<small>cross-env access</small></div>
           </div>
-          <div class="kpi">
-            <label>Pending approvals</label>
-            <strong>3</strong>
-            <span>Human review still required</span>
-          </div>
-          <div class="kpi">
-            <label>Critical paths</label>
-            <strong>1</strong>
-            <span>Immediate governance focus</span>
+          <div class="scanlog" id="scanlog">
+            <div class="scanline"><span>system status</span><span>idle</span></div>
+            <div class="scanline"><span>scan command</span><span>not started</span></div>
           </div>
         </div>
       </section>
 
       <section class="section">
         <div class="panel">
-          <div class="panel-title">
-            <div class="title-block">
-              <div class="eyebrow">Visibility first</div>
-              <h4>The wedge is discovery, not blind enforcement.</h4>
-              <p>
-                Buyers should understand where agentic risk already exists across Dust, Glean, MCP tools, service identities
-                and production systems — before AgentRail asks them to change how they work.
-              </p>
-            </div>
-          </div>
-
-          <div class="steps">
-            <div class="step">
-              <div class="num">1</div>
+          <h3>Critical path engine</h3>
+          <p class="sub">The wow moment is not the UI. It is seeing the dangerous path appear, explain itself, and become governable instantly.</p>
+          <div class="risk-list" id="riskList">
+            <div class="risk">
               <div>
-                <h5>Map runtimes and identities</h5>
-                <p>Know which agents exist, who they run as, and which environments they can reach.</p>
+                <h4>GitHub.merge_pr</h4>
+                <p>Engineering agent can merge directly into protected production branches.</p>
+                <div class="risk-meta">
+                  <span class="chip amber">shared service identity</span>
+                  <span class="chip amber">no approval gate</span>
+                  <span class="chip green">shadow mode ready</span>
+                </div>
               </div>
+              <div class="score"><strong>83</strong><small>risk</small></div>
             </div>
-            <div class="step">
-              <div class="num">2</div>
+            <div class="risk">
               <div>
-                <h5>Find sensitive action paths</h5>
-                <p>Highlight bulk writes, shared service identities, privileged actions and missing review gates.</p>
+                <h4>Okta.suspend_user</h4>
+                <p>Identity admin bot has privileged authority with no human checkpoint.</p>
+                <div class="risk-meta">
+                  <span class="chip red">privileged action</span>
+                  <span class="chip red">cross-system blast radius</span>
+                  <span class="chip amber">approval missing</span>
+                </div>
               </div>
+              <div class="score"><strong>92</strong><small>risk</small></div>
             </div>
-            <div class="step">
-              <div class="num">3</div>
+            <div class="risk">
               <div>
-                <h5>Turn control on around the risky edge</h5>
-                <p>Activate policy checks, approvals and audit trails only where the scan proves they matter.</p>
+                <h4>Notion.export_workspace</h4>
+                <p>Knowledge agent can exfiltrate large workspace surfaces under shared credentials.</p>
+                <div class="risk-meta">
+                  <span class="chip amber">bulk export</span>
+                  <span class="chip amber">sensitive memory path</span>
+                  <span class="chip green">audit replay available</span>
+                </div>
               </div>
+              <div class="score"><strong>78</strong><small>risk</small></div>
             </div>
           </div>
         </div>
 
-        <div class="stack">
-          <div class="panel">
-            <div class="panel-title">
-              <h3>Workspace posture</h3>
-              <div class="badge">Shadow mode</div>
+        <div class="panel">
+          <h3>Instant control actions</h3>
+          <p class="sub">A serious system does not just observe. It changes the state of the world.</p>
+          <div class="action-stack">
+            <div class="action-card">
+              <h4>Enforce approval on critical path</h4>
+              <p>Turn any high-risk action into a human-reviewed checkpoint without shutting the rest of the runtime down.</p>
+              <div class="action-row">
+                <button class="btn btn-primary" id="enforceBtn">Enforce approval now</button>
+                <button class="btn btn-secondary" id="shadowBtn">Keep in shadow mode</button>
+              </div>
             </div>
-
-            <div class="mini-grid">
-              <div class="mini">
-                <label>Identities</label>
-                <strong>12</strong>
-              </div>
-              <div class="mini">
-                <label>Connectors</label>
-                <strong>8</strong>
-              </div>
-              <div class="mini">
-                <label>Runtimes</label>
-                <strong>4</strong>
-              </div>
-              <div class="mini">
-                <label>Policies ready</label>
-                <strong>6</strong>
-              </div>
+            <div class="action-card">
+              <h4>Replayable audit</h4>
+              <p>Every agent decision, identity hop, tool call and attempted write becomes replayable for security and platform teams.</p>
             </div>
           </div>
-
-          <div class="panel">
-            <div class="panel-title">
-              <h3>Critical actions needing review</h3>
-              <div class="badge">Actionable now</div>
-            </div>
-
-            <div class="risk-list">
-              <div class="risk">
-                <div>
-                  <h5>GitHub.merge_pr</h5>
-                  <p>Engineering MCP Agent · pending human approval</p>
-                </div>
-                <div class="score">
-                  <span class="chip amber">Risk 83</span>
-                </div>
-              </div>
-
-              <div class="risk">
-                <div>
-                  <h5>Okta.suspend_user</h5>
-                  <p>Identity Admin Bot · privileged identity action</p>
-                </div>
-                <div class="score">
-                  <span class="chip red">Risk 92</span>
-                </div>
-              </div>
-
-              <div class="risk">
-                <div>
-                  <h5>Notion.export_workspace</h5>
-                  <p>Ops Knowledge Agent · exfiltration-capable path</p>
-                </div>
-                <div class="score">
-                  <span class="chip amber">Risk 78</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="footer-note">
-              Next best action: run a discovery scan, review the critical path, then activate approvals in shadow mode before enforcement.
-            </div>
+          <div class="timeline" id="timeline">
+            <div class="event"><time>now</time><div><h5>Waiting for live scan</h5><p>Run the scan to resolve the topology, score the risky paths and unlock control actions.</p></div></div>
           </div>
+          <div class="footer-note">Goal: make one page feel like seeing the nervous system of an autonomous company.</div>
         </div>
       </section>
     </main>
   </div>
+
+  <script>
+    const scanBtn = document.getElementById('scanBtn');
+    const reviewBtn = document.getElementById('reviewBtn');
+    const enforceBtn = document.getElementById('enforceBtn');
+    const shadowBtn = document.getElementById('shadowBtn');
+    const scanlog = document.getElementById('scanlog');
+    const graphStatus = document.getElementById('graphStatus');
+    const timeline = document.getElementById('timeline');
+
+    const metrics = {
+      agents: document.getElementById('agentsMetric'),
+      identities: document.getElementById('identitiesMetric'),
+      risks: document.getElementById('risksMetric'),
+      critical: document.getElementById('criticalMetric')
+    };
+
+    const scanLines = [
+      ['scan command', 'initiated'],
+      ['mapping runtimes', 'dust · mcp · internal bots · prod'],
+      ['resolving identities', '12 identities linked'],
+      ['indexing connectors', 'github · okta · notion · slack · prod'],
+      ['detecting privileged writes', '3 risky flows'],
+      ['simulating approval gates', 'shadow ready'],
+      ['critical path found', 'okta.suspend_user'],
+      ['mission status', 'control available']
+    ];
+
+    function setLog(lines){
+      scanlog.innerHTML = '';
+      lines.forEach(([left,right]) => {
+        const row = document.createElement('div');
+        row.className = 'scanline';
+        row.innerHTML = `<span>${left}</span><span>${right}</span>`;
+        scanlog.appendChild(row);
+      });
+      scanlog.scrollTop = scanlog.scrollHeight;
+    }
+
+    function animateMetric(el, target){
+      const start = Number(el.textContent) || 0;
+      const duration = 900;
+      const startTime = performance.now();
+      function frame(now){
+        const p = Math.min((now - startTime) / duration, 1);
+        el.textContent = Math.round(start + (target - start) * (1 - Math.pow(1 - p, 3)));
+        if(p < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    function pushTimeline(title, copy){
+      const card = document.createElement('div');
+      card.className = 'event';
+      card.innerHTML = `<time>${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</time><div><h5>${title}</h5><p>${copy}</p></div>`;
+      timeline.prepend(card);
+    }
+
+    function runScan(){
+      scanBtn.disabled = true;
+      graphStatus.textContent = 'Scanning live';
+      let shown = [];
+      let i = 0;
+      setLog([['system status','booting scan engine']]);
+      const interval = setInterval(() => {
+        shown.push(scanLines[i]);
+        setLog(shown);
+        if(i === 1){ animateMetric(metrics.agents, 5); }
+        if(i === 2){ animateMetric(metrics.identities, 12); }
+        if(i === 4){ animateMetric(metrics.risks, 3); }
+        if(i === 6){ animateMetric(metrics.critical, 1); }
+        if(i === 6){ pushTimeline('Critical path materialized', 'Okta.suspend_user surfaced as the highest-risk autonomous action path in the workspace.'); }
+        if(i === scanLines.length - 1){
+          clearInterval(interval);
+          graphStatus.textContent = 'Scan complete';
+          pushTimeline('System resolved', 'Topology, identities, connectors and risky actions were mapped into one governable control layer.');
+          scanBtn.textContent = 'Rescan system';
+          scanBtn.disabled = false;
+        }
+        i++;
+      }, 520);
+    }
+
+    scanBtn.addEventListener('click', runScan);
+    reviewBtn.addEventListener('click', () => pushTimeline('Critical path opened', 'Review mode focused the interface on the highest-risk actions and their approval state.'));
+    shadowBtn.addEventListener('click', () => pushTimeline('Shadow mode retained', 'AgentRail continues observing and simulating approvals without blocking production execution.'));
+    enforceBtn.addEventListener('click', () => {
+      pushTimeline('Approval layer activated', 'Critical actions now require human review before execution. Audit replay and policy checks were attached to the path.');
+      enforceBtn.textContent = 'Approval enforced';
+      enforceBtn.disabled = true;
+    });
+  </script>
 </body>
 </html>
