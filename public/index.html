@@ -1,182 +1,710 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AgentRail — Control Tower</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentRail — Control Plane Demo</title>
+  <style>
+    :root {
+      --bg: #0a0d14;
+      --panel: #111622;
+      --panel-2: #151c2b;
+      --border: rgba(255,255,255,.08);
+      --text: #f5f7ff;
+      --soft: #96a2bd;
+      --muted: #667085;
+      --purple: #7c5cff;
+      --cyan: #4dd7ff;
+      --green: #19c37d;
+      --amber: #f59e0b;
+      --red: #ff5f74;
+      --shadow: 0 24px 80px rgba(0,0,0,.35);
+    }
 
-<style>
-body {
-  margin:0;
-  font-family: Inter, sans-serif;
-  background:#0a0b10;
-  color:white;
-}
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(124,92,255,.16), transparent 28%),
+        radial-gradient(circle at 85% 0%, rgba(77,215,255,.12), transparent 24%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
-.container {
-  max-width:1000px;
-  margin:80px auto;
-  padding:20px;
-}
+    .page {
+      min-height: 100vh;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+    }
 
-.logo {
-  display:flex;
-  align-items:center;
-  gap:12px;
-  font-weight:700;
-  font-size:20px;
-  margin-bottom:40px;
-}
+    .sidebar, .main {
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
 
-.logo img {
-  width:40px;
-  background:white;
-  border-radius:10px;
-}
+    .sidebar {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
 
-.card {
-  background:#11131c;
-  border:1px solid #222;
-  border-radius:20px;
-  padding:30px;
-  margin-bottom:20px;
-}
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
 
-.event {
-  font-size:22px;
-  font-weight:600;
-}
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      font-weight: 800;
+      color: white;
+      box-shadow: 0 12px 30px rgba(124,92,255,.28);
+    }
 
-.sub {
-  color:#aaa;
-  margin-top:8px;
-}
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -.03em;
+    }
 
-.risk {
-  margin-top:20px;
-  padding:15px;
-  border-radius:12px;
-  background:#1a0f12;
-  border:1px solid #442;
-}
+    .brand p {
+      margin: 2px 0 0;
+      color: var(--soft);
+      font-size: 13px;
+    }
 
-.risk strong {
-  color:#ff5f74;
-}
+    .blurb {
+      color: var(--soft);
+      line-height: 1.6;
+      font-size: 14px;
+      margin: 0;
+    }
 
-.actions {
-  margin-top:25px;
-  display:flex;
-  gap:12px;
-}
+    .side-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+    }
 
-button {
-  padding:14px 18px;
-  border-radius:12px;
-  border:none;
-  font-weight:600;
-  cursor:pointer;
-}
+    .side-card h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: #d9e2ff;
+      letter-spacing: .02em;
+    }
 
-.approve { background:#19c37d; }
-.block { background:#ff5f74; }
-.shadow { background:#444; }
+    .legend {
+      display: grid;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--soft);
+    }
 
-.log {
-  margin-top:30px;
-  font-family: monospace;
-  font-size:13px;
-  color:#bbb;
-}
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-.line {
-  margin-top:6px;
-}
-</style>
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .dot.purple { background: var(--purple); }
+    .dot.cyan { background: var(--cyan); }
+    .dot.amber { background: var(--amber); }
+    .dot.red { background: var(--red); }
+    .dot.green { background: var(--green); }
+
+    .main {
+      padding: 22px;
+      display: grid;
+      gap: 18px;
+      grid-template-rows: auto auto 1fr;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .hero h2 {
+      margin: 0;
+      font-size: 40px;
+      line-height: .95;
+      letter-spacing: -.05em;
+    }
+
+    .hero p {
+      margin: 10px 0 0;
+      color: var(--soft);
+      line-height: 1.65;
+      max-width: 760px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-size: 14px;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      color: white;
+      box-shadow: 0 12px 32px rgba(124,92,255,.24);
+    }
+
+    .secondary {
+      background: rgba(255,255,255,.06);
+      color: white;
+      border: 1px solid var(--border);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 34px;
+      margin-bottom: 6px;
+    }
+
+    .stat span {
+      color: var(--soft);
+      font-size: 13px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 18px;
+      min-height: 0;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      min-height: 0;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .sub {
+      margin-top: 8px;
+      color: var(--soft);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .events {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .event {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      transition: .18s ease;
+      cursor: pointer;
+    }
+
+    .event:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,.16);
+    }
+
+    .event.active {
+      border-color: rgba(124,92,255,.5);
+      box-shadow: inset 0 0 0 1px rgba(124,92,255,.25);
+    }
+
+    .event-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .source-pill, .risk-pill, .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .source-dust { background: rgba(124,92,255,.16); color: #ddd4ff; }
+    .source-house { background: rgba(77,215,255,.14); color: #ccf6ff; }
+    .source-script { background: rgba(255,255,255,.08); color: #f2f4f8; }
+    .risk-high { background: rgba(255,95,116,.16); color: #ffd3da; }
+    .risk-medium { background: rgba(245,158,11,.16); color: #ffe6b3; }
+    .status-blocked { background: rgba(255,95,116,.12); color: #ffd3da; }
+    .status-approved { background: rgba(25,195,125,.14); color: #c8ffe7; }
+    .status-shadow { background: rgba(124,92,255,.16); color: #e0d8ff; }
+    .status-pending { background: rgba(255,255,255,.08); color: #f2f4f8; }
+
+    .event-title {
+      margin: 14px 0 0;
+      font-size: 18px;
+      letter-spacing: -.02em;
+    }
+
+    .event-desc {
+      margin: 8px 0 0;
+      color: var(--soft);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .detail-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      margin-top: 16px;
+    }
+
+    .detail-title {
+      font-size: 24px;
+      letter-spacing: -.03em;
+      margin: 0;
+    }
+
+    .detail-sub {
+      margin: 8px 0 0;
+      color: var(--soft);
+      line-height: 1.6;
+    }
+
+    .reasons {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .reason {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: var(--soft);
+      font-size: 14px;
+    }
+
+    .policy {
+      margin-top: 18px;
+      background: linear-gradient(180deg, rgba(124,92,255,.10), rgba(77,215,255,.05));
+      border: 1px solid rgba(124,92,255,.24);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .policy strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .decision-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .approve { background: var(--green); color: #04140d; }
+    .block { background: var(--red); color: white; }
+    .shadow { background: linear-gradient(135deg, var(--purple), var(--cyan)); color: white; }
+
+    .audit {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+      max-height: 420px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .audit-line {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--soft);
+      line-height: 1.55;
+    }
+
+    .audit-line strong {
+      color: white;
+    }
+
+    @media (max-width: 1200px) {
+      .page { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .page { padding: 14px; }
+      .hero, .hero-actions, .detail-head { flex-direction: column; }
+      .stats { grid-template-columns: 1fr; }
+      .hero h2 { font-size: 32px; }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="page">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">AR</div>
+        <div>
+          <h1>AgentRail</h1>
+          <p>Independent control plane</p>
+        </div>
+      </div>
 
-<div class="container">
+      <p class="blurb">
+        Cette démo montre trois origines différentes d’actions agentiques. AgentRail les intercepte, calcule un risque, applique une policy et trace la décision.
+      </p>
 
-  <div class="logo">
-    <img src="/logo.png">
-    AgentRail
+      <div class="side-card">
+        <h3>Sources observées</h3>
+        <div class="legend">
+          <div class="legend-item"><span class="dot purple"></span>Agent Dust</div>
+          <div class="legend-item"><span class="dot cyan"></span>Agent maison</div>
+          <div class="legend-item"><span class="dot amber"></span>Script autonome</div>
+        </div>
+      </div>
+
+      <div class="side-card">
+        <h3>Ce que fait AgentRail</h3>
+        <div class="legend">
+          <div class="legend-item"><span class="dot red"></span>Interception des actions critiques</div>
+          <div class="legend-item"><span class="dot amber"></span>Scoring de risque</div>
+          <div class="legend-item"><span class="dot green"></span>Décision + audit trail</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="hero">
+        <div>
+          <h2>Control plane pour actions d’agents</h2>
+          <p>
+            Dust veut agir. Un agent interne veut agir. Un script autonome veut agir. AgentRail centralise tout, évalue le risque, applique une policy et laisse une preuve exploitable.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <button class="primary" id="simulateBtn">Simuler les 3 événements</button>
+          <button class="secondary" id="resetBtn">Reset</button>
+        </div>
+      </section>
+
+      <section class="stats">
+        <div class="stat"><strong id="pendingCount">0</strong><span>Décisions en attente</span></div>
+        <div class="stat"><strong id="blockedCount">0</strong><span>Actions bloquées</span></div>
+        <div class="stat"><strong id="approvedCount">0</strong><span>Actions approuvées</span></div>
+        <div class="stat"><strong id="shadowCount">0</strong><span>Shadow mode</span></div>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h3>Événements intercepterés</h3>
+          <div class="sub">Clique sur un événement pour voir le détail, le risque et la policy appliquée.</div>
+          <div class="events" id="events"></div>
+        </div>
+
+        <div class="card">
+          <h3>Détail de décision</h3>
+          <div id="detailsEmpty" class="sub" style="margin-top:16px;">Lance la simulation puis sélectionne un événement.</div>
+          <div id="details" style="display:none;">
+            <div class="detail-head">
+              <div>
+                <h4 class="detail-title" id="detailTitle"></h4>
+                <p class="detail-sub" id="detailSub"></p>
+              </div>
+              <div id="detailRisk"></div>
+            </div>
+
+            <div class="reasons" id="detailReasons"></div>
+
+            <div class="policy" id="detailPolicy"></div>
+
+            <div class="decision-bar" id="decisionBar">
+              <button class="approve" id="approveBtn">Approve</button>
+              <button class="block" id="blockBtn">Block</button>
+              <button class="shadow" id="shadowBtn">Shadow mode</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>Audit trail</h3>
+        <div class="sub">Chaque décision produit une trace claire : source, action, niveau de risque, policy et outcome.</div>
+        <div class="audit" id="audit"></div>
+      </section>
+    </main>
   </div>
 
-  <div class="card">
+  <script>
+    const initialEvents = [
+      {
+        id: 'dust-merge',
+        source: 'dust',
+        sourceLabel: 'Dust agent',
+        action: 'Merge PR #482',
+        target: 'production repo / payments-api',
+        summary: 'Un agent Dust veut merger une pull request directement sur un repo de production.',
+        risk: 87,
+        severity: 'HIGH',
+        reasons: [
+          'write access sur repository de production',
+          'aucune approbation humaine détectée',
+          'action destructive potentielle via déploiement en chaîne'
+        ],
+        policy: 'Policy PROD_WRITE_REQUIRES_APPROVAL → blocage par défaut si aucun humain n’a approuvé.',
+        status: 'pending'
+      },
+      {
+        id: 'house-okta',
+        source: 'house',
+        sourceLabel: 'Agent maison',
+        action: 'Suspend user account',
+        target: 'Okta / compte finance@company.com',
+        summary: 'Un agent interne veut suspendre un utilisateur dans le système d’identité.',
+        risk: 81,
+        severity: 'HIGH',
+        reasons: [
+          'impact direct sur identité et accès',
+          'cible membre d’une équipe sensible',
+          'action irréversible sans contexte métier explicite'
+        ],
+        policy: 'Policy IDENTITY_CRITICAL_ACTION → shadow mode ou approbation manuelle obligatoire.',
+        status: 'pending'
+      },
+      {
+        id: 'script-export',
+        source: 'script',
+        sourceLabel: 'Script autonome',
+        action: 'Bulk export workspace',
+        target: 'Notion / workspace strategy',
+        summary: 'Un script autonome veut exporter massivement un espace documentaire.',
+        risk: 74,
+        severity: 'MEDIUM',
+        reasons: [
+          'volume de données élevé',
+          'destination externe non vérifiée',
+          'identité de service partagée'
+        ],
+        policy: 'Policy BULK_EXPORT_MONITOR → shadow mode recommandé, blocage si destination inconnue.',
+        status: 'pending'
+      }
+    ];
 
-    <div class="event" id="event">
-      ⚡ En attente d'événement...
-    </div>
+    let events = [];
+    let selectedId = null;
 
-    <div class="sub" id="sub">
-      Clique pour simuler une action agent
-    </div>
+    const eventsEl = document.getElementById('events');
+    const auditEl = document.getElementById('audit');
+    const detailsEl = document.getElementById('details');
+    const detailsEmptyEl = document.getElementById('detailsEmpty');
+    const detailTitleEl = document.getElementById('detailTitle');
+    const detailSubEl = document.getElementById('detailSub');
+    const detailRiskEl = document.getElementById('detailRisk');
+    const detailReasonsEl = document.getElementById('detailReasons');
+    const detailPolicyEl = document.getElementById('detailPolicy');
+    const approveBtn = document.getElementById('approveBtn');
+    const blockBtn = document.getElementById('blockBtn');
+    const shadowBtn = document.getElementById('shadowBtn');
 
-    <div class="risk" id="risk" style="display:none">
-      <strong>Risk: HIGH (87)</strong><br>
-      - write access<br>
-      - no approval<br>
-      - production repo
-    </div>
+    function sourceClass(source) {
+      if (source === 'dust') return 'source-dust';
+      if (source === 'house') return 'source-house';
+      return 'source-script';
+    }
 
-    <div class="actions" id="actions" style="display:none">
-      <button class="approve" onclick="decision('approve')">Approve</button>
-      <button class="block" onclick="decision('block')">Block</button>
-      <button class="shadow" onclick="decision('shadow')">Shadow</button>
-    </div>
+    function riskClass(risk) {
+      return risk >= 80 ? 'risk-high' : 'risk-medium';
+    }
 
-  </div>
+    function statusClass(status) {
+      if (status === 'blocked') return 'status-blocked';
+      if (status === 'approved') return 'status-approved';
+      if (status === 'shadow') return 'status-shadow';
+      return 'status-pending';
+    }
 
-  <div class="card">
-    <strong>Audit log</strong>
-    <div class="log" id="log"></div>
-  </div>
+    function statusLabel(status) {
+      if (status === 'blocked') return 'Blocked';
+      if (status === 'approved') return 'Approved';
+      if (status === 'shadow') return 'Shadow';
+      return 'Pending';
+    }
 
-  <button onclick="trigger()" style="margin-top:20px">
-    ▶ Simuler un agent
-  </button>
+    function updateStats() {
+      document.getElementById('pendingCount').textContent = events.filter(e => e.status === 'pending').length;
+      document.getElementById('blockedCount').textContent = events.filter(e => e.status === 'blocked').length;
+      document.getElementById('approvedCount').textContent = events.filter(e => e.status === 'approved').length;
+      document.getElementById('shadowCount').textContent = events.filter(e => e.status === 'shadow').length;
+    }
 
-</div>
+    function renderEvents() {
+      eventsEl.innerHTML = events.map(event => `
+        <div class="event ${event.id === selectedId ? 'active' : ''}" data-id="${event.id}">
+          <div class="event-head">
+            <span class="source-pill ${sourceClass(event.source)}">${event.sourceLabel}</span>
+            <span class="status-pill ${statusClass(event.status)}">${statusLabel(event.status)}</span>
+          </div>
+          <p class="event-title">${event.action}</p>
+          <p class="event-desc">${event.target}</p>
+          <div style="margin-top:12px;display:flex;justify-content:space-between;gap:10px;align-items:center;">
+            <span class="risk-pill ${riskClass(event.risk)}">${event.severity} · ${event.risk}</span>
+            <span style="font-size:12px;color:var(--soft);">AgentRail intercepted</span>
+          </div>
+        </div>
+      `).join('');
 
-<script>
-function trigger(){
-  document.getElementById("event").innerHTML =
-    "⚠️ github-agent tente de merger PR #482";
+      [...eventsEl.querySelectorAll('.event')].forEach(el => {
+        el.onclick = () => {
+          selectedId = el.dataset.id;
+          renderEvents();
+          renderDetails();
+        };
+      });
+    }
 
-  document.getElementById("sub").innerHTML =
-    "Target: production repository";
+    function renderDetails() {
+      const event = events.find(e => e.id === selectedId);
+      if (!event) {
+        detailsEl.style.display = 'none';
+        detailsEmptyEl.style.display = 'block';
+        return;
+      }
 
-  document.getElementById("risk").style.display = "block";
-  document.getElementById("actions").style.display = "flex";
+      detailsEl.style.display = 'block';
+      detailsEmptyEl.style.display = 'none';
 
-  log("Agent detected → github-agent");
-  log("Action → merge PR #482");
-}
+      detailTitleEl.textContent = event.action;
+      detailSubEl.textContent = `${event.sourceLabel} · ${event.target} · ${event.summary}`;
+      detailRiskEl.innerHTML = `<span class="risk-pill ${riskClass(event.risk)}">${event.severity} · ${event.risk}</span>`;
+      detailReasonsEl.innerHTML = event.reasons.map(reason => `<div class="reason">${reason}</div>`).join('');
+      detailPolicyEl.innerHTML = `<strong>Policy appliquée</strong>${event.policy}`;
 
-function decision(type){
-  if(type==="approve"){
-    log("✔ Approved → merge executed");
-  }
-  if(type==="block"){
-    log("❌ Blocked → action cancelled");
-  }
-  if(type==="shadow"){
-    log("👁 Shadow mode → observed only");
-  }
+      const disabled = event.status !== 'pending';
+      approveBtn.disabled = disabled;
+      blockBtn.disabled = disabled;
+      shadowBtn.disabled = disabled;
+      approveBtn.style.opacity = disabled ? '.45' : '1';
+      blockBtn.style.opacity = disabled ? '.45' : '1';
+      shadowBtn.style.opacity = disabled ? '.45' : '1';
+    }
 
-  log("→ audit trail created");
-  log("→ policy applied");
+    function addAudit(line, strongText) {
+      const row = document.createElement('div');
+      row.className = 'audit-line';
+      row.innerHTML = strongText ? `<strong>${strongText}</strong><br>${line}` : line;
+      auditEl.prepend(row);
+    }
 
-  document.getElementById("actions").style.display = "none";
-}
+    function decide(outcome) {
+      const event = events.find(e => e.id === selectedId);
+      if (!event || event.status !== 'pending') return;
 
-function log(txt){
-  const el = document.getElementById("log");
-  el.innerHTML += `<div class="line">> ${txt}</div>`;
-}
-</script>
+      event.status = outcome;
+      renderEvents();
+      renderDetails();
+      updateStats();
 
+      const message = outcome === 'blocked'
+        ? 'Action bloquée. Policy enforced avant exécution.'
+        : outcome === 'approved'
+        ? 'Action approuvée avec trace complète et responsabilité explicite.'
+        : 'Action laissée en shadow mode. Exécution observée sans enforcement destructif.';
+
+      addAudit(
+        `${event.sourceLabel} · ${event.action} · Risk ${event.risk} · Outcome: ${statusLabel(outcome)}<br>${message}`,
+        'Decision recorded'
+      );
+    }
+
+    function resetDemo() {
+      events = JSON.parse(JSON.stringify(initialEvents));
+      selectedId = null;
+      auditEl.innerHTML = '';
+      addAudit('Aucune décision encore prise. Lance la simulation pour remplir la control plane.', 'Demo ready');
+      renderEvents();
+      renderDetails();
+      updateStats();
+    }
+
+    function simulateDemo() {
+      resetDemo();
+      selectedId = events[0].id;
+      renderEvents();
+      renderDetails();
+
+      addAudit('Dust agent intercepted → tentative de merge sur repo de production.', 'Interception');
+      addAudit('Agent maison intercepted → action critique sur identité.', 'Interception');
+      addAudit('Script autonome intercepted → export documentaire massif.', 'Interception');
+    }
+
+    document.getElementById('simulateBtn').onclick = simulateDemo;
+    document.getElementById('resetBtn').onclick = resetDemo;
+    approveBtn.onclick = () => decide('approved');
+    blockBtn.onclick = () => decide('blocked');
+    shadowBtn.onclick = () => decide('shadow');
+
+    resetDemo();
+  </script>
 </body>
 </html>
