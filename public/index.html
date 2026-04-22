@@ -1,958 +1,182 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AgentRail — GitHub Public Scan</title>
-  <style>
-    :root {
-      --bg: #070812;
-      --panel: rgba(255,255,255,.06);
-      --panel-2: rgba(255,255,255,.04);
-      --line: rgba(255,255,255,.10);
-      --text: #f7f8ff;
-      --soft: #a5aec8;
-      --purple: #7c5cff;
-      --cyan: #4dd7ff;
-      --green: #19c37d;
-      --amber: #f59e0b;
-      --red: #ff5f74;
-      --shadow: 0 24px 80px rgba(0,0,0,.35);
-    }
-
-    * { box-sizing: border-box; }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at 20% 10%, rgba(124,92,255,.18), transparent 30%),
-        radial-gradient(circle at 85% 0%, rgba(77,215,255,.12), transparent 24%),
-        var(--bg);
-      color: var(--text);
-    }
-
-    a { text-decoration: none; color: inherit; }
-
-    .page {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 1fr 1.08fr;
-      gap: 18px;
-      padding: 18px;
-    }
-
-    .left, .right {
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
-      border: 1px solid var(--line);
-      border-radius: 28px;
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(16px);
-    }
-
-    .left {
-      padding: 28px 34px;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .ambient {
-      position: absolute;
-      right: -80px;
-      bottom: -150px;
-      width: 520px;
-      height: 520px;
-      border-radius: 50%;
-      background: radial-gradient(circle at center, rgba(124,92,255,.26), rgba(77,215,255,.16) 34%, transparent 70%);
-      filter: blur(24px);
-      pointer-events: none;
-    }
-
-    .topnav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 800;
-      font-size: 18px;
-    }
-
-    .brand img,
-    .hero-logo img,
-    .modal-top img {
-      background: #fff;
-      border-radius: 16px;
-      padding: 4px;
-    }
-
-    .brand img {
-      width: 42px;
-      height: 42px;
-      box-shadow: 0 10px 28px rgba(124,92,255,.22);
-    }
-
-    .navlinks {
-      display: flex;
-      gap: 22px;
-      align-items: center;
-      color: #d7def0;
-      font-size: 14px;
-    }
-
-    .cta,
-    .ghost,
-    .share {
-      border: none;
-      border-radius: 14px;
-      padding: 14px 18px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .cta {
-      background: linear-gradient(135deg, var(--purple), var(--cyan));
-      color: white;
-      box-shadow: 0 14px 32px rgba(124,92,255,.26);
-    }
-
-    .ghost {
-      background: rgba(255,255,255,.06);
-      color: white;
-      border: 1px solid var(--line);
-    }
-
-    .hero {
-      max-width: 680px;
-      margin-top: 38px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid var(--line);
-      font-size: 12px;
-      font-weight: 800;
-      color: #dbe3ff;
-    }
-
-    .hero-logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 18px;
-      margin-top: 24px;
-      padding: 18px 20px;
-      border-radius: 24px;
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-      border: 1px solid var(--line);
-    }
-
-    .hero-logo img {
-      width: 78px;
-      height: 78px;
-      box-shadow: 0 0 0 10px rgba(124,92,255,.08), 0 20px 42px rgba(124,92,255,.28);
-      animation: pulse 2.4s infinite;
-    }
-
-    .hero-logo strong {
-      display: block;
-      font-size: 30px;
-      letter-spacing: -.04em;
-    }
-
-    .hero-logo span {
-      display: block;
-      margin-top: 4px;
-      color: var(--soft);
-      font-size: 14px;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.07); }
-    }
-
-    h1 {
-      font-size: 76px;
-      line-height: .9;
-      letter-spacing: -.07em;
-      margin: 28px 0 18px;
-    }
-
-    .accent {
-      background: linear-gradient(90deg, var(--purple), var(--cyan));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .hero p {
-      max-width: 560px;
-      color: var(--soft);
-      font-size: 17px;
-      line-height: 1.75;
-      margin: 0;
-    }
-
-    .actions {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-top: 28px;
-    }
-
-    .trust {
-      display: flex;
-      gap: 18px;
-      flex-wrap: wrap;
-      margin-top: 28px;
-    }
-
-    .trust-item {
-      display: grid;
-      grid-template-columns: 34px 1fr;
-      gap: 10px;
-      min-width: 180px;
-    }
-
-    .trust-icon {
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      background: rgba(124,92,255,.14);
-    }
-
-    .trust-item strong {
-      display: block;
-      font-size: 13px;
-    }
-
-    .trust-item span {
-      display: block;
-      color: var(--soft);
-      font-size: 13px;
-    }
-
-    .brandline {
-      margin-top: auto;
-      padding-top: 18px;
-      color: #8e97ad;
-      font-size: 13px;
-      display: flex;
-      gap: 18px;
-      flex-wrap: wrap;
-      position: relative;
-      z-index: 2;
-    }
-
-    .right {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 18px 20px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .workspace {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      color: #e7ecfb;
-    }
-
-    .user {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .avatar {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #d8def0, #a8b4d1);
-    }
-
-    .content {
-      padding: 20px;
-      display: grid;
-      gap: 16px;
-    }
-
-    .welcome {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: start;
-    }
-
-    .welcome h2 {
-      margin: 0;
-      font-size: 34px;
-      letter-spacing: -.04em;
-    }
-
-    .welcome p {
-      margin: 8px 0 0;
-      color: var(--soft);
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4,1fr);
-      gap: 14px;
-    }
-
-    .stat {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 18px;
-    }
-
-    .stat strong {
-      display: block;
-      font-size: 42px;
-      line-height: 1;
-      margin-bottom: 8px;
-    }
-
-    .stat span {
-      color: var(--soft);
-      font-size: 14px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 16px;
-    }
-
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 18px;
-    }
-
-    .card h3 {
-      margin: 0 0 6px;
-      font-size: 18px;
-    }
-
-    .sub {
-      color: var(--soft);
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .flow {
-      display: grid;
-      grid-template-columns: repeat(4,1fr);
-      gap: 14px;
-      margin-top: 16px;
-    }
-
-    .node {
-      background: var(--panel-2);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      min-height: 118px;
-      padding: 14px;
-      position: relative;
-    }
-
-    .node .label {
-      font-size: 12px;
-      font-weight: 800;
-      margin-bottom: 12px;
-      color: #c7d2fe;
-    }
-
-    .node .title {
-      font-size: 19px;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-
-    .node .small {
-      margin-top: 8px;
-      color: var(--soft);
-      font-size: 13px;
-    }
-
-    .node.add {
-      display: grid;
-      place-items: center;
-      border-style: dashed;
-      cursor: pointer;
-    }
-
-    .plus {
-      position: absolute;
-      right: -14px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 28px;
-      height: 28px;
-      border-radius: 999px;
-      background: #0f1220;
-      border: 1px solid var(--line);
-      display: grid;
-      place-items: center;
-    }
-
-    .node:last-child .plus { display: none; }
-
-    .graph {
-      position: relative;
-      height: 250px;
-      margin-top: 14px;
-      border-radius: 18px;
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border: 1px solid var(--line);
-      overflow: hidden;
-    }
-
-    .graph svg {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    .g-node {
-      position: absolute;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: #13182b;
-      border: 1px solid var(--line);
-      font-size: 12px;
-      font-weight: 700;
-      box-shadow: 0 12px 28px rgba(0,0,0,.26);
-    }
-
-    .g-core {
-      background: linear-gradient(135deg, rgba(124,92,255,.28), rgba(77,215,255,.20));
-    }
-
-    .risk-wrap {
-      margin-top: 16px;
-    }
-
-    .risk-bar {
-      height: 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      overflow: hidden;
-      border: 1px solid var(--line);
-    }
-
-    .risk-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--green), var(--amber), var(--red));
-      transition: width .7s ease;
-    }
-
-    .risk-copy {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 10px;
-      color: var(--soft);
-      font-size: 13px;
-    }
-
-    .repo-list {
-      display: grid;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .repo {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 14px;
-      align-items: center;
-      padding: 14px;
-      border-radius: 14px;
-      background: var(--panel-2);
-      border: 1px solid var(--line);
-    }
-
-    .repo strong {
-      display: block;
-    }
-
-    .repo span {
-      display: block;
-      color: var(--soft);
-      font-size: 13px;
-      margin-top: 4px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .ok { background: rgba(25,195,125,.14); color: #b8ffde; }
-    .warn { background: rgba(245,158,11,.14); color: #ffe1a8; }
-    .bad { background: rgba(255,95,116,.14); color: #ffd1d8; }
-
-    .onboarding {
-      position: fixed;
-      inset: 0;
-      background: rgba(4,6,12,.62);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 30;
-    }
-
-    .modal {
-      width: min(560px, 92vw);
-      background: #111320;
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      padding: 24px;
-      box-shadow: 0 24px 80px rgba(0,0,0,.45);
-    }
-
-    .modal-top {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .modal-top img {
-      width: 58px;
-      height: 58px;
-      box-shadow: 0 0 0 10px rgba(124,92,255,.10);
-    }
-
-    .modal h3 {
-      margin: 0;
-      font-size: 28px;
-      letter-spacing: -.04em;
-    }
-
-    .modal p {
-      color: var(--soft);
-      line-height: 1.7;
-    }
-
-    .steps {
-      display: grid;
-      gap: 10px;
-      margin: 18px 0;
-    }
-
-    .step {
-      padding: 12px 14px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.04);
-      border: 1px solid var(--line);
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 18px;
-    }
-
-    @media (max-width: 1200px) {
-      .page { grid-template-columns: 1fr; }
-      .stats { grid-template-columns: repeat(2,1fr); }
-      .grid, .flow { grid-template-columns: 1fr; }
-      h1 { font-size: 56px; }
-    }
-
-    @media (max-width: 720px) {
-      .topnav, .navlinks, .welcome, .actions, .trust, .modal-actions {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .stats { grid-template-columns: 1fr; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentRail — Control Tower</title>
+
+<style>
+body {
+  margin:0;
+  font-family: Inter, sans-serif;
+  background:#0a0b10;
+  color:white;
+}
+
+.container {
+  max-width:1000px;
+  margin:80px auto;
+  padding:20px;
+}
+
+.logo {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-weight:700;
+  font-size:20px;
+  margin-bottom:40px;
+}
+
+.logo img {
+  width:40px;
+  background:white;
+  border-radius:10px;
+}
+
+.card {
+  background:#11131c;
+  border:1px solid #222;
+  border-radius:20px;
+  padding:30px;
+  margin-bottom:20px;
+}
+
+.event {
+  font-size:22px;
+  font-weight:600;
+}
+
+.sub {
+  color:#aaa;
+  margin-top:8px;
+}
+
+.risk {
+  margin-top:20px;
+  padding:15px;
+  border-radius:12px;
+  background:#1a0f12;
+  border:1px solid #442;
+}
+
+.risk strong {
+  color:#ff5f74;
+}
+
+.actions {
+  margin-top:25px;
+  display:flex;
+  gap:12px;
+}
+
+button {
+  padding:14px 18px;
+  border-radius:12px;
+  border:none;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.approve { background:#19c37d; }
+.block { background:#ff5f74; }
+.shadow { background:#444; }
+
+.log {
+  margin-top:30px;
+  font-family: monospace;
+  font-size:13px;
+  color:#bbb;
+}
+
+.line {
+  margin-top:6px;
+}
+</style>
 </head>
+
 <body>
-  <div class="onboarding" id="onboarding">
-    <div class="modal">
-      <div class="modal-top">
-        <img src="/logo.png" alt="AgentRail logo" />
-        <div>
-          <h3>Bienvenue dans AgentRail</h3>
-          <p style="margin:4px 0 0">Un onboarding simple, visuel, type Lovable.</p>
-        </div>
-      </div>
-      <p>Cette version ajoute un branding plus fort, un graph AI des repos, un score de risque visuel, et garde le scan GitHub réel.</p>
-      <div class="steps">
-        <div class="step">1. Lance le scan réel</div>
-        <div class="step">2. Observe le repo graph se remplir</div>
-        <div class="step">3. Lis le risk score visuel et priorise le top repo</div>
-      </div>
-      <div class="modal-actions">
-        <button class="cta" id="startNow">Commencer</button>
-        <button class="ghost" id="closeOnboarding">Fermer</button>
-      </div>
+
+<div class="container">
+
+  <div class="logo">
+    <img src="/logo.png">
+    AgentRail
+  </div>
+
+  <div class="card">
+
+    <div class="event" id="event">
+      ⚡ En attente d'événement...
     </div>
+
+    <div class="sub" id="sub">
+      Clique pour simuler une action agent
+    </div>
+
+    <div class="risk" id="risk" style="display:none">
+      <strong>Risk: HIGH (87)</strong><br>
+      - write access<br>
+      - no approval<br>
+      - production repo
+    </div>
+
+    <div class="actions" id="actions" style="display:none">
+      <button class="approve" onclick="decision('approve')">Approve</button>
+      <button class="block" onclick="decision('block')">Block</button>
+      <button class="shadow" onclick="decision('shadow')">Shadow</button>
+    </div>
+
   </div>
 
-  <div class="page">
-    <section class="left">
-      <div class="ambient"></div>
-
-      <div class="topnav">
-        <div class="brand">
-          <img src="/logo.png" alt="AgentRail logo" />
-          <span>AgentRail</span>
-        </div>
-        <div class="navlinks">
-          <a href="#">Produit</a>
-          <a href="#">Tarifs</a>
-          <a href="#">Ressources</a>
-          <a href="#">Connexion</a>
-          <button class="cta" id="scanHeroBtn">Essayer gratuitement</button>
-        </div>
-      </div>
-
-      <div class="hero">
-        <div class="eyebrow">Nouveau · Public GitHub scan</div>
-
-        <div class="hero-logo">
-          <img src="/logo.png" alt="AgentRail logo large" />
-          <div>
-            <strong>AgentRail</strong>
-            <span>Runtime visibility for modern teams</span>
-          </div>
-        </div>
-
-        <h1>Connecte.<br>Scanne.<br><span class="accent">Contrôle.</span></h1>
-        <p>
-          AgentRail scanne le GitHub public réel de <strong>nonodelajungle</strong>, détecte les repositories qui méritent ton attention et transforme un simple signal en décision claire.
-        </p>
-
-        <div class="actions">
-          <button class="cta" id="runScanBtn">Lancer le scan réel</button>
-          <button class="ghost" id="demoBtn">Voir la démo</button>
-        </div>
-
-        <div class="trust">
-          <div class="trust-item">
-            <div class="trust-icon">✦</div>
-            <div><strong>Logo animé</strong><span>Pulse + glow AgentRail</span></div>
-          </div>
-          <div class="trust-item">
-            <div class="trust-icon">⚡</div>
-            <div><strong>Repo graph</strong><span>Visualisation AI des repos</span></div>
-          </div>
-          <div class="trust-item">
-            <div class="trust-icon">🔒</div>
-            <div><strong>Risk score</strong><span>Barre visuelle en direct</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="brandline">
-        <span>Meta</span>
-        <span>Google</span>
-        <span>Notion</span>
-        <span>airbnb</span>
-        <span>Microsoft</span>
-      </div>
-    </section>
-
-    <section class="right">
-      <div class="topbar">
-        <div class="workspace">📂 Mon espace ▾</div>
-        <div class="user">
-          <div>🔔</div>
-          <div class="avatar"></div>
-        </div>
-      </div>
-
-      <div class="content">
-        <div class="welcome">
-          <div>
-            <h2>Bienvenue 👋</h2>
-            <p>Voici ce qui se passe dans ton espace GitHub réel.</p>
-          </div>
-          <button class="share" id="shareBtn">Partager</button>
-        </div>
-
-        <div class="stats">
-          <div class="stat"><strong id="reposMetric">0</strong><span>Repositories publics</span></div>
-          <div class="stat"><strong id="attentionMetric">0</strong><span>Repos à surveiller</span></div>
-          <div class="stat"><strong id="languagesMetric">0</strong><span>Langages détectés</span></div>
-          <div class="stat"><strong id="archivedMetric">0</strong><span>Repos archivés</span></div>
-        </div>
-
-        <div class="grid">
-          <div class="card">
-            <h3>Mon scan GitHub</h3>
-            <div class="sub">Source réelle + scoring live + résultat immédiat.</div>
-            <div class="flow">
-              <div class="node">
-                <div class="label">Source</div>
-                <div class="title">GitHub public</div>
-                <div class="small">Compte : nonodelajungle</div>
-                <div class="plus">+</div>
-              </div>
-              <div class="node">
-                <div class="label">Analyse</div>
-                <div class="title">Scoring live</div>
-                <div class="small">stale, issues, metadata</div>
-                <div class="plus">+</div>
-              </div>
-              <div class="node">
-                <div class="label">Résultat</div>
-                <div class="title" id="topRepoName">Aucun repo</div>
-                <div class="small" id="topRepoSub">Lance le scan pour voir le top repository</div>
-                <div class="plus">+</div>
-              </div>
-              <div class="node add" id="runScanNode">Lancer le scan</div>
-            </div>
-          </div>
-
-          <div class="card">
-            <h3>Graph AI des repos</h3>
-            <div class="sub">Une vue visuelle des sources, du moteur de score et du repo prioritaire.</div>
-            <div class="graph">
-              <svg viewBox="0 0 600 250" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="#7c5cff" />
-                    <stop offset="100%" stop-color="#4dd7ff" />
-                  </linearGradient>
-                </defs>
-                <path d="M110 80 L300 120" stroke="url(#g)" stroke-width="2" opacity=".6"/>
-                <path d="M300 120 L490 78" stroke="url(#g)" stroke-width="2" opacity=".6"/>
-                <path d="M300 120 L490 180" stroke="url(#g)" stroke-width="2" opacity=".4"/>
-              </svg>
-              <div class="g-node" style="left:8%;top:18%">GitHub<br><span style="color:var(--soft);font-size:11px">source</span></div>
-              <div class="g-node g-core" style="left:38%;top:36%">AgentRail AI<br><span style="font-size:11px;color:#e9ecff">score engine</span></div>
-              <div class="g-node" id="graphTop" style="left:72%;top:18%">Top repo<br><span style="color:var(--soft);font-size:11px">waiting</span></div>
-              <div class="g-node" style="left:72%;top:60%">Risk layer<br><span style="color:var(--soft);font-size:11px">visual</span></div>
-            </div>
-            <div class="risk-wrap">
-              <div class="risk-bar"><div class="risk-fill" id="riskFill"></div></div>
-              <div class="risk-copy"><span>Risk score visuel</span><span id="riskCopy">0 / 100</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid">
-          <div class="card">
-            <h3>Repositories récents</h3>
-            <div class="repo-list" id="repoList">
-              <div class="repo">
-                <div>
-                  <strong>Lance le scan</strong>
-                  <span>Le top 5 apparaîtra ici</span>
-                </div>
-                <div class="badge ok">Prêt</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <h3>Applications connectées</h3>
-            <div class="repo"><div><strong>GitHub</strong><span>Source réelle</span></div><div class="badge ok">GH</div></div>
-            <div class="repo"><div><strong>Scoring</strong><span>Analyse AgentRail</span></div><div class="badge warn">AI</div></div>
-            <div class="repo"><div><strong>Risk UI</strong><span>Visual score live</span></div><div class="badge bad">RT</div></div>
-          </div>
-        </div>
-      </div>
-    </section>
+  <div class="card">
+    <strong>Audit log</strong>
+    <div class="log" id="log"></div>
   </div>
 
-  <script>
-    const USERNAME = 'nonodelajungle';
-    let repoData = [];
-    let topRepo = null;
+  <button onclick="trigger()" style="margin-top:20px">
+    ▶ Simuler un agent
+  </button>
 
-    const reposMetric = document.getElementById('reposMetric');
-    const attentionMetric = document.getElementById('attentionMetric');
-    const languagesMetric = document.getElementById('languagesMetric');
-    const archivedMetric = document.getElementById('archivedMetric');
-    const repoList = document.getElementById('repoList');
-    const topRepoName = document.getElementById('topRepoName');
-    const topRepoSub = document.getElementById('topRepoSub');
-    const graphTop = document.getElementById('graphTop');
-    const riskFill = document.getElementById('riskFill');
-    const riskCopy = document.getElementById('riskCopy');
+</div>
 
-    function animateMetric(el, target) {
-      const start = Number(el.textContent) || 0;
-      const duration = 800;
-      const startTime = performance.now();
-      function frame(now) {
-        const p = Math.min((now - startTime) / duration, 1);
-        el.textContent = Math.round(start + (target - start) * (1 - Math.pow(1 - p, 3)));
-        if (p < 1) requestAnimationFrame(frame);
-      }
-      requestAnimationFrame(frame);
-    }
+<script>
+function trigger(){
+  document.getElementById("event").innerHTML =
+    "⚠️ github-agent tente de merger PR #482";
 
-    function daysSince(s) {
-      return Math.floor((Date.now() - new Date(s).getTime()) / 86400000);
-    }
+  document.getElementById("sub").innerHTML =
+    "Target: production repository";
 
-    function scoreRepo(repo) {
-      let score = 40;
-      const reasons = ['public'];
-      const staleDays = daysSince(repo.pushed_at || repo.updated_at);
-      if (staleDays > 365) {
-        score += 18;
-        reasons.push('stale > 1 an');
-      } else if (staleDays > 180) {
-        score += 10;
-        reasons.push('activité ancienne');
-      }
-      if ((repo.open_issues_count || 0) > 0) {
-        score += Math.min(12, repo.open_issues_count * 2);
-        reasons.push(repo.open_issues_count + ' issue(s)');
-      }
-      if (repo.allow_forking) {
-        score += 6;
-        reasons.push('forking autorisé');
-      }
-      if (!repo.description) {
-        score += 7;
-        reasons.push('pas de description');
-      }
-      if (!repo.homepage) {
-        score += 5;
-        reasons.push('pas de homepage');
-      }
-      if (repo.archived) {
-        score += 4;
-        reasons.push('archivé');
-      }
-      if (!repo.language) {
-        score += 3;
-        reasons.push('langage inconnu');
-      }
-      return { score: Math.min(score, 99), reasons };
-    }
+  document.getElementById("risk").style.display = "block";
+  document.getElementById("actions").style.display = "flex";
 
-    function cls(score) {
-      if (score >= 80) return 'bad';
-      if (score >= 70) return 'warn';
-      return 'ok';
-    }
+  log("Agent detected → github-agent");
+  log("Action → merge PR #482");
+}
 
-    function lbl(score) {
-      if (score >= 80) return 'Critique';
-      if (score >= 70) return 'Attention';
-      return 'OK';
-    }
+function decision(type){
+  if(type==="approve"){
+    log("✔ Approved → merge executed");
+  }
+  if(type==="block"){
+    log("❌ Blocked → action cancelled");
+  }
+  if(type==="shadow"){
+    log("👁 Shadow mode → observed only");
+  }
 
-    function renderTopRepo() {
-      if (!topRepo) {
-        topRepoName.textContent = 'Aucun repo';
-        topRepoSub.textContent = 'Lance le scan pour voir le top repository';
-        graphTop.innerHTML = 'Top repo<br><span style="color:var(--soft);font-size:11px">waiting</span>';
-        riskFill.style.width = '0%';
-        riskCopy.textContent = '0 / 100';
-        return;
-      }
+  log("→ audit trail created");
+  log("→ policy applied");
 
-      topRepoName.textContent = topRepo.repo.name;
-      topRepoSub.textContent = `Score ${topRepo.analysis.score} · ${topRepo.analysis.reasons.slice(0,2).join(' · ')}`;
-      graphTop.innerHTML = `${topRepo.repo.name}<br><span style="color:var(--soft);font-size:11px">top priority</span>`;
-      riskFill.style.width = topRepo.analysis.score + '%';
-      riskCopy.textContent = topRepo.analysis.score + ' / 100';
-    }
+  document.getElementById("actions").style.display = "none";
+}
 
-    function renderRepoList() {
-      if (!repoData.length) {
-        repoList.innerHTML = '<div class="repo"><div><strong>Lance le scan</strong><span>Le top 5 apparaîtra ici</span></div><div class="badge ok">Prêt</div></div>';
-        return;
-      }
+function log(txt){
+  const el = document.getElementById("log");
+  el.innerHTML += `<div class="line">> ${txt}</div>`;
+}
+</script>
 
-      repoList.innerHTML = repoData.slice(0,5).map(item => `
-        <div class="repo">
-          <div>
-            <strong>${item.repo.name}</strong>
-            <span>${item.repo.description || 'Pas de description'} · ${item.analysis.reasons.slice(0,2).join(' · ')}</span>
-          </div>
-          <div class="badge ${cls(item.analysis.score)}">${lbl(item.analysis.score)} ${item.analysis.score}</div>
-        </div>
-      `).join('');
-    }
-
-    async function runScan() {
-      repoList.innerHTML = '<div class="repo"><div><strong>Scan en cours</strong><span>Récupération des repositories publics GitHub…</span></div><div class="badge ok">Live</div></div>';
-      try {
-        const res = await fetch(`https://api.github.com/users/${USERNAME}/repos?per_page=100&sort=updated`);
-        if (!res.ok) throw new Error('GitHub API ' + res.status);
-        const repos = await res.json();
-
-        repoData = repos
-          .map(repo => ({ repo, analysis: scoreRepo(repo) }))
-          .sort((a,b) => b.analysis.score - a.analysis.score);
-
-        topRepo = repoData[0] || null;
-
-        animateMetric(reposMetric, repos.length);
-        animateMetric(attentionMetric, repoData.filter(r => r.analysis.score >= 70).length);
-        animateMetric(languagesMetric, new Set(repos.map(r => r.language).filter(Boolean)).size);
-        animateMetric(archivedMetric, repos.filter(r => r.archived).length);
-
-        renderTopRepo();
-        renderRepoList();
-      } catch (e) {
-        repoList.innerHTML = `<div class="repo"><div><strong>Erreur</strong><span>${e.message}</span></div><div class="badge bad">Erreur</div></div>`;
-      }
-    }
-
-    document.getElementById('runScanBtn').onclick = runScan;
-    document.getElementById('scanHeroBtn').onclick = runScan;
-    document.getElementById('runScanNode').onclick = runScan;
-    document.getElementById('demoBtn').onclick = () => document.querySelector('.right').scrollIntoView({ behavior: 'smooth' });
-    document.getElementById('shareBtn').onclick = () => navigator.clipboard && navigator.clipboard.writeText(window.location.href);
-    document.getElementById('startNow').onclick = () => {
-      document.getElementById('onboarding').style.display = 'none';
-      runScan();
-    };
-    document.getElementById('closeOnboarding').onclick = () => {
-      document.getElementById('onboarding').style.display = 'none';
-    };
-  </script>
 </body>
 </html>
